@@ -1,6 +1,6 @@
 # 🎥💻Golang-репозиторий комады Нетраннеры💻🎥
 
-## [Ссылка на frontend](https://github.com/frontend-park-mail-ru/2024_Netrunners)
+## [Ссылка на frontend](https://github.com/frontend-park-mail-ru/2024_1_Netrunners)
 
 ## Авторы
 
