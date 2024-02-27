@@ -1,0 +1,17 @@
+run:
+  tests: false
+  skip-dirs:
+    - vendor/
+    - uploads/
+
+  skip-files:
+    - ".pb.go"
+
+linters:
+  enable:
+    - lll
+    - bodyclose
+
+linters-settings:
+  lll:
+    line-length: 120
