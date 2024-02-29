@@ -1,0 +1,190 @@
+openapi: 3.0.1
+info:
+  title: NETtheFLIX Api
+  version: 1.0.0
+servers:
+  - url: http://localhost:80
+tags:
+  - name: Auth
+  - name: Films
+  # - name: Movies
+  # - name: Serials
+
+paths:
+
+# Auth
+
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Register new user
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Invalid data recieved or user already exists
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+          
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description:  User doesn't exists or incorrect login or password
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /auth/check:
+    post:
+      tags:
+        - Auth
+      summary: Check for valid session
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description:  Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout user
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description:  Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error     
+     
+# Films
+
+  /films/all:
+    get:
+      tags:
+        - Films
+      summary: Get all films
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FilmsResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+# Requests & responses 
+              
+components:
+  schemas:
+
+    StatusResponse:
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          example: 200
+        error:
+          type: string
+
+# Films
+
+    FilmsResponse:
+      required:
+        - films
+      properties:
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - author
+            properties:
+              name:
+                type: string
+                example: "Transformers"
+              author:
+                type: string
+                example: "Michael Bell"
+              data:
+                type: string
