@@ -19,6 +19,12 @@ paths:
       tags:
         - Auth
       summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
       responses:
         '200':
           description: Success
@@ -46,6 +52,12 @@ paths:
       tags:
         - Auth
       summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: Success
@@ -166,6 +178,36 @@ components:
         error:
           type: string
 
+#Auth
+
+    SignupRequest:
+      required:
+        - login
+        - username
+        - password
+      properties:
+        login:
+          type: string
+          example: 'nagibator@yandex.ru'
+        username:
+          type: string
+          example: 'XXX_nagibator_XXX'
+        password:
+          type: string
+          example: 'root'
+
+    LoginRequest:
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: 'nagibator@yandex.ru'
+        password:
+          type: string
+          example: 'root'
+
 # Films
 
     FilmsResponse:
@@ -182,9 +224,9 @@ components:
             properties:
               name:
                 type: string
-                example: "Transformers"
+                example: 'Transformers'
               author:
                 type: string
-                example: "Michael Bell"
+                example: 'Michael Bell'
               data:
                 type: string
