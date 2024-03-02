@@ -5,5 +5,5 @@ type User struct {
 	Name     string
 	Password string
 	Status   string
-	Version  uint8
+	Version  int
 }

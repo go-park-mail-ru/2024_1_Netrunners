@@ -17,10 +17,15 @@ import (
 
 func main() {
 	mainPageHandlers := handlers.InitMainPageHandlers()
+	authPageHandlers := handlers.InitAuthPageHandlers()
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", mainPageHandlers.GetIndex).Methods("GET")
+	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST")
+	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST")
+	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST")
+	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST")
 
 	server := &http.Server{
 		Handler: router,
