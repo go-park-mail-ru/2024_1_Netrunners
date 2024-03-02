@@ -19,9 +19,28 @@ paths:
       tags:
         - Auth
       summary: Register new user
+      security:
+        - AccessCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
       responses:
         '200':
           description: Success
+          headers:
+            Set-Cookie (access):
+              description: Access token
+              schema:
+                type: string
+                example: access=sfggafga.SDFDGsf.dsFdFDD; Path=/; HttpOnly; Secure
+            Set-Cookie (refresh):
+              description: Refresh token
+              schema:
+                type: string
+                example: refresh=sfggafga.SDFDGsf.dsFdFDD; Path=/auth; HttpOnly; Secure
           content:
             application/form:
               schema:
@@ -46,9 +65,26 @@ paths:
       tags:
         - Auth
       summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
           description: Success
+          headers:
+            Set-Cookie (access):
+              description: Access token
+              schema:
+                type: string
+                example: access=sfggafga.SDFDGsf.dsFdFDD; Path=/; HttpOnly; Secure
+            Set-Cookie (refresh):
+              description: Refresh token
+              schema:
+                type: string
+                example: refresh=sfggafga.SDFDGsf.dsFdFDD; Path=/auth; HttpOnly; Secure
           content:
             application/form:
               schema:
@@ -73,9 +109,23 @@ paths:
       tags:
         - Auth
       summary: Check for valid session
+      security:
+        - AccessCookie: []
+        - RefreshCookie: []
       responses:
         '200':
-          description: Success
+          description: Success (regenerate tokens if access expired)
+          headers:
+            Set-Cookie (access):
+              description: Access token
+              schema:
+                type: string
+                example: access=sfggafga.SDFDGsf.dsFdFDD; Path=/; HttpOnly; Secure
+            Set-Cookie (refresh):
+              description: Refresh token
+              schema:
+                type: string
+                example: refresh=sfggafga.SDFDGsf.dsFdFDD; Path=/auth; HttpOnly; Secure
           content:
             application/form:
               schema:
@@ -100,6 +150,8 @@ paths:
       tags:
         - Auth
       summary: Logout user
+      security:
+        - RefreshCookie: []
       responses:
         '200':
           description: Success
@@ -129,6 +181,8 @@ paths:
       tags:
         - Films
       summary: Get all films
+      security:
+        - AccessCookie: []
       responses:
         '200':
           description: Success
@@ -150,10 +204,25 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-
-# Requests & responses 
               
 components:
+
+# Cookies
+
+  securitySchemes:
+
+    AccessCookie:
+      type: apiKey
+      in: cookie
+      name: access
+
+    RefreshCookie:
+      type: apiKey
+      in: cookie
+      name: refresh
+
+# Requests & responses 
+
   schemas:
 
     StatusResponse:
@@ -165,6 +234,36 @@ components:
           example: 200
         error:
           type: string
+
+#Auth
+
+    SignupRequest:
+      required:
+        - login
+        - username
+        - password
+      properties:
+        login:
+          type: string
+          example: 'nagibator@yandex.ru'
+        username:
+          type: string
+          example: 'XXX_nagibator_XXX'
+        password:
+          type: string
+          example: 'root'
+
+    LoginRequest:
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: 'nagibator@yandex.ru'
+        password:
+          type: string
+          example: 'root'
 
 # Films
 
@@ -182,9 +281,9 @@ components:
             properties:
               name:
                 type: string
-                example: "Transformers"
+                example: 'Transformers'
               author:
                 type: string
-                example: "Michael Bell"
+                example: 'Michael Bell'
               data:
                 type: string
