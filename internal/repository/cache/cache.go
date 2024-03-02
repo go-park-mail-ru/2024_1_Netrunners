@@ -12,39 +12,52 @@ var (
 )
 
 type SessionStorage struct {
-	cacheStorage cache.Cache
+	cacheStorage map[string]cache.Cache
 }
 
-func (sessionStorage *SessionStorage) Add(token string, version uint8) (err error) {
-	if _, hasUser := sessionStorage.cacheStorage.Get(token); !hasUser {
-		sessionStorage.cacheStorage.Set(token, 1, 0)
+func InitSessionStorage(cacheStorage *map[string]cache.Cache) *SessionStorage {
+	return &SessionStorage{
+		cacheStorage: *cacheStorage,
+	}
+}
+
+func (sessionStorage *SessionStorage) Add(login string, token string, version int) (err error) {
+	if _, hasUser := sessionStorage.cacheStorage[login].Get(token); !hasUser {
+		sessionStorage.cacheStorage[login].Set(token, version, 0)
 		return nil
 	}
 	return itemsIsAlreadyInTheCache
 }
 
-func (sessionStorage *SessionStorage) Delete(token string) (err error) {
-	if _, hasUser := sessionStorage.cacheStorage.Get(token); hasUser {
-		sessionStorage.cacheStorage.Delete(token)
+func (sessionStorage *SessionStorage) Delete(login string, token string) (err error) {
+	if _, hasUser := sessionStorage.cacheStorage[login].Get(token); hasUser {
+		sessionStorage.cacheStorage[login].Delete(token)
 		return nil
 	}
 	return noSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) Update(token string) (err error) {
-	if version, hasUser := sessionStorage.cacheStorage.Get(token); hasUser {
-		sessionStorage.cacheStorage.Set(token, version.(int)+1, 0)
+func (sessionStorage *SessionStorage) Update(login string, token string) (err error) {
+	if version, hasUser := sessionStorage.cacheStorage[login].Get(token); hasUser {
+		sessionStorage.cacheStorage[login].Set(token, version.(int)+1, 0)
 		return nil
 	}
 	return noSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) HasUser(token string, usersVersion int) (hasSession bool, err error) {
-	if version, hasUser := sessionStorage.cacheStorage.Get(token); hasUser {
+func (sessionStorage *SessionStorage) HasUser(login string, token string, usersVersion int) (hasSession bool, err error) {
+	if version, hasUser := sessionStorage.cacheStorage[login].Get(token); hasUser {
 		if usersVersion == version {
 			return true, nil
 		}
 		return false, wrongSessionVersion
 	}
 	return false, noSuchItemInTheCache
+}
+
+func (sessionStorage *SessionStorage) GetVersion(login string, token string) (version int, err error) {
+	if version, hasUser := sessionStorage.cacheStorage[login].Get(token); hasUser {
+		return version.(int), nil
+	}
+	return 0, noSuchItemInTheCache
 }

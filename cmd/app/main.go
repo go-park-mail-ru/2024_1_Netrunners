@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	"github.com/patrickmn/go-cache"
 	"log"
 	"net/http"
 	"os"
@@ -13,11 +15,19 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 )
 
 func main() {
+	cacheStorage := cache.New(0, 0)
+	sessionStorage := mycache.InitSessionStorage(cacheStorage)
+	authStorage := mockdb.InitMockDB()
+
+	authService := service.InitAuthService(authStorage)
+
 	mainPageHandlers := handlers.InitMainPageHandlers()
-	authPageHandlers := handlers.InitAuthPageHandlers()
+	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionStorage)
 
 	router := mux.NewRouter()
 

@@ -2,20 +2,9 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
-
-// у юзера в куке лежит только два токена аксесс (5 минут) и рефреш ( 48 часов ). мы делаем конкретно ручку для
-// проверки валидности сессии. Рефреш передается только на ручки /auth.
-
-// если куки нет, то генерим новую на основе логина и статуса юзера.
-// если кука есть, проверяем на валидность, если не валидная, проверяем рефрешТокен на валидность, если валиден, то
-// 		создаем новый рефреш и аксес, и отправляем их
-// если кука есть, проверяем на валидность, если не валидная, проверяем рефрешТокен на валидность, если невалиден,
-//		то возвращаем 401
-//
 
 var (
 	SECRET        = []byte("SECRETKEY")
@@ -27,6 +16,7 @@ type sessionStorage interface {
 	Delete(token string) error
 	Update(token string) error
 	HasUser(token string, usersVersion int) (bool, error)
+	GetVersion(login string, token string) (version uint8, err error)
 }
 
 type customClaims struct {
@@ -40,36 +30,7 @@ func (c customClaims) Valid() error {
 	return c.StandardClaims.Valid()
 }
 
-func GenerateTokens(existingTokenString string, login string, status string) (string, string, error) {
-	token, err := jwt.Parse(existingTokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return SECRET, nil
-	})
-
-	version := 1
-
-	if err == nil {
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return "", "", fmt.Errorf("failed to parse claims")
-		}
-
-		login, ok = claims["login"].(string)
-		if !ok {
-			return "", "", fmt.Errorf("failed to parse username")
-		}
-		status, ok = claims["status"].(string)
-		if !ok {
-			return "", "", fmt.Errorf("failed to parse status")
-		}
-		version, ok = claims["version"].(int)
-		if !ok {
-			return "", "", fmt.Errorf("failed to parse version")
-		}
-	}
-
+func GenerateTokens(login string, status string, version int) (string, string, error) {
 	accessCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
@@ -84,7 +45,9 @@ func GenerateTokens(existingTokenString string, login string, status string) (st
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 		},
-		Login: login,
+		Login:   login,
+		Status:  status,
+		Version: version,
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
