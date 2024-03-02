@@ -114,7 +114,18 @@ paths:
         - RefreshCookie: []
       responses:
         '200':
-          description: Success
+          description: Success (regenerate tokens if access expired)
+          headers:
+            Set-Cookie (access):
+              description: Access token
+              schema:
+                type: string
+                example: access=sfggafga.SDFDGsf.dsFdFDD; Path=/; HttpOnly; Secure
+            Set-Cookie (refresh):
+              description: Refresh token
+              schema:
+                type: string
+                example: refresh=sfggafga.SDFDGsf.dsFdFDD; Path=/auth; HttpOnly; Secure
           content:
             application/form:
               schema:
