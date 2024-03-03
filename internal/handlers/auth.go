@@ -96,7 +96,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	}
 	login := r.FormValue("login")
 
-	err = authPageHandlers.sessionService.Delete(login, userRefreshToken.Value)
+	err = authPageHandlers.sessionService.DeleteSession(login, userRefreshToken.Value)
 	if err != nil {
 		errs := WriteError(w, 500, err)
 		if errs != nil {

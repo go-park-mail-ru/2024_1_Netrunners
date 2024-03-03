@@ -6,7 +6,7 @@ import (
 
 type sessionStorage interface {
 	Add(login string, token string, version uint8) (err error)
-	Delete(login string, token string) (err error)
+	DeleteSession(login string, token string) (err error)
 	Update(login string, token string) (err error)
 	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
 	GetVersion(login string, token string) (version uint8, err error)
@@ -33,8 +33,8 @@ func (sessionStorageService *SessionService) Add(login string, token string, ver
 	return nil
 }
 
-func (sessionStorageService *SessionService) Delete(login string, token string) (err error) {
-	err = sessionStorageService.sessionStorage.Delete(login, token)
+func (sessionStorageService *SessionService) DeleteSession(login string, token string) (err error) {
+	err = sessionStorageService.sessionStorage.DeleteSession(login, token)
 	if err != nil {
 		fmt.Println(err)
 		return err

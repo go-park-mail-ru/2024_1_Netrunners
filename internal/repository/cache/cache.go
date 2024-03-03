@@ -10,10 +10,14 @@ import (
 )
 
 var (
-	noSuchItemInTheCache     = errors.New("no such token in cache")
-	itemsIsAlreadyInTheCache = errors.New("such token is already in the cache")
-	wrongSessionVersion      = errors.New("different versions")
-	SECRET                   = os.Getenv("SECRETKEY")
+	noSuchItemInTheCache           = errors.New("no such token in cache")
+	itemsIsAlreadyInTheCache       = errors.New("such token is already in the cache")
+	wrongSessionVersion            = errors.New("different versions")
+	noSuchSessionInTheCache        = errors.New("no such session in cache")
+	noSuchUserInTheCache           = errors.New("no such user in cache")
+	tooHighVersion                 = errors.New("too high session version")
+	SECRET                         = os.Getenv("SECRETKEY")
+	maxVersion               uint8 = 255
 )
 
 type SessionStorage struct {
@@ -34,34 +38,47 @@ func InitSessionStorage() *SessionStorage {
 }
 
 func (sessionStorage *SessionStorage) Add(login string, token string, version uint8) (err error) {
-	if sessionMap, hasUser := sessionStorage.cacheStorage.Get(token); !hasUser {
+	sessionMap, hasUser := sessionStorage.cacheStorage.Get(login)
+	if !hasUser {
 		sesMap := make(map[string]uint8)
 		sesMap[token] = version
 		sessionStorage.cacheStorage.Set(login, sesMap, 0)
 		return nil
-	} else {
-		sesMap := sessionMap.(map[string]uint8)
-		sesMap[token] = version
-		sessionStorage.cacheStorage.Set(login, sesMap, 0)
 	}
-	return itemsIsAlreadyInTheCache
+	if _, hasSession := sessionMap.(map[string]uint8)[token]; hasSession {
+		return itemsIsAlreadyInTheCache
+	}
+	sesMap := sessionMap.(map[string]uint8)
+	sesMap[token] = version
+	sessionStorage.cacheStorage.Set(login, sesMap, 0)
+
+	return nil
 }
 
-func (sessionStorage *SessionStorage) Delete(login string, token string) (err error) {
+func (sessionStorage *SessionStorage) DeleteSession(login string, token string) (err error) {
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
-		delete(sessionMapInterface.(map[string]uint8), token)
-		return nil
+		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
+			delete(sessionMapInterface.(map[string]uint8), token)
+			return nil
+		}
+		return noSuchSessionInTheCache
 	}
-	return noSuchItemInTheCache
+	return noSuchUserInTheCache
+
 }
 
 func (sessionStorage *SessionStorage) Update(login string, token string) (err error) {
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
-		sessionStorage.cacheStorage.Set(token, (sessionMapInterface.(map[string]uint8))[token]+1, 0)
-		return nil
+		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
+			if (sessionMapInterface.(map[string]uint8))[token] == maxVersion {
+				return tooHighVersion
+			}
+			(sessionMapInterface.(map[string]uint8))[token]++
+			return nil
+		}
+		return noSuchSessionInTheCache
 	}
-
-	return noSuchItemInTheCache
+	return noSuchUserInTheCache
 }
 
 func (sessionStorage *SessionStorage) CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error) {
