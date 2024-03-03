@@ -2,21 +2,16 @@ package service
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"time"
-)
-
-var (
-	SECRET = []byte("SECRETKEY")
 )
 
 type sessionStorage interface {
-	Add(login string, token string, version int) (err error)
+	Add(login string, token string, version uint8) (err error)
 	Delete(login string, token string) (err error)
 	Update(login string, token string) (err error)
-	CheckVersion(login string, token string, usersVersion int) (hasSession bool, err error)
-	GetVersion(login string, token string) (version int, err error)
+	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
+	GetVersion(login string, token string) (version uint8, err error)
 	HasUser(login string) bool
+	GenerateTokens(login string, status string, version uint8) (string, string, error)
 }
 
 type SessionService struct {
@@ -29,7 +24,7 @@ func InitSessionService(sessionStorage sessionStorage) *SessionService {
 	}
 }
 
-func (sessionStorageService *SessionService) Add(login string, token string, version int) (err error) {
+func (sessionStorageService *SessionService) Add(login string, token string, version uint8) (err error) {
 	err = sessionStorageService.sessionStorage.Add(login, token, version)
 	if err != nil {
 		fmt.Println(err)
@@ -56,7 +51,7 @@ func (sessionStorageService *SessionService) Update(login string, token string) 
 	return nil
 }
 
-func (sessionStorageService *SessionService) CheckVersion(login string, token string, usersVersion int) (hasSession bool, err error) {
+func (sessionStorageService *SessionService) CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error) {
 	hasSession, err = sessionStorageService.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
 		fmt.Println(err)
@@ -65,7 +60,7 @@ func (sessionStorageService *SessionService) CheckVersion(login string, token st
 	return hasSession, nil
 }
 
-func (sessionStorageService *SessionService) GetVersion(login string, token string) (version int, err error) {
+func (sessionStorageService *SessionService) GetVersion(login string, token string) (version uint8, err error) {
 	version, err = sessionStorageService.sessionStorage.GetVersion(login, token)
 	if err != nil {
 		fmt.Println(err)
@@ -79,47 +74,11 @@ func (sessionStorageService *SessionService) HasUser(login string) (hasUser bool
 	return hasUser
 }
 
-type customClaims struct {
-	jwt.StandardClaims
-	Login   string
-	Status  string
-	Version int
-}
-
-func (c customClaims) Valid() error {
-	return c.StandardClaims.Valid()
-}
-
-func GenerateTokens(login string, status string, version int) (string, string, error) {
-	accessCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		Status:  status,
-		Version: version,
+func (sessionStorageService *SessionService) GenerateTokens(login string, status string, version uint8) (string, string, error) {
+	accessToken, refreshToken, err := sessionStorageService.sessionStorage.GenerateTokens(login, status, version)
+	if err != nil {
+		fmt.Println(err)
+		return "", "", err
 	}
-
-	refreshCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
-		},
-		Login:   login,
-		Status:  status,
-		Version: version,
-	}
-
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
-
-	accessTokenSigned, accessErr := accessToken.SignedString(SECRET)
-	refreshTokenSigned, refreshErr := refreshToken.SignedString(SECRET)
-	if accessErr == nil && refreshErr == nil {
-		return accessTokenSigned, refreshTokenSigned, nil
-	}
-	if accessErr != nil {
-		return "", "", accessErr
-	}
-	return "", "", refreshErr
+	return accessToken, refreshToken, nil
 }

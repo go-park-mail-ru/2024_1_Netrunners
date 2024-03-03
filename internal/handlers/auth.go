@@ -7,10 +7,11 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"net/http"
+	"os"
 )
 
 var (
-	SECRET                = []byte("SECRETKEY")
+	SECRET                = os.Getenv("SECRETKEY")
 	noSuchUser            = errors.New("no such user")
 	wrongLoginOrPassword  = errors.New("wrong login or password")
 	tokenGenerationIssues = errors.New("token generating issues")
@@ -54,7 +55,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(login, user.Status, user.Version)
+	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, user.Status, user.Version)
 	if err != nil {
 		// проблемы с генерацией токена
 		errs := WriteError(w, 500, tokenGenerationIssues)
@@ -78,7 +79,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		MaxAge:   1, // 5 mins
+		MaxAge:   5 * 60, // 5 mins
 	}
 	http.SetCookie(w, refreshCookie)
 	http.SetCookie(w, accessCookie)
@@ -128,7 +129,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	password := r.FormValue("password")
 
 	status := "regular"
-	version := 1
+	var version uint8 = 1
 
 	var user = domain.User{
 		Login:    login,
@@ -147,7 +148,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(username, status, version)
+	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(username, status, version)
 	if err != nil {
 		errs := WriteError(w, 500, err)
 		if errs != nil {
@@ -162,8 +163,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Path:     "/auth",
 		HttpOnly: true,
 		Secure:   true,
-		//MaxAge:   48 * 3600, // 48 hours
-		MaxAge: 1,
+		MaxAge:   48 * 3600, // 48 hours
 	}
 
 	accessCookie := &http.Cookie{
@@ -172,8 +172,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		// MaxAge:   5 * 60, // 5 mins
-		MaxAge: 1, // 5 mins
+		MaxAge:   5 * 60, // 5 mins
 	}
 
 	http.SetCookie(w, refreshCookie)
@@ -248,7 +247,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	version, ok := claims["version"].(int)
+	version, ok := claims["version"].(uint8)
 	if !ok {
 		errs := WriteError(w, 401, tokenIsNotValid)
 		if errs != nil {
@@ -257,7 +256,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(login, status, version)
+	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, status, version)
 
 	refreshCookie := &http.Cookie{
 		Name:     "refresh",
