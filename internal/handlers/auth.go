@@ -11,8 +11,11 @@ import (
 )
 
 var (
-	notPOSTMethod = errors.New("метод передачи не POST")
-	SECRET        = []byte("SECRETKEY")
+	notPOSTMethod         = errors.New("метод передачи не POST")
+	SECRET                = []byte("SECRETKEY")
+	noSuchUser            = errors.New("нет такого пользователя")
+	wrongLoginOrPassword  = errors.New("неверный логин или пароль")
+	tokenGenerationIssues = errors.New("проблемы с генерацией токена")
 )
 
 type AuthPageHandlers struct {
@@ -33,7 +36,10 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	user, err := authPageHandlers.authService.GetUser(login)
 	if err != nil {
 		// нет такого пользователя в базе
-		return
+		errs := WriteError(w, 500, noSuchUser)
+		if errs != nil {
+			return
+		}
 	}
 
 	if password != user.Password {
