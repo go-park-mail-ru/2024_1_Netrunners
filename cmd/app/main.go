@@ -20,9 +20,9 @@ import (
 
 func main() {
 	cacheStorage := mycache.InitSessionStorage()
-	sessionService := service.InitSessionService(cacheStorage)
 	authStorage := mockdb.InitMockDB()
 
+	sessionService := service.InitSessionService(cacheStorage)
 	authService := service.InitAuthService(authStorage)
 
 	mainPageHandlers := handlers.InitMainPageHandlers()
@@ -38,7 +38,7 @@ func main() {
 
 	server := &http.Server{
 		Handler: router,
-		Addr:    ":1180",
+		Addr:    ":80",
 	}
 
 	stopped := make(chan struct{})
@@ -54,7 +54,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Starting server at %s%s\n", "localhost", ":1180")
+	fmt.Printf("Starting server at %s%s\n", "localhost", ":80")
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
