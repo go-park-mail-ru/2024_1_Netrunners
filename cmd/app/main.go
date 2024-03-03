@@ -38,7 +38,7 @@ func main() {
 
 	server := &http.Server{
 		Handler: router,
-		Addr:    ":80",
+		Addr:    ":1180",
 	}
 
 	stopped := make(chan struct{})
