@@ -1,22 +1,82 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
 var (
-	SECRET        = []byte("SECRETKEY")
-	notPOSTMethod = errors.New("метод передачи не POST")
+	SECRET = []byte("SECRETKEY")
 )
 
 type sessionStorage interface {
-	Add(token string) error
-	Delete(token string) error
-	Update(token string) error
-	HasUser(token string, usersVersion int) (bool, error)
-	GetVersion(login string, token string) (version uint8, err error)
+	Add(login string, token string, version int) (err error)
+	Delete(login string, token string) (err error)
+	Update(login string, token string) (err error)
+	CheckVersion(login string, token string, usersVersion int) (hasSession bool, err error)
+	GetVersion(login string, token string) (version int, err error)
+	HasUser(login string) bool
+}
+
+type SessionService struct {
+	sessionStorage sessionStorage
+}
+
+func InitSessionStorage(sessionStorage sessionStorage) *SessionService {
+	return &SessionService{
+		sessionStorage: sessionStorage,
+	}
+}
+
+func (sessionStorageService *SessionService) Add(login string, token string, version int) (err error) {
+	err = sessionStorageService.Add(login, token, version)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (sessionStorageService *SessionService) Delete(login string, token string) (err error) {
+	err = sessionStorageService.Delete(login, token)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (sessionStorageService *SessionService) Update(login string, token string) (err error) {
+	err = sessionStorageService.Update(login, token)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (sessionStorageService *SessionService) CheckVersion(login string, token string, usersVersion int) (hasSession bool, err error) {
+	hasSession, err = sessionStorageService.CheckVersion(login, token, usersVersion)
+	if err != nil {
+		fmt.Println(err)
+		return hasSession, err
+	}
+	return hasSession, nil
+}
+
+func (sessionStorageService *SessionService) GetVersion(login string, token string) (version int, err error) {
+	version, err = sessionStorageService.GetVersion(login, token)
+	if err != nil {
+		fmt.Println(err)
+		return version, err
+	}
+	return version, nil
+}
+
+func (sessionStorageService *SessionService) HasUser(login string) (hasUser int) {
+	hasUser = sessionStorageService.HasUser(login)
+	return hasUser
 }
 
 type customClaims struct {

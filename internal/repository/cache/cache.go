@@ -15,12 +15,6 @@ type SessionStorage struct {
 	cacheStorage cache.Cache
 }
 
-func InitSessionStorage(cacheStorage *cache.Cache) *SessionStorage {
-	return &SessionStorage{
-		cacheStorage: *cacheStorage,
-	}
-}
-
 func (sessionStorage *SessionStorage) Add(login string, token string, version int) (err error) {
 	if sessionMap, hasUser := sessionStorage.cacheStorage.Get(token); !hasUser {
 		sesMap := make(map[string]int)
@@ -63,6 +57,13 @@ func (sessionStorage *SessionStorage) CheckVersion(login string, token string, u
 		return false, wrongSessionVersion
 	}
 	return false, noSuchItemInTheCache
+}
+
+func (sessionStorage *SessionStorage) HasUser(login string) bool {
+	if _, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
+		return true
+	}
+	return false
 }
 
 func (sessionStorage *SessionStorage) GetVersion(login string, token string) (version int, err error) {
