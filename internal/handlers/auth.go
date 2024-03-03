@@ -7,11 +7,9 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"net/http"
-	"os"
 )
 
 var (
-	SECRET                = os.Getenv("SECRETKEY")
 	noSuchUser            = errors.New("no such user")
 	wrongLoginOrPassword  = errors.New("wrong login or password")
 	tokenGenerationIssues = errors.New("token generating issues")
@@ -83,6 +81,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 	http.SetCookie(w, refreshCookie)
 	http.SetCookie(w, accessCookie)
+
 	fmt.Println("success login")
 }
 
@@ -117,6 +116,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, refreshCookie)
 	http.SetCookie(w, accessCookie)
+
 	_, err = authPageHandlers.sessionService.GetVersion(login, userRefreshToken.Value)
 	if err != nil {
 		fmt.Println("success logout")
@@ -186,6 +186,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		}
 		return
 	}
+
 	fmt.Println("success signup")
 }
 
@@ -199,13 +200,8 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	refreshtoken, err := jwt.Parse(userRefreshToken.Value, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
+	refreshToken, err := authPageHandlers.authService.IsTokenValid(userRefreshToken)
 
-		return SECRET, nil
-	})
 	if err != nil {
 		// не удалось распарсить токен
 		errs := WriteError(w, 500, err)
@@ -214,7 +210,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	if !refreshtoken.Valid {
+	if !refreshToken.Valid {
 		/// не авторизован
 		errs := WriteError(w, 401, notAuthorised)
 		if errs != nil {
@@ -222,7 +218,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	claims, ok := refreshtoken.Claims.(jwt.MapClaims)
+	claims, ok := refreshToken.Claims.(jwt.MapClaims)
 	if !ok {
 		errs := WriteError(w, 401, tokenIsNotValid)
 		if errs != nil {

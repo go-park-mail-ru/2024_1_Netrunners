@@ -2,7 +2,10 @@ package service
 
 import (
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"net/http"
+	"os"
 )
 
 type usersStorage interface {
@@ -76,4 +79,19 @@ func (authService *AuthService) ChangeName(login, newName string) (domain.User, 
 		return domain.User{}, err
 	}
 	return user, nil
+}
+
+func (authService *AuthService) IsTokenValid(token *http.Cookie) (*jwt.Token, error) {
+	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return os.Getenv("SECRETKEY"), nil
+	})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return parsedToken, nil
 }
