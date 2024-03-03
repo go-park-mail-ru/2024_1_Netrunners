@@ -15,13 +15,12 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
-	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 )
 
 func main() {
 	cacheStorage := cache.New(0, 0)
-	sessionStorage := mycache.InitSessionStorage(cacheStorage)
+	sessionStorage := service.InitSessionStorage(cacheStorage)
 	authStorage := mockdb.InitMockDB()
 
 	authService := service.InitAuthService(authStorage)

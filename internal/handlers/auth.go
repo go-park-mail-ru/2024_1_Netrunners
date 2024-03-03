@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"net/http"
 )
@@ -16,17 +15,20 @@ var (
 	noSuchUser            = errors.New("нет такого пользователя")
 	wrongLoginOrPassword  = errors.New("неверный логин или пароль")
 	tokenGenerationIssues = errors.New("проблемы с генерацией токена")
+	noActiveSession       = errors.New("нет активной сессии")
+	notAuthorised         = errors.New("не авторизован")
+	tokenIsNotValid       = errors.New("токен не валиден")
 )
 
 type AuthPageHandlers struct {
-	authService *service.AuthService
-	cache       *cache.SessionStorage
+	authService    *service.AuthService
+	sessionService *service.SessionService
 }
 
-func InitAuthPageHandlers(authService *service.AuthService, cache *cache.SessionStorage) *AuthPageHandlers {
+func InitAuthPageHandlers(authService *service.AuthService, sessionService *service.SessionService) *AuthPageHandlers {
 	return &AuthPageHandlers{
-		authService: authService,
-		cache:       cache,
+		authService:    authService,
+		sessionService: sessionService,
 	}
 }
 
@@ -44,13 +46,19 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 	if password != user.Password {
 		// неверный логин или пароль
-		return
+		errs := WriteError(w, 500, wrongLoginOrPassword)
+		if errs != nil {
+			return
+		}
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(login, user.Status, user.Version)
 	if err != nil {
 		// проблемы с генерацией токена
-		return
+		errs := WriteError(w, 500, tokenGenerationIssues)
+		if errs != nil {
+			return
+		}
 	}
 
 	refreshCookie := &http.Cookie{
@@ -78,13 +86,19 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	userRefreshToken, err := r.Cookie("refresh")
 	if err != nil {
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 	login := r.FormValue("login")
 
-	err = authPageHandlers.cache.Delete(login, userRefreshToken.Value)
+	err = authPageHandlers.sessionService.Delete(login, userRefreshToken.Value)
 	if err != nil {
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 
 	refreshCookie := &http.Cookie{
@@ -118,17 +132,26 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err := authPageHandlers.authService.Create(user)
 	if err != nil {
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(username, status, version)
 	if err != nil {
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 
-	err = authPageHandlers.cache.Add(login, refreshTokenSigned, version)
+	err = authPageHandlers.sessionService.Add(login, refreshTokenSigned, version)
 	if err != nil {
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 
 	refreshCookie := &http.Cookie{
@@ -153,16 +176,14 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	http.SetCookie(w, accessCookie)
 }
 
-// если кука есть, проверяем на валидность, если не валидная, проверяем рефрешТокен на валидность, если валиден, то
-// 		создаем новый рефреш и аксес, и отправляем их
-// если кука есть, проверяем на валидность, если не валидная, проверяем рефрешТокен на валидность, если невалиден,
-//		то возвращаем 401
-
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	userRefreshToken, err := r.Cookie("refresh")
 	if err != nil {
 		// у юзера нет активной сессии
-		return
+		errs := WriteError(w, 500, noActiveSession)
+		if errs != nil {
+			return
+		}
 	}
 
 	refreshtoken, err := jwt.Parse(userRefreshToken.Value, func(token *jwt.Token) (interface{}, error) {
@@ -174,30 +195,47 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	})
 	if err != nil {
 		// не удалось распарсить токен
-		return
+		errs := WriteError(w, 500, err)
+		if errs != nil {
+			return
+		}
 	}
 
 	if !refreshtoken.Valid {
 		/// не авторизован
-		return
+		errs := WriteError(w, 401, notAuthorised)
+		if errs != nil {
+			return
+		}
 	}
-
 	claims, ok := refreshtoken.Claims.(jwt.MapClaims)
 	if !ok {
-		return
+		errs := WriteError(w, 401, tokenIsNotValid)
+		if errs != nil {
+			return
+		}
 	}
 
 	login, ok := claims["login"].(string)
 	if !ok {
-		return
+		errs := WriteError(w, 401, tokenIsNotValid)
+		if errs != nil {
+			return
+		}
 	}
 	status, ok := claims["status"].(string)
 	if !ok {
-		return
+		errs := WriteError(w, 401, tokenIsNotValid)
+		if errs != nil {
+			return
+		}
 	}
 	version, ok := claims["version"].(int)
 	if !ok {
-		return
+		errs := WriteError(w, 401, tokenIsNotValid)
+		if errs != nil {
+			return
+		}
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := service.GenerateTokens(login, status, version)
