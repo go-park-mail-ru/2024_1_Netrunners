@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
-	"github.com/patrickmn/go-cache"
 	"log"
 	"net/http"
 	"os"
@@ -15,18 +14,19 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 )
 
 func main() {
-	cacheStorage := cache.New(0, 0)
-	sessionStorage := service.InitSessionStorage(cacheStorage)
+	cacheStorage := mycache.InitSessionStorage()
+	sessionService := service.InitSessionService(cacheStorage)
 	authStorage := mockdb.InitMockDB()
 
 	authService := service.InitAuthService(authStorage)
 
 	mainPageHandlers := handlers.InitMainPageHandlers()
-	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionStorage)
+	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
 
 	router := mux.NewRouter()
 
@@ -38,7 +38,7 @@ func main() {
 
 	server := &http.Server{
 		Handler: router,
-		Addr:    ":80",
+		Addr:    ":1180",
 	}
 
 	stopped := make(chan struct{})
@@ -54,7 +54,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Starting server at %s%s\n", "localhost", ":80")
+	fmt.Printf("Starting server at %s%s\n", "localhost", ":1180")
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)

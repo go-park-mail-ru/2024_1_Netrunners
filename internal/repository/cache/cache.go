@@ -6,13 +6,19 @@ import (
 )
 
 var (
-	itemsIsAlreadyInTheCache = errors.New("такого токена нет в кэше")
-	noSuchItemInTheCache     = errors.New("такой токен уже есть в кэше")
-	wrongSessionVersion      = errors.New("версии отличаются")
+	noSuchItemInTheCache     = errors.New("no such token in cache")
+	itemsIsAlreadyInTheCache = errors.New("such token is already in the cache")
+	wrongSessionVersion      = errors.New("different versions")
 )
 
 type SessionStorage struct {
-	cacheStorage cache.Cache
+	cacheStorage *cache.Cache
+}
+
+func InitSessionStorage() *SessionStorage {
+	return &SessionStorage{
+		cacheStorage: cache.New(0, 0),
+	}
 }
 
 func (sessionStorage *SessionStorage) Add(login string, token string, version int) (err error) {
@@ -30,7 +36,7 @@ func (sessionStorage *SessionStorage) Add(login string, token string, version in
 }
 
 func (sessionStorage *SessionStorage) Delete(login string, token string) (err error) {
-	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); !hasUser {
+	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
 		delete(sessionMapInterface.(map[string]int), token)
 		return nil
 	}
@@ -42,9 +48,6 @@ func (sessionStorage *SessionStorage) Update(login string, token string) (err er
 		sessionStorage.cacheStorage.Set(token, (sessionMapInterface.(map[string]int))[token]+1, 0)
 		return nil
 	}
-	sessionMap := make(map[string]int)
-	sessionMap[token] = 1
-	sessionStorage.cacheStorage.Set(token, sessionMap, 0)
 
 	return noSuchItemInTheCache
 }
