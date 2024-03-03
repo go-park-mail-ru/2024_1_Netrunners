@@ -23,14 +23,14 @@ type SessionService struct {
 	sessionStorage sessionStorage
 }
 
-func InitSessionStorage(sessionStorage sessionStorage) *SessionService {
+func InitSessionService(sessionStorage sessionStorage) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 	}
 }
 
 func (sessionStorageService *SessionService) Add(login string, token string, version int) (err error) {
-	err = sessionStorageService.Add(login, token, version)
+	err = sessionStorageService.sessionStorage.Add(login, token, version)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -39,7 +39,7 @@ func (sessionStorageService *SessionService) Add(login string, token string, ver
 }
 
 func (sessionStorageService *SessionService) Delete(login string, token string) (err error) {
-	err = sessionStorageService.Delete(login, token)
+	err = sessionStorageService.sessionStorage.Delete(login, token)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -48,7 +48,7 @@ func (sessionStorageService *SessionService) Delete(login string, token string) 
 }
 
 func (sessionStorageService *SessionService) Update(login string, token string) (err error) {
-	err = sessionStorageService.Update(login, token)
+	err = sessionStorageService.sessionStorage.Update(login, token)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -57,7 +57,7 @@ func (sessionStorageService *SessionService) Update(login string, token string) 
 }
 
 func (sessionStorageService *SessionService) CheckVersion(login string, token string, usersVersion int) (hasSession bool, err error) {
-	hasSession, err = sessionStorageService.CheckVersion(login, token, usersVersion)
+	hasSession, err = sessionStorageService.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
 		fmt.Println(err)
 		return hasSession, err
@@ -66,7 +66,7 @@ func (sessionStorageService *SessionService) CheckVersion(login string, token st
 }
 
 func (sessionStorageService *SessionService) GetVersion(login string, token string) (version int, err error) {
-	version, err = sessionStorageService.GetVersion(login, token)
+	version, err = sessionStorageService.sessionStorage.GetVersion(login, token)
 	if err != nil {
 		fmt.Println(err)
 		return version, err
@@ -74,8 +74,8 @@ func (sessionStorageService *SessionService) GetVersion(login string, token stri
 	return version, nil
 }
 
-func (sessionStorageService *SessionService) HasUser(login string) (hasUser int) {
-	hasUser = sessionStorageService.HasUser(login)
+func (sessionStorageService *SessionService) HasUser(login string) (hasUser bool) {
+	hasUser = sessionStorageService.sessionStorage.HasUser(login)
 	return hasUser
 }
 
@@ -115,9 +115,11 @@ func GenerateTokens(login string, status string, version int) (string, string, e
 
 	accessTokenSigned, accessErr := accessToken.SignedString(SECRET)
 	refreshTokenSigned, refreshErr := refreshToken.SignedString(SECRET)
-	if accessErr != nil && refreshErr != nil {
+	if accessErr == nil && refreshErr == nil {
 		return accessTokenSigned, refreshTokenSigned, nil
 	}
-	return "", "", accessErr
-
+	if accessErr != nil {
+		return "", "", accessErr
+	}
+	return "", "", refreshErr
 }
