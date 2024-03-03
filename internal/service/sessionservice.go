@@ -11,6 +11,7 @@ type sessionStorage interface {
 	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
 	GetVersion(login string, token string) (version uint8, err error)
 	HasSession(login string, token string) bool
+	CheckAllUserSessionTokens(login string) error
 	GenerateTokens(login string, status string, version uint8) (string, string, error)
 }
 
@@ -72,6 +73,15 @@ func (sessionStorageService *SessionService) GetVersion(login string, token stri
 func (sessionStorageService *SessionService) HasSession(login string, token string) (hasSession bool) {
 	hasSession = sessionStorageService.sessionStorage.HasSession(login, token)
 	return hasSession
+}
+
+func (sessionStorageService *SessionService) CheckAllUserSessionTokens(login string) error {
+	err := sessionStorageService.sessionStorage.CheckAllUserSessionTokens(login)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
 }
 
 func (sessionStorageService *SessionService) GenerateTokens(login string, status string, version uint8) (string, string, error) {

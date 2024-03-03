@@ -108,7 +108,17 @@ func (sessionStorage *SessionStorage) GetVersion(login string, token string) (ve
 	return 0, noSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) GenerateTokens(login string, status string, version uint8) (string, string, error) {
+func (sessionStorage *SessionStorage) CheckAllUserSessionTokens(login string) error {
+	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
+		for token, version := range sessionMapInterface.(map[string]uint8) {
+			fmt.Println("token:", token, "version:", version)
+		}
+		return nil
+	}
+	return noSuchUserInTheCache
+}
+
+func (sessionStorage *SessionStorage) GenerateTokens(login string, status string, version uint8) (accessTokenSigned string, refreshTokenSigned string, err error) {
 	accessCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
@@ -122,6 +132,7 @@ func (sessionStorage *SessionStorage) GenerateTokens(login string, status string
 	refreshCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
 		},
 		Login:   login,
 		Status:  status,
@@ -130,16 +141,14 @@ func (sessionStorage *SessionStorage) GenerateTokens(login string, status string
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
-	fmt.Println(accessToken, refreshToken)
 
-	fmt.Println(SECRET)
-	accessTokenSigned, accessErr := accessToken.SignedString([]byte(SECRET))
-	if accessErr != nil {
-		return "", "", accessErr
+	accessTokenSigned, err = accessToken.SignedString([]byte(SECRET))
+	if err != nil {
+		return "", "", err
 	}
-	refreshTokenSigned, refreshErr := refreshToken.SignedString([]byte(SECRET))
-	if refreshErr != nil {
-		return "", "", refreshErr
+	refreshTokenSigned, err = refreshToken.SignedString([]byte(SECRET))
+	if err != nil {
+		return "", "", err
 	}
 
 	return accessTokenSigned, refreshTokenSigned, nil
