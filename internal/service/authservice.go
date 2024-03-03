@@ -8,6 +8,10 @@ import (
 	"os"
 )
 
+var (
+	SECRET = os.Getenv("SECRETKEY")
+)
+
 type usersStorage interface {
 	Create(user domain.User) error
 	Remove(login string) error
@@ -87,7 +91,7 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (*jwt.Token, er
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return os.Getenv("SECRETKEY"), nil
+		return []byte(SECRET), nil
 	})
 	if err != nil {
 		fmt.Println(err)
