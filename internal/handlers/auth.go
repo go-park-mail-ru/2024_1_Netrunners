@@ -56,7 +56,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, user.Status, user.Version)
 	if err != nil {
 		// проблемы с генерацией токена
-		errs := WriteError(w, 500, tokenGenerationIssues)
+		errs := WriteError(w, 500, err)
 		if errs != nil {
 			return
 		}
@@ -149,6 +149,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(username, status, version)
+
 	if err != nil {
 		errs := WriteError(w, 500, err)
 		if errs != nil {

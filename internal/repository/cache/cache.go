@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/patrickmn/go-cache"
 	"os"
@@ -73,8 +74,11 @@ func (sessionStorage *SessionStorage) CheckVersion(login string, token string, u
 	return false, noSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) HasUser(login string) bool {
-	if _, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
+func (sessionStorage *SessionStorage) HasSession(login string, token string) bool {
+	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
+		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
+			return true
+		}
 		return true
 	}
 	return false
@@ -109,13 +113,14 @@ func (sessionStorage *SessionStorage) GenerateTokens(login string, status string
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
+	fmt.Println(accessToken, refreshToken)
 
-	accessTokenSigned, accessErr := accessToken.SignedString(SECRET)
-	refreshTokenSigned, refreshErr := refreshToken.SignedString(SECRET)
-
+	fmt.Println(SECRET)
+	accessTokenSigned, accessErr := accessToken.SignedString([]byte(SECRET))
 	if accessErr != nil {
 		return "", "", accessErr
 	}
+	refreshTokenSigned, refreshErr := refreshToken.SignedString([]byte(SECRET))
 	if refreshErr != nil {
 		return "", "", refreshErr
 	}
