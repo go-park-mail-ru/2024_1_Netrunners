@@ -9,7 +9,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 	validCases := []struct {
 		testName string
 		login    string
@@ -49,11 +49,11 @@ func TestCreate(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			err := db.Create(domain.User{
+			err := db.CreateUser(domain.User{
 				Login: currentCase.login,
 			})
 
@@ -65,7 +65,7 @@ func TestCreate(t *testing.T) {
 
 	for _, currentCase := range invalidCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			err := db.Create(domain.User{
+			err := db.CreateUser(domain.User{
 				Login: currentCase.login,
 			})
 
@@ -76,7 +76,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestRemove(t *testing.T) {
+func TestRemoveUser(t *testing.T) {
 	data := []string{
 		"Ahmed", "Dima", "Danyenchka",
 	}
@@ -120,7 +120,7 @@ func TestRemove(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentData := range data {
 		db.mutex.Lock()
@@ -132,7 +132,7 @@ func TestRemove(t *testing.T) {
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			err := db.Remove(currentCase.login)
+			err := db.RemoveUser(currentCase.login)
 
 			if err != nil {
 				t.Error(err)
@@ -142,7 +142,7 @@ func TestRemove(t *testing.T) {
 
 	for _, currentCase := range invalidCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			err := db.Remove(currentCase.login)
+			err := db.RemoveUser(currentCase.login)
 
 			if err == nil {
 				t.Error("no error returned")
@@ -196,7 +196,7 @@ func TestHasUser(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentData := range data {
 		db.mutex.Lock()
@@ -282,7 +282,7 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentData := range data {
 		db.mutex.Lock()
@@ -319,7 +319,7 @@ func TestGetUser(t *testing.T) {
 	}
 }
 
-func TestChangePassword(t *testing.T) {
+func TestChangeUserPassword(t *testing.T) {
 	data := []domain.User{
 		{
 			Login:    "Ahmed",
@@ -366,7 +366,7 @@ func TestChangePassword(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentData := range data {
 		db.mutex.Lock()
@@ -376,7 +376,7 @@ func TestChangePassword(t *testing.T) {
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			err := db.ChangePassword(currentCase.login, currentCase.newPassword)
+			err := db.ChangeUserPassword(currentCase.login, currentCase.newPassword)
 
 			if err != nil {
 				t.Error(err)
@@ -401,7 +401,7 @@ func TestChangePassword(t *testing.T) {
 	}
 }
 
-func TestChangeName(t *testing.T) {
+func TestChangeUserName(t *testing.T) {
 	data := []domain.User{
 		{
 			Login:    "Ahmed",
@@ -448,7 +448,7 @@ func TestChangeName(t *testing.T) {
 		},
 	}
 
-	db := InitMockDB()
+	db := InitUsersMockDB()
 
 	for _, currentData := range data {
 		db.mutex.Lock()
@@ -458,7 +458,7 @@ func TestChangeName(t *testing.T) {
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			user, err := db.ChangeName(currentCase.login, currentCase.newName)
+			user, err := db.ChangeUserName(currentCase.login, currentCase.newName)
 
 			if err != nil {
 				t.Error(err)
