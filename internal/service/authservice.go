@@ -2,10 +2,12 @@ package service
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"net/http"
 	"os"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 var (
@@ -13,12 +15,12 @@ var (
 )
 
 type usersStorage interface {
-	Create(user domain.User) error
-	Remove(login string) error
+	CreateUser(user domain.User) error
+	RemoveUser(login string) error
 	HasUser(login, password string) error
 	GetUser(login string) (domain.User, error)
-	ChangePassword(login, newPassword string) error
-	ChangeName(login, newName string) (domain.User, error)
+	ChangeUserPassword(login, newPassword string) error
+	ChangeUserName(login, newName string) (domain.User, error)
 }
 
 type AuthService struct {
@@ -31,19 +33,19 @@ func InitAuthService(storage usersStorage) *AuthService {
 	}
 }
 
-func (authService *AuthService) Create(user domain.User) error {
-	err := authService.storage.Create(user)
+func (authService *AuthService) CreateUser(user domain.User) error {
+	err := authService.storage.CreateUser(user)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) Remove(login string) error {
-	err := authService.storage.Remove(login)
+func (authService *AuthService) RemoveUser(login string) error {
+	err := authService.storage.RemoveUser(login)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return err
 	}
 	return nil
@@ -52,7 +54,7 @@ func (authService *AuthService) Remove(login string) error {
 func (authService *AuthService) HasUser(login, password string) error {
 	err := authService.storage.HasUser(login, password)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return err
 	}
 	return nil
@@ -61,25 +63,25 @@ func (authService *AuthService) HasUser(login, password string) error {
 func (authService *AuthService) GetUser(login string) (domain.User, error) {
 	user, err := authService.storage.GetUser(login)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return domain.User{}, err
 	}
 	return user, nil
 }
 
-func (authService *AuthService) ChangePassword(login, newPassword string) error {
-	err := authService.storage.ChangePassword(login, newPassword)
+func (authService *AuthService) ChangeUserPassword(login, newPassword string) error {
+	err := authService.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) ChangeName(login, newName string) (domain.User, error) {
+func (authService *AuthService) ChangeUserName(login, newName string) (domain.User, error) {
 	user, err := authService.storage.GetUser(login)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -94,7 +96,7 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (*jwt.Token, er
 		return []byte(SECRET), nil
 	})
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("creating user error: %v", err)
 		return nil, err
 	}
 	return parsedToken, nil

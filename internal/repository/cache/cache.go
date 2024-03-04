@@ -3,10 +3,11 @@ package cache
 import (
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/patrickmn/go-cache"
 	"os"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/patrickmn/go-cache"
 )
 
 var (
