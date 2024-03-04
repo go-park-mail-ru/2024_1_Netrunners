@@ -99,6 +99,14 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	}
 	login := r.FormValue("login")
 
+	if err != nil {
+		errs := WriteError(w, http.StatusInternalServerError, err)
+		if errs != nil {
+			return
+		}
+		return
+	}
+
 	err = authPageHandlers.sessionService.DeleteSession(login, userRefreshToken.Value)
 	if err != nil {
 		errs := WriteError(w, http.StatusInternalServerError, err)
@@ -109,20 +117,12 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	}
 
 	refreshCookie := &http.Cookie{
-		Name:     "refresh",
-		Value:    "",
-		Path:     "/auth",
-		HttpOnly: true,
-		Secure:   true,
-		MaxAge:   0,
+		Name:   "refresh",
+		MaxAge: 0,
 	}
 	accessCookie := &http.Cookie{
-		Name:     "access",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		MaxAge:   0,
+		Name:   "access",
+		MaxAge: 0,
 	}
 
 	http.SetCookie(w, refreshCookie)
