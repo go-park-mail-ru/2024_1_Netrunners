@@ -38,28 +38,16 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	password := r.FormValue("password")
 	user, err := authPageHandlers.authService.GetUser(login)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, noSuchUser)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, noSuchUser)
 	}
 
 	if password != user.Password {
-		errs := WriteError(w, http.StatusInternalServerError, wrongLoginOrPassword)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, wrongLoginOrPassword)
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, user.Status, user.Version)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	accessCookie := &http.Cookie{
@@ -91,29 +79,14 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 	userRefreshToken, err := r.Cookie("refresh")
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
-	login := r.FormValue("login")
 
-	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
-	}
+	login := r.FormValue("login")
 
 	err = authPageHandlers.sessionService.DeleteSession(login, userRefreshToken.Value)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	accessCookie := &http.Cookie{
@@ -161,20 +134,12 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err := authPageHandlers.authService.CreateUser(user)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(username, status, version)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	accessCookie := &http.Cookie{
@@ -200,87 +165,49 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err = authPageHandlers.sessionService.Add(login, refreshTokenSigned, version)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
-
-	fmt.Println("success signup")
 }
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	userRefreshToken, err := r.Cookie("refresh")
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, noActiveSession)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, noActiveSession)
 	}
 
 	hasSession := authPageHandlers.sessionService.HasSession(r.FormValue("login"), userRefreshToken.Value)
 	if !hasSession {
 		if err != nil {
-			errs := WriteError(w, http.StatusInternalServerError, noActiveSession)
-			if errs != nil {
-				return
-			}
-			return
+			WriteError(w, http.StatusInternalServerError, noActiveSession)
 		}
 	}
 
 	refreshToken, err := authPageHandlers.authService.IsTokenValid(userRefreshToken)
 	if err != nil {
-		errs := WriteError(w, http.StatusInternalServerError, err)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusInternalServerError, err)
 	}
 
 	if !refreshToken.Valid {
-		errs := WriteError(w, http.StatusUnauthorized, notAuthorised)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusUnauthorized, notAuthorised)
 	}
 	claims, ok := refreshToken.Claims.(jwt.MapClaims)
 	if !ok {
-		errs := WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
 	}
 
 	login, ok := claims["Login"].(string)
 	if !ok {
-		errs := WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
 	}
 	status, ok := claims["Status"].(string)
 	if !ok {
-		errs := WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
 	}
 
 	ver, ok := claims["Version"].(float64)
 	version := uint8(ver)
 	if !ok {
-		errs := WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
-		if errs != nil {
-			return
-		}
-		return
+		WriteError(w, http.StatusUnauthorized, tokenIsNotValid)
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, status, version)
