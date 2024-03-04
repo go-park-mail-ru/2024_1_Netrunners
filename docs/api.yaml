@@ -276,14 +276,28 @@ components:
           items:
             type: object
             required:
+              - preview_data
               - name
               - author
+              - average_score
+              - scores_count
+              - duration
             properties:
+              preview_data:
+                type: string
               name:
                 type: string
                 example: 'Transformers'
               author:
                 type: string
                 example: 'Michael Bell'
-              data:
-                type: string
+              average_score:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scores_count:
+                type: integer
+                example: 20324
+              duration:
+                type: integer
+                example: 7560
