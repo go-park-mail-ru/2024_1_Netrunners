@@ -116,13 +116,22 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	refreshCookie := &http.Cookie{
-		Name:   "refresh",
-		MaxAge: 0,
-	}
 	accessCookie := &http.Cookie{
-		Name:   "access",
-		MaxAge: 0,
+		Name:     "access",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   0,
+	}
+
+	refreshCookie := &http.Cookie{
+		Name:     "refresh",
+		Value:    "",
+		Path:     "/auth",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   0,
 	}
 
 	http.SetCookie(w, refreshCookie)
