@@ -7,19 +7,19 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
-type MockDB struct {
+type UsersMockDB struct {
 	storage map[string]domain.User // key: login; value: password
 	mutex   *sync.RWMutex
 }
 
-func InitMockDB() *MockDB {
-	return &MockDB{
+func InitUsersMockDB() *UsersMockDB {
+	return &UsersMockDB{
 		storage: make(map[string]domain.User),
 		mutex:   &sync.RWMutex{},
 	}
 }
 
-func (db *MockDB) Create(user domain.User) error {
+func (db *UsersMockDB) CreateUser(user domain.User) error {
 	db.mutex.RLock()
 	_, ok := db.storage[user.Login]
 	db.mutex.RUnlock()
@@ -35,7 +35,7 @@ func (db *MockDB) Create(user domain.User) error {
 	return nil
 }
 
-func (db *MockDB) Remove(login string) error {
+func (db *UsersMockDB) RemoveUser(login string) error {
 	db.mutex.RLock()
 	_, ok := db.storage[login]
 	db.mutex.RUnlock()
@@ -51,7 +51,7 @@ func (db *MockDB) Remove(login string) error {
 	return nil
 }
 
-func (db *MockDB) HasUser(login, password string) error {
+func (db *UsersMockDB) HasUser(login, password string) error {
 	db.mutex.RLock()
 	user, ok := db.storage[login]
 	db.mutex.RUnlock()
@@ -67,7 +67,7 @@ func (db *MockDB) HasUser(login, password string) error {
 	return nil
 }
 
-func (db *MockDB) GetUser(login string) (domain.User, error) {
+func (db *UsersMockDB) GetUser(login string) (domain.User, error) {
 	db.mutex.RLock()
 	user, ok := db.storage[login]
 	db.mutex.RUnlock()
@@ -79,7 +79,7 @@ func (db *MockDB) GetUser(login string) (domain.User, error) {
 	return user, nil
 }
 
-func (db *MockDB) ChangePassword(login, newPassword string) error {
+func (db *UsersMockDB) ChangeUserPassword(login, newPassword string) error {
 	db.mutex.RLock()
 	user, ok := db.storage[login]
 	db.mutex.RUnlock()
@@ -97,7 +97,7 @@ func (db *MockDB) ChangePassword(login, newPassword string) error {
 	return nil
 }
 
-func (db *MockDB) ChangeName(login, newName string) (domain.User, error) {
+func (db *UsersMockDB) ChangeUserName(login, newName string) (domain.User, error) {
 	db.mutex.RLock()
 	user, ok := db.storage[login]
 	db.mutex.RUnlock()
