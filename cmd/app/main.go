@@ -13,18 +13,32 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
 func main() {
+	cacheStorage := mycache.InitSessionStorage()
+	authStorage := mockdb.InitUsersMockDB()
+
+	sessionService := service.InitSessionService(cacheStorage)
+	authService := service.InitAuthService(authStorage)
+
 	mainPageHandlers := handlers.InitMainPageHandlers()
+	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", mainPageHandlers.GetIndex).Methods("GET")
+	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST")
+	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST")
+	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST")
+	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST")
 
 	server := &http.Server{
 		Handler: router,
-		Addr:    ":80",
+		Addr:    ":1180",
 	}
 
 	stopped := make(chan struct{})
