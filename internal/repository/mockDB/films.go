@@ -62,3 +62,14 @@ func (db *FilmsMockDB) GetFilmPreview(id string) (domain.FilmPreview, error) {
 
 	return film, nil
 }
+
+func (db *FilmsMockDB) GetAllFilmsPreviews() []domain.FilmPreview {
+	films := make([]domain.FilmPreview, 0, len(db.storage))
+	db.mutex.RLock()
+	for _, filmPreview := range db.storage {
+		films = append(films, filmPreview)
+	}
+	db.mutex.RUnlock()
+
+	return films
+}
