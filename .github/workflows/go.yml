@@ -1,0 +1,28 @@
+name: projet-CI
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+ 
+      - name: build
+        run: go build ./cmd/app/main.go
+
+      - name: install lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+
+      - name: lint
+        run: golangci-lint run
+
+      - name: test
+        run: go test -v ./...

@@ -40,7 +40,8 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 	user, _ := authPageHandlers.authService.GetUser(login)
 
-	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, user.Status, user.Version)
+	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login,
+		user.Status, user.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -104,31 +105,6 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		}
 		return
 	}
-
-	// if !refreshToken.Valid {
-	// 	err = WriteError(w, myerrors.ErrNotAuthorised)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-	// claims, ok := refreshToken.Claims.(jwt.MapClaims)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-
-	// login, ok := claims["Login"].(string)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
 
 	err = authPageHandlers.sessionService.DeleteSession(refreshTokenClaims["Login"].(string), userRefreshToken.Value)
 	if err != nil {
@@ -281,49 +257,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			return
 		}
 	}
-
-	// if !refreshToken.Valid {
-	// 	err = WriteError(w, myerrors.ErrNotAuthorised)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-	// claims, ok := refreshToken.Claims.(jwt.MapClaims)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-
-	// login, ok := claims["Login"].(string)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-	// status, ok := claims["Status"].(string)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
-
-	// ver, ok := claims["Version"].(float64)
-	// version := uint8(ver)
-	// if !ok {
-	// 	err = WriteError(w, myerrors.ErrTokenIsNotValid)
-	// 	if err != nil {
-	// 		fmt.Printf("error at writing response: %v\n", err)
-	// 	}
-	// 	return
-	// }
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(
 		refreshTokenClaims["Login"].(string), refreshTokenClaims["Status"].(string),

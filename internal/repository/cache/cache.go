@@ -76,7 +76,8 @@ func (sessionStorage *SessionStorage) Update(login string, token string) (err er
 	return myerrors.ErrNoSuchUserInTheCache
 }
 
-func (sessionStorage *SessionStorage) CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error) {
+func (sessionStorage *SessionStorage) CheckVersion(login string, token string,
+	usersVersion uint8) (hasSession bool, err error) {
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
 		if sessionMapInterface.(map[string]uint8)[token] == usersVersion {
 			return true, nil
@@ -112,7 +113,8 @@ func (sessionStorage *SessionStorage) CheckAllUserSessionTokens(login string) er
 	return myerrors.ErrNoSuchUserInTheCache
 }
 
-func (sessionStorage *SessionStorage) GenerateTokens(login string, status string, version uint8) (accessTokenSigned string, refreshTokenSigned string, err error) {
+func (sessionStorage *SessionStorage) GenerateTokens(login string, status string,
+	version uint8) (accessTokenSigned string, refreshTokenSigned string, err error) {
 	accessCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),

@@ -247,7 +247,6 @@ func TestGetUser(t *testing.T) {
 		testName string
 		login    string
 		name     string
-		password string
 		status   string
 		version  uint8
 	}{
@@ -255,7 +254,6 @@ func TestGetUser(t *testing.T) {
 			"get existed user",
 			"Ahmed",
 			"ahded",
-			"root",
 			"guest",
 			1,
 		},
@@ -263,7 +261,6 @@ func TestGetUser(t *testing.T) {
 			"get existed user",
 			"Dima",
 			"BestDimaEver",
-			"AbobA",
 			"publisher",
 			2,
 		},
@@ -299,11 +296,10 @@ func TestGetUser(t *testing.T) {
 			}
 
 			assert.Equal(t, true, reflect.DeepEqual(user, domain.User{
-				Login:    currentCase.login,
-				Name:     currentCase.name,
-				Password: currentCase.password,
-				Status:   currentCase.status,
-				Version:  currentCase.version,
+				Login:   currentCase.login,
+				Name:    currentCase.name,
+				Status:  currentCase.status,
+				Version: currentCase.version,
 			}))
 		})
 	}
@@ -424,7 +420,6 @@ func TestChangeUserName(t *testing.T) {
 		newName  string
 		login    string
 		name     string
-		password string
 		status   string
 		version  uint8
 	}{
@@ -433,7 +428,6 @@ func TestChangeUserName(t *testing.T) {
 			"Nikita",
 			"Ahmed",
 			"Nikita",
-			"root",
 			"guest",
 			2,
 		},
@@ -442,7 +436,6 @@ func TestChangeUserName(t *testing.T) {
 			"ArArA",
 			"Dima",
 			"ArArA",
-			"AbobA",
 			"publisher",
 			3,
 		},
@@ -465,11 +458,10 @@ func TestChangeUserName(t *testing.T) {
 			}
 
 			assert.Equal(t, true, reflect.DeepEqual(user, domain.User{
-				Login:    currentCase.login,
-				Name:     currentCase.name,
-				Password: currentCase.password,
-				Status:   currentCase.status,
-				Version:  currentCase.version,
+				Login:   currentCase.login,
+				Name:    currentCase.name,
+				Status:  currentCase.status,
+				Version: currentCase.version,
 			}))
 		})
 	}

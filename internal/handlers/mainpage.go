@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -11,5 +12,8 @@ func InitMainPageHandlers() *MainPageHandlers {
 }
 
 func (mainPageHandlers *MainPageHandlers) GetIndex(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello"))
+	_, err := w.Write([]byte("hello"))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
