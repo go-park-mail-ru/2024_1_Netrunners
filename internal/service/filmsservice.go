@@ -21,6 +21,36 @@ func InitFilmsService(storage filmsStorage) *FilmsService {
 	}
 }
 
+// TODO: remove this
+func (filmsService *FilmsService) AddSomeData() error {
+	data := []domain.FilmPreview{
+		{
+			Id:       "dfgea4ra424r4fw",
+			Name:     "Film1",
+			Duration: 3600,
+		},
+		{
+			Id:       "fnuf7842huirn23",
+			Name:     "Film2",
+			Duration: 7200,
+		},
+		{
+			Id:       "syh54eat4r4wf4wh",
+			Name:     "Film3",
+			Duration: 4800,
+		},
+	}
+
+	for _, film := range data {
+		err := filmsService.storage.AddFilm(film)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (filmsService *FilmsService) GetFilmsPreviews() ([]domain.FilmPreview, error) {
 	films := filmsService.storage.GetAllFilmsPreviews()
 

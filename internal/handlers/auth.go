@@ -63,6 +63,13 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 
 	err = authPageHandlers.sessionService.Add(user.Login, refreshTokenSigned, user.Version)
+	if err != nil {
+		err = WriteError(w, http.StatusInternalServerError, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	accessCookie := &http.Cookie{
 		Name:     "access",
@@ -289,8 +296,22 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, status, version)
+	if err != nil {
+		err = WriteError(w, http.StatusUnauthorized, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	err = authPageHandlers.sessionService.Add(login, refreshTokenSigned, version)
+	if err != nil {
+		err = WriteError(w, http.StatusInternalServerError, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	accessCookie := &http.Cookie{
 		Name:     "access",

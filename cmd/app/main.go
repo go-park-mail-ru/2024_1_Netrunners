@@ -12,7 +12,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
@@ -20,28 +19,17 @@ import (
 )
 
 func main() {
-	data := []domain.FilmPreview{
-		{
-			Id:       "dfgea4ra424r4fw",
-			Name:     "Film1",
-			Duration: 3600,
-		},
-		{
-			Id:       "fnuf7842huirn23",
-			Name:     "Film2",
-			Duration: 7200,
-		},
-	}
-
 	cacheStorage := mycache.InitSessionStorage()
 	authStorage := mockdb.InitUsersMockDB()
 	filmsStorage := mockdb.InitFilmsMockDB()
-	filmsStorage.AddFilm(data[0])
-	filmsStorage.AddFilm(data[1])
 
 	sessionService := service.InitSessionService(cacheStorage)
 	authService := service.InitAuthService(authStorage)
 	filmsService := service.InitFilmsService(filmsStorage)
+	err := filmsService.AddSomeData()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mainPageHandlers := handlers.InitMainPageHandlers()
 	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
