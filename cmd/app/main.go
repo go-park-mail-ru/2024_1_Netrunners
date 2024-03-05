@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,6 +30,15 @@ func addCors(router *mux.Router, originNames []string) http.Handler {
 }
 
 func main() {
+	var (
+		frontEndPort int
+		backEndPort  int
+	)
+	flag.IntVar(&frontEndPort, "f-port", 8000, "front-end server port")
+	flag.IntVar(&backEndPort, "b-port", 80, "back-end server port")
+
+	flag.Parse()
+
 	cacheStorage := mycache.InitSessionStorage()
 	authStorage := mockdb.InitUsersMockDB()
 	filmsStorage := mockdb.InitFilmsMockDB()
@@ -52,11 +62,11 @@ func main() {
 	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST")
 	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET")
 
-	corsRouter := addCors(router, []string{"http://localhost:80/"})
+	corsRouter := addCors(router, []string{fmt.Sprintf("http://localhost:%d/", frontEndPort)})
 
 	server := &http.Server{
 		Handler: corsRouter,
-		Addr:    ":80",
+		Addr:    fmt.Sprintf(":%d", backEndPort),
 	}
 
 	stopped := make(chan struct{})
@@ -72,7 +82,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Starting server at %s%s\n", "localhost", ":80")
+	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
