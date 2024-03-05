@@ -41,13 +41,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mainPageHandlers := handlers.InitMainPageHandlers()
 	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
 	filmsPageHandlers := handlers.InitFilmsPageHandlers(filmsService)
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", mainPageHandlers.GetIndex).Methods("GET")
 	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST")
 	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST")
 	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST")
