@@ -1,10 +1,11 @@
 package mockdb
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 type FilmsMockDB struct {
@@ -25,7 +26,7 @@ func (db *FilmsMockDB) AddFilm(film domain.FilmPreview) error {
 	db.mutex.RUnlock()
 
 	if ok {
-		return errors.New("film with given Id already exists")
+		return fmt.Errorf("film with given Id already exists: %w", myerrors.ErrInternalServerError)
 	}
 
 	db.mutex.Lock()
@@ -41,7 +42,7 @@ func (db *FilmsMockDB) RemoveFilm(id string) error {
 	db.mutex.RUnlock()
 
 	if !ok {
-		return errors.New("film with given Id doesn't exists")
+		return fmt.Errorf("film with given Id doesn't exists: %w", myerrors.ErrInternalServerError)
 	}
 
 	db.mutex.Lock()
@@ -57,7 +58,7 @@ func (db *FilmsMockDB) GetFilmPreview(id string) (domain.FilmPreview, error) {
 	db.mutex.RUnlock()
 
 	if !ok {
-		return domain.FilmPreview{}, errors.New("film with given Id doesn't exists")
+		return domain.FilmPreview{}, fmt.Errorf("film with given Id doesn't exists: %w", myerrors.ErrNoSuchFilm)
 	}
 
 	return film, nil

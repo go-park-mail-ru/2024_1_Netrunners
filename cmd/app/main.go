@@ -25,7 +25,7 @@ func main() {
 
 	sessionService := service.InitSessionService(cacheStorage)
 	authService := service.InitAuthService(authStorage)
-	filmsService := service.InitFilmsService(filmsStorage)
+	filmsService := service.InitFilmsService(filmsStorage, "./uploads")
 	err := filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)

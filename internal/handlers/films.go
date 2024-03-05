@@ -24,7 +24,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmsPreviews(w http.ResponseWrit
 	var response interface{}
 	films, err := filmsPageHandlers.filmsService.GetFilmsPreviews()
 	if err != nil {
-		err = WriteError(w, http.StatusInternalServerError, errors.New("Unexpected error"))
+		err = WriteError(w, errors.New("Unexpected error"))
 		if err != nil {
 			fmt.Printf("error at writing response: %v\n", err)
 		}

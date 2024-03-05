@@ -1,10 +1,11 @@
 package mockdb
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 type UsersMockDB struct {
@@ -25,7 +26,7 @@ func (db *UsersMockDB) CreateUser(user domain.User) error {
 	db.mutex.RUnlock()
 
 	if ok {
-		return errors.New("user already exists")
+		return fmt.Errorf("user already exists: %w", myerrors.ErrUserAlreadyExists)
 	}
 
 	db.mutex.Lock()
@@ -41,7 +42,7 @@ func (db *UsersMockDB) RemoveUser(login string) error {
 	db.mutex.RUnlock()
 
 	if !ok {
-		return errors.New("user doesn't exists")
+		return fmt.Errorf("user doesn't exists: %w", myerrors.ErrNoSuchUser)
 	}
 
 	db.mutex.Lock()
@@ -57,11 +58,11 @@ func (db *UsersMockDB) HasUser(login, password string) error {
 	db.mutex.RUnlock()
 
 	if !ok {
-		return errors.New("user doesn't exists")
+		return fmt.Errorf("user doesn't exists: %w", myerrors.ErrNoSuchUser)
 	}
 
 	if user.Password != password {
-		return errors.New("incorrect password")
+		return fmt.Errorf("incorrect password: %w", myerrors.ErrIncorrectLoginOrPassword)
 	}
 
 	return nil
@@ -72,8 +73,10 @@ func (db *UsersMockDB) GetUser(login string) (domain.User, error) {
 	user, ok := db.storage[login]
 	db.mutex.RUnlock()
 
+	user.Password = ""
+
 	if !ok {
-		return domain.User{}, errors.New("user doesn't exists")
+		return domain.User{}, fmt.Errorf("user doesn't exists: %w", myerrors.ErrNoSuchUser)
 	}
 
 	return user, nil
@@ -85,7 +88,7 @@ func (db *UsersMockDB) ChangeUserPassword(login, newPassword string) error {
 	db.mutex.RUnlock()
 
 	if !ok {
-		return errors.New("user doesn't exists")
+		return fmt.Errorf("user doesn't exists: %w", myerrors.ErrNoSuchUser)
 	}
 
 	db.mutex.Lock()
@@ -103,7 +106,7 @@ func (db *UsersMockDB) ChangeUserName(login, newName string) (domain.User, error
 	db.mutex.RUnlock()
 
 	if !ok {
-		return domain.User{}, errors.New("user doesn't exists")
+		return domain.User{}, fmt.Errorf("user doesn't exists: %w", myerrors.ErrNoSuchUser)
 	}
 
 	db.mutex.Lock()

@@ -1,6 +1,11 @@
 package service
 
 import (
+	"encoding/base64"
+	"fmt"
+	"os"
+	"path"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
@@ -12,12 +17,14 @@ type filmsStorage interface {
 }
 
 type FilmsService struct {
-	storage filmsStorage
+	storage          filmsStorage
+	localStoragePath string
 }
 
-func InitFilmsService(storage filmsStorage) *FilmsService {
+func InitFilmsService(storage filmsStorage, localStoragePath string) *FilmsService {
 	return &FilmsService{
-		storage: storage,
+		storage:          storage,
+		localStoragePath: localStoragePath,
 	}
 }
 
@@ -53,6 +60,16 @@ func (filmsService *FilmsService) AddSomeData() error {
 
 func (filmsService *FilmsService) GetFilmsPreviews() ([]domain.FilmPreview, error) {
 	films := filmsService.storage.GetAllFilmsPreviews()
+
+	for i, film := range films {
+		fileBytes, err := os.ReadFile(path.Join(filmsService.localStoragePath, "films", film.Id, "preview.png"))
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+
+		films[i].Preview = []byte(base64.StdEncoding.EncodeToString(fileBytes))
+	}
 
 	return films, nil
 }

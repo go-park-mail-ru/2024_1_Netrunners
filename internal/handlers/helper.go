@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 type SuccessResponse struct {
@@ -33,10 +35,12 @@ func WriteSuccess(w http.ResponseWriter) error {
 	return nil
 }
 
-func WriteError(w http.ResponseWriter, statusCode int, message error) error {
+func WriteError(w http.ResponseWriter, err error) error {
+	statusCode, err := myerrors.ParseError(err)
+
 	response := ErrorResponse{
 		Status: statusCode,
-		Err:    message.Error(),
+		Err:    err.Error(),
 	}
 
 	jsonResponse, err := json.Marshal(response)
