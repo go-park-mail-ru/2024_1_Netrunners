@@ -37,13 +37,13 @@ func (filmsService *FilmsService) AddSomeData() error {
 			Duration: 3600,
 		},
 		{
-			Id:       "Fast and Furious 2",
-			Name:     "Film2",
+			Id:       "fnuf7842huirn23",
+			Name:     "Fast and Furious 2",
 			Duration: 7200,
 		},
 		{
-			Id:       "Fast and Furious 3",
-			Name:     "Film3",
+			Id:       "syh54eat4r4wf4wh",
+			Name:     "Fast and Furious 3",
 			Duration: 4800,
 		},
 	}

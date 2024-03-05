@@ -16,7 +16,17 @@ import (
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	muxhandlers "github.com/gorilla/handlers"
 )
+
+func addCors(router *mux.Router, originNames []string) http.Handler {
+	credentials := muxhandlers.AllowCredentials()
+	methods := muxhandlers.AllowedMethods([]string{http.MethodGet, http.MethodPost})
+	age := muxhandlers.MaxAge(3600)
+	origins := muxhandlers.AllowedOrigins(originNames)
+	handler := muxhandlers.CORS(credentials, methods, age, origins)(router)
+	return handler
+}
 
 func main() {
 	cacheStorage := mycache.InitSessionStorage()
@@ -44,8 +54,10 @@ func main() {
 	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST")
 	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET")
 
+	corsRouter := addCors(router, []string{"http://localhost:80/"})
+
 	server := &http.Server{
-		Handler: router,
+		Handler: corsRouter,
 		Addr:    ":80",
 	}
 
