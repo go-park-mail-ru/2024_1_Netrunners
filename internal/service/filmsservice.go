@@ -33,16 +33,16 @@ func (filmsService *FilmsService) AddSomeData() error {
 	data := []domain.FilmPreview{
 		{
 			Id:       "dfgea4ra424r4fw",
-			Name:     "Film1",
+			Name:     "Fast and Furious 1",
 			Duration: 3600,
 		},
 		{
-			Id:       "fnuf7842huirn23",
+			Id:       "Fast and Furious 2",
 			Name:     "Film2",
 			Duration: 7200,
 		},
 		{
-			Id:       "syh54eat4r4wf4wh",
+			Id:       "Fast and Furious 3",
 			Name:     "Film3",
 			Duration: 4800,
 		},
