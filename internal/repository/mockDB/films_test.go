@@ -239,3 +239,30 @@ func TestGetFilmPreview(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAllFilmsPreviews(t *testing.T) {
+	data := []domain.FilmPreview{
+		{
+			Id:       "dfgea4ra424r4fw",
+			Name:     "Film1",
+			Duration: 3600,
+		},
+		{
+			Id:       "fnuf7842huirn23",
+			Name:     "Film2",
+			Duration: 7200,
+		},
+	}
+
+	db := InitFilmsMockDB()
+
+	for _, currentData := range data {
+		db.mutex.Lock()
+		db.storage[currentData.Id] = currentData
+		db.mutex.Unlock()
+	}
+
+	films := db.GetAllFilmsPreviews()
+
+	assert.Equal(t, true, reflect.DeepEqual(films, data))
+}

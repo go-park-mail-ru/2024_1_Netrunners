@@ -276,6 +276,7 @@ components:
           items:
             type: object
             required:
+              - status
               - preview_data
               - name
               - author
@@ -283,6 +284,9 @@ components:
               - scores_count
               - duration
             properties:
+              status:
+                type: integer
+                example: 200
               preview_data:
                 type: string
               name:

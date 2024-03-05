@@ -52,7 +52,8 @@ func (sessionStorageService *SessionService) Update(login string, token string) 
 	return nil
 }
 
-func (sessionStorageService *SessionService) CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error) {
+func (sessionStorageService *SessionService) CheckVersion(login string, token string,
+	usersVersion uint8) (hasSession bool, err error) {
 	hasSession, err = sessionStorageService.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
 		fmt.Println(err)
@@ -84,7 +85,13 @@ func (sessionStorageService *SessionService) CheckAllUserSessionTokens(login str
 	return nil
 }
 
-func (sessionStorageService *SessionService) GenerateTokens(login string, status string, version uint8) (string, string, error) {
+// TODO: move token checks from handler to service
+func (sessionStorageService *SessionService) CheckRefreshToken(token string) error {
+	return nil
+}
+
+func (sessionStorageService *SessionService) GenerateTokens(login string, status string,
+	version uint8) (string, string, error) {
 	accessToken, refreshToken, err := sessionStorageService.sessionStorage.GenerateTokens(login, status, version)
 	if err != nil {
 		fmt.Println(err)
