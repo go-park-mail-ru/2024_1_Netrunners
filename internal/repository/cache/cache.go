@@ -55,7 +55,6 @@ func (sessionStorage *SessionStorage) DeleteSession(login string, token string) 
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
 		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
 			delete(sessionMapInterface.(map[string]uint8), token)
-			fmt.Println(sessionMapInterface.(map[string]uint8))
 			return nil
 		}
 		return myerrors.ErrNoSuchSessionInTheCache
@@ -92,7 +91,6 @@ func (sessionStorage *SessionStorage) HasSession(login string, token string) boo
 		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
 			return true
 		}
-		return true
 	}
 	return false
 }

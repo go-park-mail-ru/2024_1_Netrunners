@@ -8,6 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 var (
@@ -87,7 +88,7 @@ func (authService *AuthService) ChangeUserName(login, newName string) (domain.Us
 	return user, nil
 }
 
-func (authService *AuthService) IsTokenValid(token *http.Cookie) (*jwt.Token, error) {
+func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
 	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -99,5 +100,28 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (*jwt.Token, er
 		fmt.Printf("creating user error: %v", err)
 		return nil, err
 	}
-	return parsedToken, nil
+
+	if !parsedToken.Valid {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Login"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	_, ok = claims["Status"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Version"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	return claims, nil
 }
