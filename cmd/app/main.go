@@ -29,6 +29,21 @@ func addCors(router *mux.Router, originNames []string) http.Handler {
 	return handler
 }
 
+func CorsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	var (
 		frontEndPort int
@@ -45,7 +60,7 @@ func main() {
 
 	sessionService := service.InitSessionService(cacheStorage)
 	authService := service.InitAuthService(authStorage)
-	filmsService := service.InitFilmsService(filmsStorage, "./uploads")
+	filmsService := service.InitFilmsService(filmsStorage, "/root/2024_1_Netrunners/uploads")
 	err := filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)
@@ -56,16 +71,17 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST")
-	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST")
-	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST")
-	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST")
-	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET")
+	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST", "OPTIONS")
+	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST", "OPTIONS")
+	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST", "OPTIONS")
+	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET", "OPTIONS")
 
-	corsRouter := addCors(router, []string{fmt.Sprintf("http://localhost:%d/", frontEndPort)})
+	router.Use(CorsMiddleware)
+	// corsRouter := addCors(router, []string{fmt.Sprintf("http://localhost:%d/", frontEndPort)})
 
 	server := &http.Server{
-		Handler: corsRouter,
+		Handler: router,
 		Addr:    fmt.Sprintf(":%d", backEndPort),
 	}
 
