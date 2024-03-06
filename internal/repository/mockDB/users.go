@@ -110,7 +110,7 @@ func (db *UsersMockDB) ChangeUserName(login, newName string) (domain.User, error
 	}
 
 	db.mutex.Lock()
-	user.Username = newName
+	user.Name = newName
 	user.Version++
 	db.storage[login] = user
 	db.mutex.Unlock()
