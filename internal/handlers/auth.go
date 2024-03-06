@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -27,9 +28,18 @@ func InitAuthPageHandlers(authService *service.AuthService, sessionService *serv
 }
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
-	login := r.FormValue("login")
-	password := r.FormValue("password")
-	err := authPageHandlers.authService.HasUser(login, password)
+	var inputUserData domain.User
+	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+	login := inputUserData.Login
+	password := inputUserData.Password
+	err = authPageHandlers.authService.HasUser(login, password)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -38,7 +48,14 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	user, _ := authPageHandlers.authService.GetUser(login)
+	user, err := authPageHandlers.authService.GetUser(login)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login,
 		user.Status, user.Version)
@@ -148,9 +165,18 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
-	login := r.FormValue("login")
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	var inputUserData domain.User
+	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+	login := inputUserData.Login
+	username := inputUserData.Name
+	password := inputUserData.Password
 
 	status := "regular"
 	var version uint8 = 1
@@ -163,7 +189,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Version:  version,
 	}
 
-	err := authPageHandlers.authService.CreateUser(user)
+	err = authPageHandlers.authService.CreateUser(user)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
