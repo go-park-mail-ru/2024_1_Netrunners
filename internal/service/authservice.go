@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 
@@ -22,10 +24,11 @@ type usersStorage interface {
 	GetUser(login string) (domain.User, error)
 	ChangeUserPassword(login, newPassword string) error
 	ChangeUserName(login, newName string) (domain.User, error)
-}
+	}
 
 type AuthService struct {
-	storage usersStorage
+	storage   usersStorage
+	secretKey string
 }
 
 func InitAuthService(storage usersStorage) *AuthService {
@@ -124,4 +127,70 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 	}
 
 	return claims, nil
+}
+
+func ValidateLogin(e string) error {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if emailRegex.MatchString(e) {
+		return nil
+	}
+	return myerrors.ErrLoginIsNotValid
+}
+
+func ValidateUsername(username string) error {
+	if len(username) >= 4 {
+		return nil
+	}
+	return myerrors.ErrUsernameIsToShort
+}
+
+func ValidatePassword(password string) error {
+	if len(password) >= 6 {
+		return nil
+	}
+	return myerrors.ErrPasswordIsToShort
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	Status  string
+	Version uint8
+}
+
+func GenerateTokens(login string, status string, version uint8) (accessTokenSigned string,
+	refreshTokenSigned string, err error) {
+	accessCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		Status:  status,
+		Version: version,
+	}
+
+	refreshCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		Status:  status,
+		Version: version,
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
+
+	accessTokenSigned, err = accessToken.SignedString([]byte(SECRET))
+	if err != nil {
+		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
+	}
+	refreshTokenSigned, err = refreshToken.SignedString([]byte(SECRET))
+	if err != nil {
+		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
+	}
+
+	return accessTokenSigned, refreshTokenSigned, nil
 }

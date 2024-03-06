@@ -17,24 +17,15 @@ import (
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
-	muxhandlers "github.com/gorilla/handlers"
 )
-
-func addCors(router *mux.Router, originNames []string) http.Handler {
-	credentials := muxhandlers.AllowCredentials()
-	methods := muxhandlers.AllowedMethods([]string{http.MethodGet, http.MethodPost})
-	age := muxhandlers.MaxAge(3600)
-	origins := muxhandlers.AllowedOrigins(originNames)
-	handler := muxhandlers.CORS(credentials, methods, age, origins)(router)
-	return handler
-}
 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "http://94.139.247.246:8080")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, "+
+			"Accept-Encoding, X-CSRF-Token, Authorization")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusNoContent)
@@ -79,7 +70,6 @@ func main() {
 	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET", "OPTIONS")
 
 	router.Use(CorsMiddleware)
-	// corsRouter := addCors(router, []string{fmt.Sprintf("http://localhost:%d/", frontEndPort)})
 
 	server := &http.Server{
 		Handler: router,

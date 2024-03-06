@@ -12,7 +12,6 @@ type sessionStorage interface {
 	GetVersion(login string, token string) (version uint8, err error)
 	HasSession(login string, token string) bool
 	CheckAllUserSessionTokens(login string) error
-	GenerateTokens(login string, status string, version uint8) (string, string, error)
 }
 
 type SessionService struct {
@@ -83,19 +82,4 @@ func (sessionStorageService *SessionService) CheckAllUserSessionTokens(login str
 		return err
 	}
 	return nil
-}
-
-// TODO: move token checks from handler to service
-func (sessionStorageService *SessionService) CheckRefreshToken(token string) error {
-	return nil
-}
-
-func (sessionStorageService *SessionService) GenerateTokens(login string, status string,
-	version uint8) (string, string, error) {
-	accessToken, refreshToken, err := sessionStorageService.sessionStorage.GenerateTokens(login, status, version)
-	if err != nil {
-		fmt.Println(err)
-		return "", "", err
-	}
-	return accessToken, refreshToken, nil
 }
