@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -13,9 +11,6 @@ import (
 )
 
 var (
-	loginIsNotValid             = errors.New("login is not valid")
-	passwordIsToShort           = errors.New("password is too short")
-	usernameIsToShort           = errors.New("username is too short")
 	accessCookieExpirationTime  = 5 * 60
 	refreshCookieExpirationTime = 48 * 3600
 )
@@ -191,6 +186,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.User
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -241,6 +237,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Version:  version,
 	}
 
+	fmt.Println(user.Login)
 	err = authPageHandlers.authService.CreateUser(user)
 	if err != nil {
 		err = WriteError(w, err)
@@ -339,9 +336,8 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			err = WriteSuccess(w)
 			if err != nil {
 				fmt.Printf("error at writing response: %v\n", err)
-
+				return
 			}
-			return
 		}
 	}
 
@@ -350,11 +346,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		refreshTokenClaims["Status"].(string),
 		uint8(refreshTokenClaims["Version"].(float64)))
 	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			fmt.Printf("error at writing response: %v\n", err)
-		}
-		return
 	}
 
 	err = authPageHandlers.sessionService.Add(refreshTokenClaims["Login"].(string), refreshTokenSigned,
@@ -372,6 +363,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    accessTokenSigned,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   false,
 		MaxAge:   accessCookieExpirationTime,
 	}
 
@@ -380,6 +372,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    refreshTokenSigned,
 		Path:     "/auth",
 		HttpOnly: true,
+		Secure:   false,
 		MaxAge:   refreshCookieExpirationTime,
 	}
 
@@ -389,23 +382,4 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		fmt.Printf("error at writing response: %v\n", err)
 	}
-}
-
-func ValidateLogin(login string) (match bool, err error) {
-	match, err = regexp.MatchString(`/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/`, login)
-	return match, err
-}
-
-func ValidateUsername(username string) bool {
-	if len(username) >= 4 {
-		return true
-	}
-	return false
-}
-
-func ValidatePassword(password string) bool {
-	if len(password) >= 6 {
-		return true
-	}
-	return false
 }
