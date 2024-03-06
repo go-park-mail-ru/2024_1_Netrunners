@@ -336,8 +336,9 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			err = WriteSuccess(w)
 			if err != nil {
 				fmt.Printf("error at writing response: %v\n", err)
-				return
+
 			}
+			return
 		}
 	}
 
@@ -363,7 +364,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    accessTokenSigned,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false,
 		MaxAge:   accessCookieExpirationTime,
 	}
 
@@ -372,7 +372,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    refreshTokenSigned,
 		Path:     "/auth",
 		HttpOnly: true,
-		Secure:   false,
 		MaxAge:   refreshCookieExpirationTime,
 	}
 
