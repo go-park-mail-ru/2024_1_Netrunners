@@ -237,7 +237,6 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Version:  version,
 	}
 
-	fmt.Println(user.Login)
 	err = authPageHandlers.authService.CreateUser(user)
 	if err != nil {
 		err = WriteError(w, err)
@@ -257,14 +256,6 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	}
 
 	err = authPageHandlers.sessionService.Add(login, refreshTokenSigned, version)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			fmt.Printf("error at writing response: %v\n", err)
-		}
-		return
-	}
-	err = authPageHandlers.sessionService.CheckAllUserSessionTokens(login)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -302,7 +293,6 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	userRefreshToken, err := r.Cookie("refresh")
-	fmt.Println(userRefreshToken)
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
@@ -347,6 +337,11 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		refreshTokenClaims["Status"].(string),
 		uint8(refreshTokenClaims["Version"].(float64)))
 	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
 	}
 
 	err = authPageHandlers.sessionService.Add(refreshTokenClaims["Login"].(string), refreshTokenSigned,
