@@ -42,8 +42,9 @@ func (sessionStorage *SessionStorage) Add(login string, token string, version ui
 		return nil
 	}
 	if _, hasSession := sessionMap.(map[string]uint8)[token]; hasSession {
-		return myerrors.ErrItemsIsAlreadyInTheCache
-	}
+		// return myerrors.ErrItemsIsAlreadyInTheCache
+		return nil	
+}
 	sesMap := sessionMap.(map[string]uint8)
 	sesMap[token] = version
 	sessionStorage.cacheStorage.Set(login, sesMap, 0)
