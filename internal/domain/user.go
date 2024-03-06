@@ -1,9 +1,9 @@
 package domain
 
 type User struct {
-	Login    string
-	Name     string
-	Password string
+	Login    string `json:"login"`
+	Name     string `json:"username"`
+	Password string `json:"password"`
 	Status   string
 	Version  uint8
 }

@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -10,6 +13,9 @@ import (
 )
 
 var (
+	loginIsNotValid             = errors.New("login is not valid")
+	passwordIsToShort           = errors.New("password is too short")
+	usernameIsToShort           = errors.New("username is too short")
 	accessCookieExpirationTime  = 5 * 60
 	refreshCookieExpirationTime = 48 * 3600
 )
@@ -27,9 +33,28 @@ func InitAuthPageHandlers(authService *service.AuthService, sessionService *serv
 }
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
-	login := r.FormValue("login")
-	password := r.FormValue("password")
-	err := authPageHandlers.authService.HasUser(login, password)
+	var inputUserData domain.User
+	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+	login := inputUserData.Login
+	password := inputUserData.Password
+
+	match := ValidateLogin(login)
+	if !match {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", loginIsNotValid)
+		}
+		return
+	}
+
+	err = ValidatePassword(password)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -38,7 +63,31 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	user, _ := authPageHandlers.authService.GetUser(login)
+	err = ValidatePassword(password)
+	if err != nil {
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", passwordIsToShort)
+		}
+		return
+	}
+
+	err = authPageHandlers.authService.HasUser(login, password)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+
+	user, err := authPageHandlers.authService.GetUser(login)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login,
 		user.Status, user.Version)
@@ -64,7 +113,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		Value:    accessTokenSigned,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   accessCookieExpirationTime,
 	}
 
@@ -73,7 +122,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		Value:    refreshTokenSigned,
 		Path:     "/auth",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   refreshCookieExpirationTime,
 	}
 
@@ -120,7 +169,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   0,
 	}
 
@@ -129,7 +178,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		Value:    "",
 		Path:     "/auth",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   0,
 	}
 
@@ -148,9 +197,47 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
-	login := r.FormValue("login")
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	var inputUserData domain.User
+	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+	login := inputUserData.Login
+	username := inputUserData.Name
+	password := inputUserData.Password
+	fmt.Println(login)
+	match := ValidateLogin(login)
+	if !match {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", loginIsNotValid)
+		}
+		return
+	}
+
+	fmt.Println(username)
+	err = ValidateUsername(username)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
+
+	err = ValidatePassword(password)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	status := "regular"
 	var version uint8 = 1
@@ -163,7 +250,8 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Version:  version,
 	}
 
-	err := authPageHandlers.authService.CreateUser(user)
+	fmt.Println(user.Login)
+	err = authPageHandlers.authService.CreateUser(user)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -172,7 +260,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(username, status, version)
+	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.sessionService.GenerateTokens(login, status, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -189,13 +277,21 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		}
 		return
 	}
+	err = authPageHandlers.sessionService.CheckAllUserSessionTokens(login)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			fmt.Printf("error at writing response: %v\n", err)
+		}
+		return
+	}
 
 	accessCookie := &http.Cookie{
 		Name:     "access",
 		Value:    accessTokenSigned,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   accessCookieExpirationTime,
 	}
 
@@ -204,7 +300,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Value:    refreshTokenSigned,
 		Path:     "/auth",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		MaxAge:   refreshCookieExpirationTime,
 	}
 
@@ -219,6 +315,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	userRefreshToken, err := r.Cookie("refresh")
+	fmt.Println(userRefreshToken)
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
@@ -236,6 +333,8 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	fmt.Println(refreshTokenClaims)
+	fmt.Println("data to check hassession:", refreshTokenClaims["Login"].(string), "|||", userRefreshToken.Value)
 	hasSession := authPageHandlers.sessionService.HasSession(refreshTokenClaims["Login"].(string),
 		userRefreshToken.Value)
 	if !hasSession {
@@ -253,6 +352,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			err = WriteSuccess(w)
 			if err != nil {
 				fmt.Printf("error at writing response: %v\n", err)
+
 			}
 			return
 		}
@@ -269,8 +369,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(
-		refreshTokenClaims["Login"].(string), refreshTokenSigned,
+	err = authPageHandlers.sessionService.Add(refreshTokenClaims["Login"].(string), refreshTokenSigned,
 		uint8(refreshTokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
@@ -285,7 +384,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    accessTokenSigned,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
 		MaxAge:   accessCookieExpirationTime,
 	}
 
@@ -294,7 +392,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Value:    refreshTokenSigned,
 		Path:     "/auth",
 		HttpOnly: true,
-		Secure:   true,
 		MaxAge:   refreshCookieExpirationTime,
 	}
 
@@ -304,4 +401,23 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		fmt.Printf("error at writing response: %v\n", err)
 	}
+}
+
+func ValidateLogin(e string) bool {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(e)
+}
+
+func ValidateUsername(username string) error {
+	if len(username) >= 4 {
+		return nil
+	}
+	return usernameIsToShort
+}
+
+func ValidatePassword(password string) error {
+	if len(password) >= 6 {
+		return nil
+	}
+	return passwordIsToShort
 }
