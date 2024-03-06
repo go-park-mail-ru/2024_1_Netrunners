@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -11,6 +13,9 @@ import (
 )
 
 var (
+	loginIsNotValid             = errors.New("login is not valid")
+	passwordIsToShort           = errors.New("password is too short")
+	usernameIsToShort           = errors.New("username is too short")
 	accessCookieExpirationTime  = 5 * 60
 	refreshCookieExpirationTime = 48 * 3600
 )
@@ -384,4 +389,23 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		fmt.Printf("error at writing response: %v\n", err)
 	}
+}
+
+func ValidateLogin(login string) (match bool, err error) {
+	match, err = regexp.MatchString(`/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/`, login)
+	return match, err
+}
+
+func ValidateUsername(username string) bool {
+	if len(username) >= 4 {
+		return true
+	}
+	return false
+}
+
+func ValidatePassword(password string) bool {
+	if len(password) >= 6 {
+		return true
+	}
+	return false
 }
