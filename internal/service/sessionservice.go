@@ -10,7 +10,7 @@ type sessionStorage interface {
 	Update(login string, token string) (err error)
 	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
 	GetVersion(login string, token string) (version uint8, err error)
-	HasSession(login string, token string) bool
+	HasSession(login string, token string) error
 	CheckAllUserSessionTokens(login string) error
 }
 
@@ -70,9 +70,9 @@ func (sessionStorageService *SessionService) GetVersion(login string, token stri
 	return version, nil
 }
 
-func (sessionStorageService *SessionService) HasSession(login string, token string) (hasSession bool) {
-	hasSession = sessionStorageService.sessionStorage.HasSession(login, token)
-	return hasSession
+func (sessionStorageService *SessionService) HasSession(login string, token string) (err error) {
+	err = sessionStorageService.sessionStorage.HasSession(login, token)
+	return err
 }
 
 func (sessionStorageService *SessionService) CheckAllUserSessionTokens(login string) error {

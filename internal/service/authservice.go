@@ -13,10 +13,6 @@ import (
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
-var (
-	SECRET = os.Getenv("SECRETKEY")
-)
-
 type usersStorage interface {
 	CreateUser(user domain.User) error
 	RemoveUser(login string) error
@@ -24,7 +20,7 @@ type usersStorage interface {
 	GetUser(login string) (domain.User, error)
 	ChangeUserPassword(login, newPassword string) error
 	ChangeUserName(login, newName string) (domain.User, error)
-	}
+}
 
 type AuthService struct {
 	storage   usersStorage
@@ -33,7 +29,8 @@ type AuthService struct {
 
 func InitAuthService(storage usersStorage) *AuthService {
 	return &AuthService{
-		storage: storage,
+		storage:   storage,
+		secretKey: os.Getenv("SECRETKEY"),
 	}
 }
 
@@ -97,7 +94,7 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(SECRET), nil
+		return []byte(authService.secretKey), nil
 	})
 	if err != nil {
 		fmt.Printf("creating user error: %v", err)
@@ -158,7 +155,7 @@ type customClaims struct {
 	Version uint8
 }
 
-func GenerateTokens(login string, status string, version uint8) (accessTokenSigned string,
+func (authService *AuthService) GenerateTokens(login string, status string, version uint8) (accessTokenSigned string,
 	refreshTokenSigned string, err error) {
 	accessCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
@@ -183,11 +180,11 @@ func GenerateTokens(login string, status string, version uint8) (accessTokenSign
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
 
-	accessTokenSigned, err = accessToken.SignedString([]byte(SECRET))
+	accessTokenSigned, err = accessToken.SignedString([]byte(authService.secretKey))
 	if err != nil {
 		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
 	}
-	refreshTokenSigned, err = refreshToken.SignedString([]byte(SECRET))
+	refreshTokenSigned, err = refreshToken.SignedString([]byte(authService.secretKey))
 	if err != nil {
 		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
 	}

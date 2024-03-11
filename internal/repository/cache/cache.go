@@ -78,13 +78,13 @@ func (sessionStorage *SessionStorage) CheckVersion(login string, token string,
 	return false, myerrors.ErrNoSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) HasSession(login string, token string) bool {
+func (sessionStorage *SessionStorage) HasSession(login string, token string) error {
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
 		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
-			return true
+			return nil
 		}
 	}
-	return false
+	return myerrors.ErrNoSuchUser
 }
 
 func (sessionStorage *SessionStorage) GetVersion(login string, token string) (version uint8, err error) {
