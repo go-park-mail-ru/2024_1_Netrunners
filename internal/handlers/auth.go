@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -12,9 +11,6 @@ import (
 )
 
 var (
-	loginIsNotValid             = errors.New("login is not valid")
-	passwordIsToShort           = errors.New("password is too short")
-	usernameIsToShort           = errors.New("username is too short")
 	accessCookieExpirationTime  = 5 * 60
 	refreshCookieExpirationTime = 48 * 3600
 )
@@ -43,7 +39,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 	login := inputUserData.Login
 	password := inputUserData.Password
-  
+
 	err = service.ValidateLogin(login)
 	if err != nil {
 		err = WriteError(w, err)
@@ -239,7 +235,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Status:   status,
 		Version:  version,
 	}
-  
+
 	err = authPageHandlers.authService.CreateUser(user)
 	if err != nil {
 		err = WriteError(w, err)
@@ -388,23 +384,4 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		fmt.Printf("error at writing response: %v\n", err)
 	}
-}
-
-func ValidateLogin(e string) bool {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	return emailRegex.MatchString(e)
-}
-
-func ValidateUsername(username string) error {
-	if len(username) >= 4 {
-		return nil
-	}
-	return usernameIsToShort
-}
-
-func ValidatePassword(password string) error {
-	if len(password) >= 6 {
-		return nil
-	}
-	return passwordIsToShort
 }
