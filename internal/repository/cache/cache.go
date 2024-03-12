@@ -2,14 +2,13 @@ package cache
 
 import (
 	"fmt"
+
 	"github.com/patrickmn/go-cache"
-	"os"
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 var (
-	SECRET           = os.Getenv("SECRETKEY")
 	maxVersion uint8 = 255
 )
 
