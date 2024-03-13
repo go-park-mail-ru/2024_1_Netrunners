@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
-	"net/http"
 )
 
 var (

@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
-	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
+	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
 func TestAuthPageHandlers_Signup(t *testing.T) {
