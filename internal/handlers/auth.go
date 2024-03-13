@@ -3,11 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	"net/http"
 )
 
 var (
@@ -326,7 +325,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			err = WriteSuccess(w)
 			if err != nil {
 				fmt.Printf("error at writing response: %v\n", err)
-
 			}
 			return
 		}
