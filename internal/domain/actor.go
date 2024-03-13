@@ -2,6 +2,11 @@ package domain
 
 import "time"
 
+type ActorToAdd struct {
+	Name string
+	Data string
+}
+
 type ActorData struct {
 	Uuid     string
 	Name     string

@@ -14,14 +14,23 @@ type FilmData struct {
 	Data         string
 }
 
+type FilmDataToAdd struct {
+	Preview  string
+	Title    string
+	Director string
+	Duration int
+	Data     string
+	Actors   []ActorData
+}
+
 type FilmPreview struct {
-	Uuid         string `json:"uuid"`
-	Preview      string `json:"preview_data"`
-	Title        string `json:"title"`
-	Director     string `json:"author"`
-	AverageScore int    `json:"average_score"`
-	ScoresCount  int    `json:"scores_count"`
-	Duration     int    `json:"duration"`
+	Uuid         string  `json:"uuid"`
+	Preview      string  `json:"preview_data"`
+	Title        string  `json:"title"`
+	Director     string  `json:"author"`
+	AverageScore float32 `json:"average_score"`
+	ScoresCount  int     `json:"scores_count"`
+	Duration     int     `json:"duration"`
 }
 
 type FilmLink struct {

@@ -16,9 +16,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
-	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
 	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
@@ -47,44 +45,44 @@ func main() {
 		"root1234",
 		"netrunnerflix",
 	))
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	cacheStorage := mycache.InitSessionStorage()
-	authStorage := mockdb.InitUsersMockDB()
-	filmsStorage := mockdb.InitFilmsMockDB()
-	actorsStorage, err := database.NewActorsStorage(pool)
+	authStorage, err := database.NewUsersStorage(pool)
+	if err != nil {
+		log.Fatal(err)
+	}
+	filmsStorage, err := database.NewFilmsStorage(pool)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sessionService := service.InitSessionService(cacheStorage)
-	authService := service.InitAuthService(authStorage)
-	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
-	filmsService := service.InitFilmsService(filmsStorage, "/root/2024_1_Netrunners/uploads")
+	sessionService := service.InitSessionService(cacheStorage, sugarLogger)
+	authService := service.NewAuthService(authStorage, sugarLogger)
+	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
+
+	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
+	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(authService, sugarLogger)
+
 	err = filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
-	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
-	filmsPageHandlers := handlers.InitFilmsPageHandlers(filmsService)
-	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
-
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
-	router.HandleFunc("/films",
-		middleware.AuthMiddleware(filmsPageHandlers.GetFilmsPreviews)).Methods("GET", "OPTIONS")
-	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
-	router.Use(middleware.CorsMiddleware)
-	router.Use(middleware.PanicMiddleware)
+	router.HandleFunc("/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
 
 	server := &http.Server{
 		Handler: router,

@@ -12,7 +12,7 @@ tags:
 
 paths:
 
-# Auth
+  # Auth
 
   /auth/signup:
     post:
@@ -59,7 +59,7 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-          
+
   /auth/login:
     post:
       tags:
@@ -174,9 +174,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/StatusResponse'
         default:
-          description: Unknown error     
-     
-# Films
+          description: Unknown error
+
+  # Films
 
   /films/all:
     get:
@@ -406,7 +406,11 @@ paths:
         default:
           description: Unknown error
 
+<<<<<<< HEAD
 # Profile
+=======
+  # Profile
+>>>>>>> 0b3f692 (users and films done)
 
   /profile/{uuid}/data:
     get:
@@ -452,7 +456,11 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 0b3f692 (users and films done)
   /profile/{uuid}/preview:
     get:
       tags:
@@ -549,7 +557,11 @@ paths:
         default:
           description: Unknown error
 
+<<<<<<< HEAD
 # Actors
+=======
+  # Actors
+>>>>>>> 0b3f692 (users and films done)
 
   /actors/all:
     get:
@@ -674,7 +686,7 @@ paths:
 
 components:
 
-# Cookies
+  # Cookies
 
   securitySchemes:
 
@@ -688,7 +700,7 @@ components:
       in: cookie
       name: refresh
 
-# Requests & responses 
+  # Requests & responses
 
   schemas:
 
@@ -702,7 +714,7 @@ components:
         error:
           type: string
 
-#Auth
+    #Auth
 
     SignupRequest:
       required:
@@ -732,7 +744,33 @@ components:
           type: string
           example: 'root'
 
-# Films
+    # Films
+
+    NewFilmRequest:
+      required:
+        - title
+        - director
+        - preview_data
+        - duration
+        - release_date
+        - film_data
+      properties:
+        title:
+          type: string
+          example: 'Transformers'
+        director:
+          type: string
+          example: 'Transformers'
+        preview_data:
+          type: string
+        duration:
+          type: integer
+          example: 7560
+        release_date:
+          type: string
+          example: '2011-04-11T10:20:30'
+        film_data:
+          type: string
 
     NewFilmRequest:
       required:
@@ -875,7 +913,11 @@ components:
                 type: string
                 example: '2011-04-11T10:20:30'
 
+<<<<<<< HEAD
 # Profile
+=======
+    # Profile
+>>>>>>> 0b3f692 (users and films done)
 
     ProfileResponse:
       required:
@@ -907,7 +949,11 @@ components:
               example: false
             avatar:
               type: string
+<<<<<<< HEAD
               
+=======
+
+>>>>>>> 0b3f692 (users and films done)
     ProfilePreviewResponse:
       required:
         - status
@@ -926,7 +972,11 @@ components:
               example: 'Ahmed'
             avatar:
               type: string
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 0b3f692 (users and films done)
     ProfileEditRequest:
       required:
         - action
@@ -945,7 +995,11 @@ components:
           type: string
 
 
+<<<<<<< HEAD
 # Actors
+=======
+    # Actors
+>>>>>>> 0b3f692 (users and films done)
 
     NewActorRequest:
       required:
