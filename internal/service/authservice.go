@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-)
-
-var (
-	SECRET = os.Getenv("SECRETKEY")
 )
 
 type usersStorage interface {
@@ -25,12 +23,14 @@ type usersStorage interface {
 }
 
 type AuthService struct {
-	storage usersStorage
+	storage   usersStorage
+	secretKey string
 }
 
 func InitAuthService(storage usersStorage) *AuthService {
 	return &AuthService{
-		storage: storage,
+		storage:   storage,
+		secretKey: os.Getenv("SECRETKEY"),
 	}
 }
 
@@ -94,7 +94,7 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(SECRET), nil
+		return []byte(authService.secretKey), nil
 	})
 	if err != nil {
 		fmt.Printf("creating user error: %v", err)
@@ -124,4 +124,70 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 	}
 
 	return claims, nil
+}
+
+func ValidateLogin(e string) error {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if emailRegex.MatchString(e) {
+		return nil
+	}
+	return myerrors.ErrLoginIsNotValid
+}
+
+func ValidateUsername(username string) error {
+	if len(username) >= 4 {
+		return nil
+	}
+	return myerrors.ErrUsernameIsToShort
+}
+
+func ValidatePassword(password string) error {
+	if len(password) >= 6 {
+		return nil
+	}
+	return myerrors.ErrPasswordIsToShort
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	Status  string
+	Version uint8
+}
+
+func (authService *AuthService) GenerateTokens(login string, status string, version uint8) (accessTokenSigned string,
+	refreshTokenSigned string, err error) {
+	accessCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		Status:  status,
+		Version: version,
+	}
+
+	refreshCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		Status:  status,
+		Version: version,
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
+
+	accessTokenSigned, err = accessToken.SignedString([]byte(authService.secretKey))
+	if err != nil {
+		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
+	}
+	refreshTokenSigned, err = refreshToken.SignedString([]byte(authService.secretKey))
+	if err != nil {
+		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
+	}
+
+	return accessTokenSigned, refreshTokenSigned, nil
 }

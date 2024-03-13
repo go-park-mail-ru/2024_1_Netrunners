@@ -217,9 +217,9 @@ func TestHasSession(t *testing.T) {
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			has := storage.HasSession(currentCase.login, currentCase.token)
+			err := storage.HasSession(currentCase.login, currentCase.token)
 
-			if !has {
+			if err != nil {
 				t.Error("no such session")
 			}
 		})
@@ -227,9 +227,9 @@ func TestHasSession(t *testing.T) {
 
 	for _, currentCase := range invalidCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			has := storage.HasSession(currentCase.login, currentCase.token)
+			err := storage.HasSession(currentCase.login, currentCase.token)
 
-			if has {
+			if err == nil {
 				t.Error("no error returned")
 			}
 		})

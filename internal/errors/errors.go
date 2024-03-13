@@ -12,6 +12,9 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrUserAlreadyExists),
 		errors.Is(err, ErrNoSuchUser),
 		errors.Is(err, ErrIncorrectLoginOrPassword),
+		errors.Is(err, ErrLoginIsNotValid),
+		errors.Is(err, ErrPasswordIsToShort),
+		errors.Is(err, ErrUsernameIsToShort),
 		errors.Is(err, ErrNoSuchFilm):
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),

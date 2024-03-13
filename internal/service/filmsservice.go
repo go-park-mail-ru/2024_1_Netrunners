@@ -27,8 +27,9 @@ func InitFilmsService(storage filmsStorage, localStoragePath string) *FilmsServi
 func (filmsService *FilmsService) AddSomeData() error {
 	data := []domain.FilmPreview{
 		{
-			Id:       "dfgea4ra424r4fw",
-			Preview:  "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZmMxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
+			Id: "dfgea4ra424r4fw",
+			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
+				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
 			Name:     "Fast and Furious 1",
 			Duration: 3600,
 		},
@@ -58,16 +59,6 @@ func (filmsService *FilmsService) AddSomeData() error {
 
 func (filmsService *FilmsService) GetFilmsPreviews() ([]domain.FilmPreview, error) {
 	films := filmsService.storage.GetAllFilmsPreviews()
-
-	//for i, film := range films {
-	//	fileBytes, err := os.ReadFile(path.Join(filmsService.localStoragePath, "films", film.Id, "preview.png"))
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		return nil, err
-	//	}
-	//
-	//	films[i].Preview = []byte(base64.StdEncoding.EncodeToString(fileBytes))
-	//}
 
 	return films, nil
 }

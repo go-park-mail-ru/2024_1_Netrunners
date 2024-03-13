@@ -2,29 +2,18 @@ package cache
 
 import (
 	"fmt"
-	"os"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/patrickmn/go-cache"
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 var (
-	SECRET           = os.Getenv("SECRETKEY")
 	maxVersion uint8 = 255
 )
 
 type SessionStorage struct {
 	cacheStorage *cache.Cache
-}
-
-type customClaims struct {
-	jwt.StandardClaims
-	Login   string
-	Status  string
-	Version uint8
 }
 
 func InitSessionStorage() *SessionStorage {
@@ -43,7 +32,7 @@ func (sessionStorage *SessionStorage) Add(login string, token string, version ui
 	}
 	if _, hasSession := sessionMap.(map[string]uint8)[token]; hasSession {
 		return myerrors.ErrItemsIsAlreadyInTheCache
-		// return nil
+
 	}
 	sesMap := sessionMap.(map[string]uint8)
 	sesMap[token] = version
@@ -88,13 +77,13 @@ func (sessionStorage *SessionStorage) CheckVersion(login string, token string,
 	return false, myerrors.ErrNoSuchItemInTheCache
 }
 
-func (sessionStorage *SessionStorage) HasSession(login string, token string) bool {
+func (sessionStorage *SessionStorage) HasSession(login string, token string) error {
 	if sessionMapInterface, hasUser := sessionStorage.cacheStorage.Get(login); hasUser {
 		if _, hasSession := sessionMapInterface.(map[string]uint8)[token]; hasSession {
-			return true
+			return nil
 		}
 	}
-	return false
+	return myerrors.ErrNoSuchUser
 }
 
 func (sessionStorage *SessionStorage) GetVersion(login string, token string) (version uint8, err error) {
@@ -112,41 +101,4 @@ func (sessionStorage *SessionStorage) CheckAllUserSessionTokens(login string) er
 		return nil
 	}
 	return myerrors.ErrNoSuchUserInTheCache
-}
-
-func (sessionStorage *SessionStorage) GenerateTokens(login string, status string,
-	version uint8) (accessTokenSigned string, refreshTokenSigned string, err error) {
-	accessCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		Status:  status,
-		Version: version,
-	}
-
-	refreshCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		Status:  status,
-		Version: version,
-	}
-
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
-
-	accessTokenSigned, err = accessToken.SignedString([]byte(SECRET))
-	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
-	}
-	refreshTokenSigned, err = refreshToken.SignedString([]byte(SECRET))
-	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
-	}
-
-	return accessTokenSigned, refreshTokenSigned, nil
 }
