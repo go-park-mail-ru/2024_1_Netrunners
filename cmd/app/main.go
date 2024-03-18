@@ -12,10 +12,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -46,14 +48,25 @@ func main() {
 
 	flag.Parse()
 
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sugarLogger := logger.Sugar()
+
 	cacheStorage := mycache.InitSessionStorage()
 	authStorage := mockdb.InitUsersMockDB()
 	filmsStorage := mockdb.InitFilmsMockDB()
+	actorsStorage, err := postgres.NewActorsStorage()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	sessionService := service.InitSessionService(cacheStorage)
 	authService := service.InitAuthService(authStorage)
+	_ = service.NewActorsService(actorsStorage, sugarLogger)
 	filmsService := service.InitFilmsService(filmsStorage, "/root/2024_1_Netrunners/uploads")
-	err := filmsService.AddSomeData()
+	err = filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)
 	}

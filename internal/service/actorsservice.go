@@ -16,7 +16,7 @@ type ActorsService struct {
 	logger  *zap.SugaredLogger
 }
 
-func NewActorsStorage(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsService {
+func NewActorsService(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsService {
 	return &ActorsService{
 		storage: storage,
 		logger:  logger,

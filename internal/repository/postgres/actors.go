@@ -16,7 +16,8 @@ type ActorsStorage struct {
 }
 
 func NewActorsStorage() (*ActorsStorage, error) {
-	pool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"localhost",
 		"5432",
 		"postgres",
@@ -65,9 +66,15 @@ func (storage *ActorsStorage) GetAllActorsPreviews() ([]domain.ActorPreview, err
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at begin transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{},
+			fmt.Errorf("error at begin transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
-	defer tx.Rollback(context.Background())
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("error at rollback transaction in GetActorByUuid: %v", myerrors.ErrInternalServerError)
+		}
+	}()
 
 	var actor domain.ActorData
 	err = tx.QueryRow(context.Background(),
@@ -79,7 +86,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		&actor.Data,
 		&actor.Birthday)
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at recieving data in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{},
+			fmt.Errorf("error at recieving data in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	rows, err := storage.pool.Query(context.Background(),
@@ -87,7 +95,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		from films f left join (film_actors fa left join actors a on fa.actor = a.id) faa on f.id = faa.film
 		where faa.uuid = $1`, actorUuid)
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{},
+			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	films := make([]domain.FilmLink, 0)
@@ -106,12 +115,14 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		return nil
 	})
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{},
+			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at commit transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{},
+			fmt.Errorf("error at commit transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	actor.Films = films
