@@ -907,6 +907,25 @@ components:
               example: false
             avatar:
               type: string
+              
+    ProfilePreviewResponse:
+      required:
+        - status
+        - profile
+      properties:
+        status:
+          type: integer
+          example: 200
+        profile:
+          required:
+            - name
+            - avatar
+          properties:
+            name:
+              type: string
+              example: 'Ahmed'
+            avatar:
+              type: string
 
     ProfilePreviewResponse:
       required:
