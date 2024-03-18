@@ -16,16 +16,16 @@ func TestAddFilm(t *testing.T) {
 		{
 			"add new film",
 			domain.FilmPreview{
-				Id:       "dfgea4ra424r4fw",
-				Name:     "Film1",
+				Uuid:     "dfgea4ra424r4fw",
+				Title:    "Film1",
 				Duration: 3600,
 			},
 		},
 		{
 			"add new film",
 			domain.FilmPreview{
-				Id:       "fnuf7842huirn23",
-				Name:     "Film2",
+				Uuid:     "fnuf7842huirn23",
+				Title:    "Film2",
 				Duration: 7200,
 			},
 		},
@@ -37,23 +37,23 @@ func TestAddFilm(t *testing.T) {
 		{
 			"add existed film",
 			domain.FilmPreview{
-				Id:       "dfgea4ra424r4fw",
-				Name:     "Film1",
+				Uuid:     "dfgea4ra424r4fw",
+				Title:    "Film1",
 				Duration: 3600,
 			},
 		},
 		{
 			"add existed film",
 			domain.FilmPreview{
-				Id:   "dfgea4ra424r4fw",
-				Name: "Film3",
+				Uuid:  "dfgea4ra424r4fw",
+				Title: "Film3",
 			},
 		},
 		{
 			"add existed film",
 			domain.FilmPreview{
-				Id:       "fnuf7842huirn23",
-				Name:     "Film2",
+				Uuid:     "fnuf7842huirn23",
+				Title:    "Film2",
 				Duration: 7200,
 			},
 		},
@@ -84,13 +84,13 @@ func TestAddFilm(t *testing.T) {
 func TestRemoveFilm(t *testing.T) {
 	data := []domain.FilmPreview{
 		{
-			Id:       "dfgea4ra424r4fw",
-			Name:     "Film1",
+			Uuid:     "dfgea4ra424r4fw",
+			Title:    "Film1",
 			Duration: 3600,
 		},
 		{
-			Id:       "fnuf7842huirn23",
-			Name:     "Film2",
+			Uuid:     "fnuf7842huirn23",
+			Title:    "Film2",
 			Duration: 7200,
 		},
 	}
@@ -126,7 +126,7 @@ func TestRemoveFilm(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Id] = currentData
+		db.storage[currentData.Uuid] = currentData
 		db.mutex.Unlock()
 	}
 
@@ -154,13 +154,13 @@ func TestRemoveFilm(t *testing.T) {
 func TestGetFilmPreview(t *testing.T) {
 	data := []domain.FilmPreview{
 		{
-			Id:       "dfgea4ra424r4fw",
-			Name:     "Film1",
+			Uuid:     "dfgea4ra424r4fw",
+			Title:    "Film1",
 			Duration: 3600,
 		},
 		{
-			Id:       "fnuf7842huirn23",
-			Name:     "Film2",
+			Uuid:     "fnuf7842huirn23",
+			Title:    "Film2",
 			Duration: 7200,
 		},
 	}
@@ -172,16 +172,16 @@ func TestGetFilmPreview(t *testing.T) {
 		{
 			"get existed film",
 			domain.FilmPreview{
-				Id:       "dfgea4ra424r4fw",
-				Name:     "Film1",
+				Uuid:     "dfgea4ra424r4fw",
+				Title:    "Film1",
 				Duration: 3600,
 			},
 		},
 		{
 			"get existed film",
 			domain.FilmPreview{
-				Id:       "fnuf7842huirn23",
-				Name:     "Film2",
+				Uuid:     "fnuf7842huirn23",
+				Title:    "Film2",
 				Duration: 7200,
 			},
 		},
@@ -193,16 +193,16 @@ func TestGetFilmPreview(t *testing.T) {
 		{
 			"get unexisted film",
 			domain.FilmPreview{
-				Id:       "dfgea4ra424r4fw",
-				Name:     "Film1",
+				Uuid:     "dfgea4ra424r4fw",
+				Title:    "Film1",
 				Duration: 7200,
 			},
 		},
 		{
 			"get unexisted film",
 			domain.FilmPreview{
-				Id:       "fnuf7842huirn23",
-				Name:     "Film3",
+				Uuid:     "fnuf7842huirn23",
+				Title:    "Film3",
 				Duration: 7200,
 			},
 		},
@@ -212,13 +212,13 @@ func TestGetFilmPreview(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Id] = currentData
+		db.storage[currentData.Uuid] = currentData
 		db.mutex.Unlock()
 	}
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			filmPreview, err := db.GetFilmPreview(currentCase.expected.Id)
+			filmPreview, err := db.GetFilmPreview(currentCase.expected.Uuid)
 			if err != nil {
 				t.Error(err)
 			}
@@ -229,7 +229,7 @@ func TestGetFilmPreview(t *testing.T) {
 
 	for _, currentCase := range invalidCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
-			filmPreview, err := db.GetFilmPreview(currentCase.expected.Id)
+			filmPreview, err := db.GetFilmPreview(currentCase.expected.Uuid)
 
 			if err != nil {
 				t.Error(err)
@@ -243,13 +243,13 @@ func TestGetFilmPreview(t *testing.T) {
 func TestGetAllFilmsPreviews(t *testing.T) {
 	data := []domain.FilmPreview{
 		{
-			Id:       "dfgea4ra424r4fw",
-			Name:     "Film1",
+			Uuid:     "dfgea4ra424r4fw",
+			Title:    "Film1",
 			Duration: 3600,
 		},
 		{
-			Id:       "fnuf7842huirn23",
-			Name:     "Film2",
+			Uuid:     "fnuf7842huirn23",
+			Title:    "Film2",
 			Duration: 7200,
 		},
 	}
@@ -258,7 +258,7 @@ func TestGetAllFilmsPreviews(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Id] = currentData
+		db.storage[currentData.Uuid] = currentData
 		db.mutex.Unlock()
 	}
 

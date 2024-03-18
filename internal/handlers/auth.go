@@ -37,7 +37,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		}
 		return
 	}
-	login := inputUserData.Login
+	login := inputUserData.Email
 	password := inputUserData.Password
 
 	err = service.ValidateLogin(login)
@@ -86,7 +86,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(user.Login, refreshTokenSigned, user.Version)
+	err = authPageHandlers.sessionService.Add(user.Email, refreshTokenSigned, user.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -195,7 +195,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	login := inputUserData.Login
+	login := inputUserData.Email
 	username := inputUserData.Name
 	password := inputUserData.Password
 
@@ -230,7 +230,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	var version uint8 = 1
 
 	var user = domain.User{
-		Login:    login,
+		Email:    login,
 		Name:     username,
 		Password: password,
 		Status:   status,

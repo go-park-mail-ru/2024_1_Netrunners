@@ -27,22 +27,22 @@ func InitFilmsService(storage filmsStorage, localStoragePath string) *FilmsServi
 func (filmsService *FilmsService) AddSomeData() error {
 	data := []domain.FilmPreview{
 		{
-			Id: "dfgea4ra424r4fw",
+			Uuid: "dfgea4ra424r4fw",
 			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
 				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-			Name:     "Fast and Furious 1",
+			Title:    "Fast and Furious 1",
 			Duration: 3600,
 		},
 		{
-			Id:       "fnuf7842huirn23",
+			Uuid:     "fnuf7842huirn23",
 			Preview:  "https://m.media-amazon.com/images/I/71Wo+cFznbL.jpg",
-			Name:     "Fast and Furious 2",
+			Title:    "Fast and Furious 2",
 			Duration: 7200,
 		},
 		{
-			Id:       "syh54eat4r4wf4wh",
+			Uuid:     "syh54eat4r4wf4wh",
 			Preview:  "https://m.media-amazon.com/images/I/71ql8kIrPKL.jpg",
-			Name:     "Fast and Furious 3",
+			Title:    "Fast and Furious 3",
 			Duration: 4800,
 		},
 	}
