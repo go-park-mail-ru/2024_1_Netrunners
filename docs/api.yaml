@@ -8,6 +8,7 @@ tags:
   - name: Auth
   - name: Films
   - name: Profile
+  - name: Actors
 
 paths:
 
@@ -273,7 +274,7 @@ paths:
       security:
         - AccessCookie: []
       parameters:
-        - name: Uuid
+        - name: uuid
           in: path
           description: Uuid of the film
           required: true
@@ -327,7 +328,7 @@ paths:
       security:
         - AccessCookie: []
       parameters:
-        - name: Uuid
+        - name: uuid
           in: path
           description: Uuid of the film
           required: true
@@ -368,11 +369,11 @@ paths:
 
 # Profile
 
-  /profile/{uuid}:
+  /profile/{uuid}/data:
     get:
       tags:
         - Profile
-      summary: Get user Profile
+      summary: Get user profile
       security:
         - AccessCookie: []
       parameters:
@@ -413,6 +414,51 @@ paths:
         default:
           description: Unknown error
     # TODO: add post method for editining profile
+    
+  /profile/{uuid}/preview:
+    get:
+      tags:
+        - Profile
+      summary: Get user preview
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/ProfilePreviewResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
 
 # Actors
 
@@ -453,7 +499,7 @@ paths:
       security:
         - AccessCookie: []
       parameters:
-        - name: Uuid
+        - name: uuid
           in: path
           description: Uuid of the actor
           required: true
@@ -567,23 +613,19 @@ components:
           items:
             type: object
             required:
-              - status
               - preview_data
-              - name
-              - author
+              - title
+              - director
               - average_score
               - scores_count
               - duration
             properties:
-              status:
-                type: integer
-                example: 200
               preview_data:
                 type: string
-              name:
+              title:
                 type: string
                 example: 'Transformers'
-              author:
+              director:
                 type: string
                 example: 'Michael Bell'
               average_score:
@@ -689,7 +731,7 @@ components:
             - name
             - email
             - signup_at
-            - is_director
+            - is_admin
             - avatar
           properties:
             name:
@@ -701,9 +743,28 @@ components:
             signup_at:
               type: string
               example: '2011-04-11T10:20:30'
-            is_director:
+            is_admin:
               type: boolean
               example: false
+            avatar:
+              type: string
+              
+    ProfilePreviewResponse:
+      required:
+        - status
+        - profile
+      properties:
+        status:
+          type: integer
+          example: 200
+        profile:
+          required:
+            - name
+            - avatar
+          properties:
+            name:
+              type: string
+              example: 'Ahmed'
             avatar:
               type: string
 
@@ -746,6 +807,7 @@ components:
             - data
             - birthday
             - avatar
+            - films
           properties:
             name:
               type: string
@@ -757,3 +819,17 @@ components:
               example: '2011-04-11T10:20:30'
             avatar:
               type: string
+            films:
+              type: array
+              items:
+                type: object
+                required:
+                  - uuid
+                  - title
+                properties:
+                  uuid:
+                    type: string
+                    example: 'frfdF48AfJ1MAFfKF13KFAOS'
+                  title:
+                    type: string
+                    example: 'Fast & Furious'
