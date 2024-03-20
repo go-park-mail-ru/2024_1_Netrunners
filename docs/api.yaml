@@ -641,7 +641,7 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-
+          
   /profile/{uuid}/preview:
     get:
       tags:
@@ -1086,6 +1086,32 @@ components:
           example: 'root'
 
     # Films
+
+    NewFilmRequest:
+      required:
+        - title
+        - director
+        - preview_data
+        - duration
+        - release_date
+        - film_data
+      properties:
+        title:
+          type: string
+          example: 'Transformers'
+        director:
+          type: string
+          example: 'Transformers'
+        preview_data:
+          type: string
+        duration:
+          type: integer
+          example: 7560
+        release_date:
+          type: string
+          example: '2011-04-11T10:20:30'
+        film_data:
+          type: string
 
     NewFilmRequest:
       required:
