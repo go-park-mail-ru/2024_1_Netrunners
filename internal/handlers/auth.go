@@ -326,7 +326,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 			err = WriteSuccess(w)
 			if err != nil {
 				fmt.Printf("error at writing response: %v\n", err)
-
 			}
 			return
 		}
