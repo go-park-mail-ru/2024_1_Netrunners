@@ -365,7 +365,46 @@ paths:
         default:
           description: Unknown error
 
-  # TODO: /films/add:
+  /films/add:
+    post:
+      tags:
+        - Films
+      summary: Add new film
+      security:
+        - AccessCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewFilmRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '403':
+          description: Permissions denied
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
 
 # Profile
 
@@ -413,7 +452,6 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-    # TODO: add post method for editining profile
     
   /profile/{uuid}/preview:
     get:
@@ -439,6 +477,57 @@ paths:
             application/form:
               schema:
                 $ref: '#/components/schemas/ProfilePreviewResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /profile/{uuid}/edit:
+    put:
+      tags:
+        - Profile
+      summary: Get user preview
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileEditRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
         '401':
           description: Not authorized
           content:
@@ -536,7 +625,52 @@ paths:
         default:
           description: Unknown error
 
-# TODO: /actors/add:
+  /actors/add:
+    post:
+      tags:
+        - Actors
+      summary: Add new actor
+      security:
+        - AccessCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewActorRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '403':
+          description: Permissions denied
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
 
 components:
 
@@ -600,6 +734,32 @@ components:
 
 # Films
 
+    NewFilmRequest:
+      required:
+        - title
+        - director
+        - preview_data
+        - duration
+        - release_date
+        - film_data
+      properties:
+        title:
+          type: string
+          example: 'Transformers'
+        director:
+          type: string
+          example: 'Transformers'
+        preview_data:
+          type: string
+        duration:
+          type: integer
+          example: 7560
+        release_date:
+          type: string
+          example: '2011-04-11T10:20:30'
+        film_data:
+          type: string
+
     FilmsResponse:
       required:
         - status
@@ -656,7 +816,7 @@ components:
             - average_score
             - scores_count
             - duration
-            - date
+            - release_date
             - film_data
           properties:
             preview_data:
@@ -677,7 +837,7 @@ components:
             duration:
               type: integer
               example: 7560
-            date:
+            release_date:
               type: string
               example: '2011-04-11T10:20:30'
             film_data:
@@ -699,7 +859,7 @@ components:
               - score
               - text
               - author
-              - date
+              - release_date
             properties:
               score:
                 type: integer
@@ -709,10 +869,9 @@ components:
                 type: string
                 example: 'nice film!!!'
               author:
-                type: string # ? user name or uuid
+                type: string
                 example: 'Arnold Hendrikson'
-                # example: 'fnuE64ifa3Foaf6jjgsis5Dof'
-              date:
+              release_date:
                 type: string
                 example: '2011-04-11T10:20:30'
 
@@ -767,8 +926,44 @@ components:
               example: 'Ahmed'
             avatar:
               type: string
+        
+    ProfileEditRequest:
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          example: 'ch_password'
+          pattern: '[ch_password | ch_username | ch_avatar]'
+        new_username:
+          type: string
+          example: 'XXX_nagibator_XXX'
+        new_password:
+          type: string
+          example: 'root'
+        new_avatar:
+          type: string
+
 
 # Actors
+
+    NewActorRequest:
+      required:
+        - name
+        - data
+        - birthday
+        - avatar
+      properties:
+        name:
+          type: string
+          example: 'Evgenij Gennadjevich'
+        data:
+          type: string
+        birthday:
+          type: string
+          example: '2011-04-11T10:20:30'
+        avatar:
+          type: string
 
     ActorsResponse:
       required:
