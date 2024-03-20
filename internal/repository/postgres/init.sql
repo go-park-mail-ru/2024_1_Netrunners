@@ -8,7 +8,7 @@ create table if not exists users (
     password varchar(64) not null,
     registered_at timestamp default now() not null,
     birthday timestamp not null,
-    is_director boolean default false not null
+    is_admin boolean default false not null
 );
 
 create table if not exists actors (
@@ -19,13 +19,21 @@ create table if not exists actors (
     birthday timestamp not null
 );
 
+create table if not exists directors (
+    id serial primary key unique not null,
+    name text not null,
+    birthday timestamp not null
+);
+
 create table if not exists films (
     id serial primary key unique not null,
     uuid uuid default gen_random_uuid() unique not null,
     title text not null,
+    director integer not null,
     data text not null,
     duration smallint check (duration > 0) not null,
-    published_at timestamp default now() not null
+    published_at timestamp default now() not null,
+    foreign key (director) references directors (id)
 );
 
 create table if not exists comments (
