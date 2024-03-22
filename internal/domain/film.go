@@ -7,7 +7,7 @@ type FilmData struct {
 	Preview      string
 	Title        string
 	Director     string
-	AverageScore int
+	AverageScore float32
 	ScoresCount  int
 	Duration     int
 	Date         time.Time

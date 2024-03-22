@@ -1,4 +1,4 @@
-package postgres
+package database
 
 import (
 	"context"
@@ -15,19 +15,7 @@ type ActorsStorage struct {
 	pool *pgxpool.Pool
 }
 
-func NewActorsStorage() (*ActorsStorage, error) {
-	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
-		"5432",
-		"postgres",
-		"root1234",
-		"netrunnerflix",
-	))
-	if err != nil {
-		return nil, fmt.Errorf("error at connecting to database: %w", myerrors.ErrInternalServerError)
-	}
-
+func NewActorsStorage(pool *pgxpool.Pool) (*ActorsStorage, error) {
 	return &ActorsStorage{
 		pool: pool,
 	}, nil
@@ -69,12 +57,6 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		return domain.ActorData{},
 			fmt.Errorf("error at begin transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
-	defer func() {
-		err = tx.Rollback(context.Background())
-		if err != nil {
-			fmt.Printf("error at rollback transaction in GetActorByUuid: %v", myerrors.ErrInternalServerError)
-		}
-	}()
 
 	var actor domain.ActorData
 	err = tx.QueryRow(context.Background(),
@@ -90,7 +72,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 			fmt.Errorf("error at recieving data in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
-	rows, err := storage.pool.Query(context.Background(),
+	rows, err := tx.Query(context.Background(),
 		`select f.uuid, f.title
 		from films f left join (film_actors fa left join actors a on fa.actor = a.id) faa on f.id = faa.film
 		where faa.uuid = $1`, actorUuid)
@@ -117,12 +99,6 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 	if err != nil {
 		return domain.ActorData{},
 			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
-	}
-
-	err = tx.Commit(context.Background())
-	if err != nil {
-		return domain.ActorData{},
-			fmt.Errorf("error at commit transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	actor.Films = films

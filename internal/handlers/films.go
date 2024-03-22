@@ -10,6 +10,11 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
+type filmLink struct {
+	Uuid  string `json:"uuid"`
+	Title string `json:"title"`
+}
+
 type FilmsPageHandlers struct {
 	filmsService *service.FilmsService
 }

@@ -11,9 +11,9 @@ type User struct {
 }
 
 type UserSignUp struct {
-	Email    string
-	Name     string
-	Password string
+	Email    string `json:"login"`
+	Name     string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UserPreview struct {

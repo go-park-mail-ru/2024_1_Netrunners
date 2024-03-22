@@ -184,9 +184,9 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
-	var inputUserData domain.User
-	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	var inputUserData domain.UserSignUp
 
+	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
