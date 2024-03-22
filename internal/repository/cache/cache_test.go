@@ -65,7 +65,7 @@ func TestAddSession(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestDeleteSession(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		err := storage.Add(currentCase.login, currentCase.token, currentCase.version)
@@ -207,7 +207,7 @@ func TestHasSession(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		err := storage.Add(currentCase.login, currentCase.token, 1)
@@ -288,7 +288,7 @@ func TestGetVersion(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		err := storage.Add(currentCase.login, currentCase.token, currentCase.version)
@@ -376,7 +376,7 @@ func TestCheckVersion(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		err := storage.Add(currentCase.login, currentCase.token, currentCase.version)
@@ -444,7 +444,7 @@ func TestUpdateVersion(t *testing.T) {
 		},
 	}
 
-	storage := InitSessionStorage()
+	storage := NewSessionStorage()
 
 	for _, currentCase := range validCases {
 		err := storage.Add(currentCase.login, currentCase.token, currentCase.version)

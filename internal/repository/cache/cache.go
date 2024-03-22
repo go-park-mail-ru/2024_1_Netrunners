@@ -16,7 +16,7 @@ type SessionStorage struct {
 	cacheStorage *cache.Cache
 }
 
-func InitSessionStorage() *SessionStorage {
+func NewSessionStorage() *SessionStorage {
 	return &SessionStorage{
 		cacheStorage: cache.New(0, 0),
 	}

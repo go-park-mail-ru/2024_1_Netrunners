@@ -46,7 +46,7 @@ func main() {
 		"netrunnerflix",
 	))
 
-	cacheStorage := mycache.InitSessionStorage()
+	cacheStorage := mycache.NewSessionStorage()
 	authStorage, err := database.NewUsersStorage(pool)
 	if err != nil {
 		log.Fatal(err)
