@@ -12,29 +12,16 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	mockdb "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/mockDB"
+	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
-
-func CorsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://94.139.247.246:8080")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, "+
-			"Accept-Encoding, X-CSRF-Token, Authorization")
-
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
 
 func main() {
 	var (
@@ -46,20 +33,45 @@ func main() {
 
 	flag.Parse()
 
-	cacheStorage := mycache.InitSessionStorage()
-	authStorage := mockdb.InitUsersMockDB()
-	filmsStorage := mockdb.InitFilmsMockDB()
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sugarLogger := logger.Sugar()
 
-	sessionService := service.InitSessionService(cacheStorage)
-	authService := service.InitAuthService(authStorage)
-	filmsService := service.InitFilmsService(filmsStorage, "/root/2024_1_Netrunners/uploads")
-	err := filmsService.AddSomeData()
+	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"localhost",
+		"5432",
+		"postgres",
+		"root1234",
+		"netrunnerflix",
+	))
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	cacheStorage := mycache.InitSessionStorage()
+	authStorage := mockdb.InitUsersMockDB()
+	filmsStorage := mockdb.InitFilmsMockDB()
+	actorsStorage, err := database.NewActorsStorage(pool)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sessionService := service.InitSessionService(cacheStorage)
+	authService := service.InitAuthService(authStorage)
+	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
+	filmsService := service.InitFilmsService(filmsStorage, "/root/2024_1_Netrunners/uploads")
+	err = filmsService.AddSomeData()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
 	authPageHandlers := handlers.InitAuthPageHandlers(authService, sessionService)
 	filmsPageHandlers := handlers.InitFilmsPageHandlers(filmsService)
+	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
 	router := mux.NewRouter()
 
@@ -67,9 +79,12 @@ func main() {
 	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
-	router.HandleFunc("/films", filmsPageHandlers.GetFilmsPreviews).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films",
+		middleware.AuthMiddleware(filmsPageHandlers.GetFilmsPreviews)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
-	router.Use(CorsMiddleware)
+	router.Use(middleware.CorsMiddleware)
+	router.Use(middleware.PanicMiddleware)
 
 	server := &http.Server{
 		Handler: router,

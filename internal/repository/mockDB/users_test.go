@@ -54,7 +54,7 @@ func TestCreateUser(t *testing.T) {
 	for _, currentCase := range validCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
 			err := db.CreateUser(domain.User{
-				Login: currentCase.login,
+				Email: currentCase.login,
 			})
 
 			if err != nil {
@@ -66,7 +66,7 @@ func TestCreateUser(t *testing.T) {
 	for _, currentCase := range invalidCases {
 		t.Run(currentCase.testName, func(t *testing.T) {
 			err := db.CreateUser(domain.User{
-				Login: currentCase.login,
+				Email: currentCase.login,
 			})
 
 			if err == nil {
@@ -125,7 +125,7 @@ func TestRemoveUser(t *testing.T) {
 	for _, currentData := range data {
 		db.mutex.Lock()
 		db.storage[currentData] = domain.User{
-			Login: currentData,
+			Email: currentData,
 		}
 		db.mutex.Unlock()
 	}
@@ -154,11 +154,11 @@ func TestRemoveUser(t *testing.T) {
 func TestHasUser(t *testing.T) {
 	data := []domain.User{
 		{
-			Login:    "Ahmed",
+			Email:    "Ahmed",
 			Password: "root",
 		},
 		{
-			Login:    "Dima",
+			Email:    "Dima",
 			Password: "AbobA",
 		},
 	}
@@ -200,7 +200,7 @@ func TestHasUser(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Login] = currentData
+		db.storage[currentData.Email] = currentData
 		db.mutex.Unlock()
 	}
 
@@ -228,14 +228,14 @@ func TestHasUser(t *testing.T) {
 func TestGetUser(t *testing.T) {
 	data := []domain.User{
 		{
-			Login:    "Ahmed",
+			Email:    "Ahmed",
 			Name:     "ahded",
 			Password: "root",
 			Status:   "guest",
 			Version:  1,
 		},
 		{
-			Login:    "Dima",
+			Email:    "Dima",
 			Name:     "BestDimaEver",
 			Password: "AbobA",
 			Status:   "publisher",
@@ -283,7 +283,7 @@ func TestGetUser(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Login] = currentData
+		db.storage[currentData.Email] = currentData
 		db.mutex.Unlock()
 	}
 
@@ -296,7 +296,7 @@ func TestGetUser(t *testing.T) {
 			}
 
 			assert.Equal(t, true, reflect.DeepEqual(user, domain.User{
-				Login:   currentCase.login,
+				Email:   currentCase.login,
 				Name:    currentCase.name,
 				Status:  currentCase.status,
 				Version: currentCase.version,
@@ -318,14 +318,14 @@ func TestGetUser(t *testing.T) {
 func TestChangeUserPassword(t *testing.T) {
 	data := []domain.User{
 		{
-			Login:    "Ahmed",
+			Email:    "Ahmed",
 			Name:     "ahded",
 			Password: "root",
 			Status:   "guest",
 			Version:  1,
 		},
 		{
-			Login:    "Dima",
+			Email:    "Dima",
 			Name:     "BestDimaEver",
 			Password: "AbobA",
 			Status:   "publisher",
@@ -366,7 +366,7 @@ func TestChangeUserPassword(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Login] = currentData
+		db.storage[currentData.Email] = currentData
 		db.mutex.Unlock()
 	}
 
@@ -387,7 +387,7 @@ func TestChangeUserPassword(t *testing.T) {
 			}
 
 			assert.Equal(t, true, reflect.DeepEqual(user, domain.User{
-				Login:    currentCase.login,
+				Email:    currentCase.login,
 				Name:     currentCase.name,
 				Password: currentCase.password,
 				Status:   currentCase.status,
@@ -400,14 +400,14 @@ func TestChangeUserPassword(t *testing.T) {
 func TestChangeUserName(t *testing.T) {
 	data := []domain.User{
 		{
-			Login:    "Ahmed",
+			Email:    "Ahmed",
 			Name:     "ahded",
 			Password: "root",
 			Status:   "guest",
 			Version:  1,
 		},
 		{
-			Login:    "Dima",
+			Email:    "Dima",
 			Name:     "BestDimaEver",
 			Password: "AbobA",
 			Status:   "publisher",
@@ -445,7 +445,7 @@ func TestChangeUserName(t *testing.T) {
 
 	for _, currentData := range data {
 		db.mutex.Lock()
-		db.storage[currentData.Login] = currentData
+		db.storage[currentData.Email] = currentData
 		db.mutex.Unlock()
 	}
 
@@ -458,7 +458,7 @@ func TestChangeUserName(t *testing.T) {
 			}
 
 			assert.Equal(t, true, reflect.DeepEqual(user, domain.User{
-				Login:   currentCase.login,
+				Email:   currentCase.login,
 				Name:    currentCase.name,
 				Status:  currentCase.status,
 				Version: currentCase.version,

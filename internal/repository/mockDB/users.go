@@ -22,7 +22,7 @@ func InitUsersMockDB() *UsersMockDB {
 
 func (db *UsersMockDB) CreateUser(user domain.User) error {
 	db.mutex.RLock()
-	_, ok := db.storage[user.Login]
+	_, ok := db.storage[user.Email]
 	db.mutex.RUnlock()
 
 	if ok {
@@ -30,7 +30,7 @@ func (db *UsersMockDB) CreateUser(user domain.User) error {
 	}
 
 	db.mutex.Lock()
-	db.storage[user.Login] = user
+	db.storage[user.Email] = user
 	db.mutex.Unlock()
 
 	return nil

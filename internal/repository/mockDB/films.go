@@ -22,7 +22,7 @@ func InitFilmsMockDB() *FilmsMockDB {
 
 func (db *FilmsMockDB) AddFilm(film domain.FilmPreview) error {
 	db.mutex.RLock()
-	_, ok := db.storage[film.Id]
+	_, ok := db.storage[film.Uuid]
 	db.mutex.RUnlock()
 
 	if ok {
@@ -30,7 +30,7 @@ func (db *FilmsMockDB) AddFilm(film domain.FilmPreview) error {
 	}
 
 	db.mutex.Lock()
-	db.storage[film.Id] = film
+	db.storage[film.Uuid] = film
 	db.mutex.Unlock()
 
 	return nil
