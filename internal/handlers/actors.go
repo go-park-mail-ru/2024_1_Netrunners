@@ -18,19 +18,9 @@ type actorData struct {
 	Films    []filmLink `json:"films"`
 }
 
-type actorPreview struct {
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
-}
-
 type actorResponse struct {
 	Status int       `json:"status"`
 	Actor  actorData `json:"actor"`
-}
-
-type actorsResponse struct {
-	Status int            `json:"status"`
-	Actors []actorPreview `json:"actors"`
 }
 
 type ActorsHandlers struct {
