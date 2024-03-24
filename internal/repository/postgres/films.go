@@ -47,7 +47,7 @@ func (storage *FilmsStorage) GetFilmByUuid(uuid string) (domain.FilmData, error)
 	return film, nil
 }
 
-func (storage *FilmsStorage) Film(film domain.FilmDataToAdd) error {
+func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return fmt.Errorf("error at begin transaction in AddFilm: %w",
