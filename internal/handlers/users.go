@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
@@ -27,18 +29,9 @@ type profileResponse struct {
 }
 
 func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, r *http.Request) {
-	var inputUserData domain.User
-	err := json.NewDecoder(r.Body).Decode(&inputUserData)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-		}
-		return
-	}
+	uuid := mux.Vars(r)["uuid"]
 
-	login := inputUserData.Email
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(login)
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

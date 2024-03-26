@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	accessCookieExpirationTime  = 5 * 60
-	refreshCookieExpirationTime = 48 * 3600
+	tokenCookieExpirationTime = 48 * 3600
 )
 
 type AuthPageHandlers struct {
@@ -32,14 +31,12 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 }
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
-	var inputUserData domain.User
+	var inputUserData domain.UserSignUp
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			if err != nil {
-				authPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-			}
+			authPageHandlers.logger.Errorf("error at writing response: %v\n", err)
 		}
 		return
 	}
@@ -82,8 +79,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.authService.GenerateTokens(login,
-		user.IsAdmin, user.Version)
+	tokenSigned, err := authPageHandlers.authService.GenerateTokens(login, user.IsAdmin, user.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -92,7 +88,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(user.Email, refreshTokenSigned, user.Version)
+	err = authPageHandlers.sessionService.Add(user.Email, tokenSigned, user.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -102,26 +98,16 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	accessCookie := &http.Cookie{
+	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    accessTokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
-		MaxAge:   accessCookieExpirationTime,
+		MaxAge:   tokenCookieExpirationTime,
 	}
 
-	refreshCookie := &http.Cookie{
-		Name:     "refresh",
-		Value:    refreshTokenSigned,
-		Path:     "/auth",
-		HttpOnly: true,
-		Secure:   false,
-		MaxAge:   refreshCookieExpirationTime,
-	}
-
-	http.SetCookie(w, refreshCookie)
-	http.SetCookie(w, accessCookie)
+	http.SetCookie(w, tokenCookie)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("error at writing response: %v\n", err)
@@ -131,7 +117,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 }
 
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
-	userRefreshToken, err := r.Cookie("refresh")
+	userToken, err := r.Cookie("access")
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -140,7 +126,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	refreshTokenClaims, err := authPageHandlers.authService.IsTokenValid(userRefreshToken)
+	tokenClaims, err := authPageHandlers.authService.IsTokenValid(userToken)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -149,7 +135,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = authPageHandlers.sessionService.DeleteSession(refreshTokenClaims["Login"].(string), userRefreshToken.Value)
+	err = authPageHandlers.sessionService.DeleteSession(tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -158,7 +144,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	accessCookie := &http.Cookie{
+	tokenCookie := &http.Cookie{
 		Name:     "access",
 		Value:    "",
 		Path:     "/",
@@ -167,23 +153,11 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		MaxAge:   0,
 	}
 
-	refreshCookie := &http.Cookie{
-		Name:     "refresh",
-		Value:    "",
-		Path:     "/auth",
-		HttpOnly: true,
-		Secure:   false,
-		MaxAge:   0,
-	}
+	http.SetCookie(w, tokenCookie)
 
-	http.SetCookie(w, refreshCookie)
-	http.SetCookie(w, accessCookie)
-
-	_, err = authPageHandlers.sessionService.GetVersion(refreshTokenClaims["Login"].(string), userRefreshToken.Value)
+	_, err = authPageHandlers.sessionService.GetVersion(tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
-		if err != nil {
-			authPageHandlers.logger.Info("success logout")
-		}
+		authPageHandlers.logger.Info("success logout")
 	}
 
 	err = WriteSuccess(w)
@@ -194,7 +168,6 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
@@ -252,8 +225,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	accessTokenSigned, refreshTokenSigned, err :=
-		authPageHandlers.authService.GenerateTokens(login, false, version)
+	tokenSigned, err := authPageHandlers.authService.GenerateTokens(login, false, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -262,36 +234,25 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(login, refreshTokenSigned, version)
+	err = authPageHandlers.sessionService.Add(login, tokenSigned, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("error at writing response: %v\n", err)
 		}
-
 		return
 	}
 
-	accessCookie := &http.Cookie{
+	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    accessTokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
-		MaxAge:   accessCookieExpirationTime,
+		MaxAge:   tokenCookieExpirationTime,
 	}
 
-	refreshCookie := &http.Cookie{
-		Name:     "refresh",
-		Value:    refreshTokenSigned,
-		Path:     "/auth",
-		HttpOnly: true,
-		Secure:   false,
-		MaxAge:   refreshCookieExpirationTime,
-	}
-
-	http.SetCookie(w, refreshCookie)
-	http.SetCookie(w, accessCookie)
+	http.SetCookie(w, tokenCookie)
 
 	err = WriteSuccess(w)
 	if err != nil {
@@ -300,7 +261,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
-	userRefreshToken, err := r.Cookie("refresh")
+	userToken, err := r.Cookie("access")
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
@@ -309,7 +270,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	refreshTokenClaims, err := authPageHandlers.authService.IsTokenValid(userRefreshToken)
+	tokenClaims, err := authPageHandlers.authService.IsTokenValid(userToken)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -318,7 +279,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.HasSession(refreshTokenClaims["Login"].(string), userRefreshToken.Value)
+	err = authPageHandlers.sessionService.HasSession(tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
@@ -327,22 +288,10 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userAccessToken, err := r.Cookie("access")
-	if err == nil {
-		_, err = authPageHandlers.authService.IsTokenValid(userAccessToken)
-		if err == nil {
-			err = WriteSuccess(w)
-			if err != nil {
-				authPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-			}
-			return
-		}
-	}
-
-	accessTokenSigned, refreshTokenSigned, err := authPageHandlers.authService.GenerateTokens(
-		refreshTokenClaims["Login"].(string),
-		refreshTokenClaims["IsAdmin"].(bool),
-		uint8(refreshTokenClaims["Version"].(float64)))
+	tokenSigned, err := authPageHandlers.authService.GenerateTokens(
+		tokenClaims["Login"].(string),
+		tokenClaims["IsAdmin"].(bool),
+		uint8(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -351,8 +300,8 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(refreshTokenClaims["Login"].(string), refreshTokenSigned,
-		uint8(refreshTokenClaims["Version"].(float64)))
+	err = authPageHandlers.sessionService.Add(tokenClaims["Login"].(string), tokenSigned,
+		uint8(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -361,24 +310,15 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	accessCookie := &http.Cookie{
+	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    accessTokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
-		MaxAge:   accessCookieExpirationTime,
+		MaxAge:   tokenCookieExpirationTime,
 	}
 
-	refreshCookie := &http.Cookie{
-		Name:     "refresh",
-		Value:    refreshTokenSigned,
-		Path:     "/auth",
-		HttpOnly: true,
-		MaxAge:   refreshCookieExpirationTime,
-	}
-
-	http.SetCookie(w, refreshCookie)
-	http.SetCookie(w, accessCookie)
+	http.SetCookie(w, tokenCookie)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("error at writing response: %v\n", err)

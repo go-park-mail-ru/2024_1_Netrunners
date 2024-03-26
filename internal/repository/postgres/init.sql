@@ -128,6 +128,7 @@ create table if not exists film_actors (
 
 ALTER TABLE actors
     ALTER COLUMN birthday SET DEFAULT NOW();
+<<<<<<< HEAD
 >>>>>>> 0b3f692 (users and films done)
 =======
 >>>>>>> e7380e5 (№35 feat: add actors storage & service)
@@ -136,3 +137,9 @@ ALTER TABLE actors
 ALTER TABLE actors
     ALTER COLUMN birthday SET DEFAULT NOW();
 >>>>>>> 8383997 (users and films done)
+=======
+    foreign key (film) references films (id) on delete cascade,
+    foreign key (actor) references actors (id) on delete cascade
+);
+
+>>>>>>> 692782b (postgres fixes and sessions rework)

@@ -46,10 +46,12 @@ func main() {
 		"root1234",
 		"netrunnerflix",
 	))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	cacheStorage := mycache.NewSessionStorage()
 	authStorage, err := database.NewUsersStorage(pool)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,7 +64,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sessionService := service.InitSessionService(cacheStorage, sugarLogger)
+	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
 	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
 	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")

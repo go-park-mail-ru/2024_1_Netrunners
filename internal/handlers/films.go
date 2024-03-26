@@ -3,17 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
-
-type filmLink struct {
-	Uuid  string `json:"uuid"`
-	Title string `json:"title"`
-}
 
 type FilmsPageHandlers struct {
 	filmsService *service.FilmsService
@@ -33,7 +30,6 @@ type filmsPreviewsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseWriter, r *http.Request) {
-	var response interface{}
 	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews()
 	if err != nil {
 		err = WriteError(w, err)
@@ -41,7 +37,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 			fmt.Printf("error at writing response: %v\n", err)
 		}
 	}
-	response = filmsPreviewsResponse{
+	response := filmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  films,
 	}
@@ -64,18 +60,9 @@ type filmDataResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
-	var uuid string
-	err := json.NewDecoder(r.Body).Decode(&uuid)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-		}
+	uuid := mux.Vars(r)["uuid"]
 
-		return
-	}
-
-	filmData, err := filmsPageHandlers.filmsService.GetFilmByUuid(uuid)
+	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -116,16 +103,8 @@ type filmCommentsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
-	var uuid string
-	err := json.NewDecoder(r.Body).Decode(&uuid)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-		}
+	uuid := mux.Vars(r)["uuid"]
 
-		return
-	}
 	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(uuid)
 	if err != nil {
 		err = WriteError(w, err)
@@ -169,17 +148,7 @@ type filmActorsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWriter, r *http.Request) {
-	var uuid string
-	err := json.NewDecoder(r.Body).Decode(&uuid)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			if err != nil {
-				filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-			}
-		}
-		return
-	}
+	uuid := mux.Vars(r)["uuid"]
 
 	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(uuid)
 	if err != nil {

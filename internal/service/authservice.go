@@ -42,7 +42,7 @@ func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthServic
 func (service *AuthService) CreateUser(user domain.UserSignUp) error {
 	err := service.storage.CreateUser(user)
 	if err != nil {
-		service.logger.Errorf("service error at CreateUser: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("service error at CreateUser: %v", err)
 		return err
 	}
 	return nil
@@ -135,6 +135,7 @@ func ValidateLogin(e string) error {
 	if emailRegex.MatchString(e) {
 		return nil
 	}
+	fmt.Println(e)
 	return myerrors.ErrLoginIsNotValid
 }
 
@@ -160,18 +161,8 @@ type customClaims struct {
 }
 
 func (service *AuthService) GenerateTokens(login string, isAdmin bool, version uint8) (accessTokenSigned string,
-	refreshTokenSigned string, err error) {
-	accessCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		IsAdmin: isAdmin,
-		Version: version,
-	}
-
-	refreshCustomClaims := customClaims{
+	err error) {
+	tokenCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    "NETrunnerFLIX",
@@ -181,21 +172,14 @@ func (service *AuthService) GenerateTokens(login string, isAdmin bool, version u
 		Version: version,
 	}
 
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
 
-	accessTokenSigned, err = accessToken.SignedString([]byte(service.secretKey))
+	tokenSigned, err := token.SignedString([]byte(service.secretKey))
 	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err,
-			myerrors.ErrInternalServerError)
-	}
-	refreshTokenSigned, err = refreshToken.SignedString([]byte(service.secretKey))
-	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err,
-			myerrors.ErrInternalServerError)
+		return "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
 	}
 
-	return accessTokenSigned, refreshTokenSigned, nil
+	return tokenSigned, nil
 }
 
 func (service *AuthService) GetUserDataByUuid(uuid string) (domain.User, error) {

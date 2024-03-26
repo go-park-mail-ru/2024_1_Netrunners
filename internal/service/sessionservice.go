@@ -17,7 +17,7 @@ type SessionService struct {
 	logger         *zap.SugaredLogger
 }
 
-func InitSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
+func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 		logger:         logger,

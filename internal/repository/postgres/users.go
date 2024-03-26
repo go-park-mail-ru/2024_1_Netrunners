@@ -26,8 +26,7 @@ func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 		`insert into users (email, name, password) VALUES ($1, $2, $3);`,
 		user.Email, user.Name, user.Password)
 	if err != nil {
-		return fmt.Errorf("error at inserting info into users in CreateUser: %w",
-			myerrors.ErrInternalServerError)
+		return fmt.Errorf("error at inserting info into users in CreateUser: %w", err)
 	}
 
 	return nil
@@ -60,8 +59,7 @@ func (storage *UsersStorage) RemoveUser(email string) error {
 			set is_deleted = true
 			where email = $1;`, email)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in RemoveUser: %w",
-			myerrors.ErrInternalServerError)
+		return fmt.Errorf("error at recieving data in RemoveUser: %w", err)
 	}
 
 	return nil
@@ -75,8 +73,7 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 		where email = $1;`, email).Scan(
 		&passwordFromDB)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in HasUser: %w",
-			myerrors.ErrInternalServerError)
+		return fmt.Errorf("error at recieving data in HasUser: %w", err)
 	}
 
 	if passwordFromDB != password {
@@ -93,7 +90,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) error
 			set password = $1, version += 1
 			where email = $2;`, newPassword, email)
 	if err != nil {
-		return fmt.Errorf("error at updating data in ChangeUserPassword: %w", myerrors.ErrInternalServerError)
+		return fmt.Errorf("error at updating data in ChangeUserPassword: %w", err)
 	}
 
 	return nil

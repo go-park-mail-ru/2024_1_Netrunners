@@ -7,17 +7,17 @@ type User struct {
 	Email        string `json:"login"`
 	Name         string `json:"username"`
 	Password     string `json:"password"`
-	RegisteredAt time.Time
-	Birthday     time.Time
 	Version      uint8
 	IsAdmin      bool
 	Avatar       string
+	RegisteredAt time.Time
+	Birthday     time.Time
 }
 
 type UserSignUp struct {
-	Email    string
-	Name     string
-	Password string
+	Email    string `json:"login"`
+	Name     string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UserPreview struct {

@@ -34,6 +34,6 @@ type FilmPreview struct {
 }
 
 type FilmLink struct {
-	Uuid  string
-	Title string
+	Uuid  string `json:"uuid"`
+	Title string `json:"title"`
 }

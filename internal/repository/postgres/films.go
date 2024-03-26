@@ -22,7 +22,7 @@ func NewFilmsStorage(pool *pgxpool.Pool) (*FilmsStorage, error) {
 	}, nil
 }
 
-func (storage *FilmsStorage) GetFilmByUuid(uuid string) (domain.FilmData, error) {
+func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(),
 		`select f.uuid, f.title, d.name, f.published_at, f.duration, avg(c.score), count(c.id)

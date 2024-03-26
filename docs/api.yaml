@@ -406,15 +406,7 @@ paths:
         default:
           description: Unknown error
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Profile
-=======
-  # Profile
->>>>>>> 0b3f692 (users and films done)
-=======
-# Profile
->>>>>>> 5339b0e (№38 feat: API for rk2)
 
   /profile/{uuid}/data:
     get:
@@ -460,11 +452,7 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 0b3f692 (users and films done)
   /profile/{uuid}/preview:
     get:
       tags:
@@ -561,15 +549,7 @@ paths:
         default:
           description: Unknown error
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Actors
-=======
-  # Actors
->>>>>>> 0b3f692 (users and films done)
-=======
-# Actors
->>>>>>> 5339b0e (№38 feat: API for rk2)
 
   /actors/all:
     get:
@@ -780,32 +760,6 @@ components:
         film_data:
           type: string
 
-    NewFilmRequest:
-      required:
-        - title
-        - director
-        - preview_data
-        - duration
-        - release_date
-        - film_data
-      properties:
-        title:
-          type: string
-          example: 'Transformers'
-        director:
-          type: string
-          example: 'Transformers'
-        preview_data:
-          type: string
-        duration:
-          type: integer
-          example: 7560
-        release_date:
-          type: string
-          example: '2011-04-11T10:20:30'
-        film_data:
-          type: string
-
     FilmsResponse:
       required:
         - status
@@ -921,15 +875,7 @@ components:
                 type: string
                 example: '2011-04-11T10:20:30'
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Profile
-=======
-    # Profile
->>>>>>> 0b3f692 (users and films done)
-=======
-# Profile
->>>>>>> 5339b0e (№38 feat: API for rk2)
 
     ProfileResponse:
       required:
@@ -961,11 +907,7 @@ components:
               example: false
             avatar:
               type: string
-<<<<<<< HEAD
-              
-=======
 
->>>>>>> 0b3f692 (users and films done)
     ProfilePreviewResponse:
       required:
         - status
@@ -984,11 +926,7 @@ components:
               example: 'Ahmed'
             avatar:
               type: string
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 0b3f692 (users and films done)
     ProfileEditRequest:
       required:
         - action
@@ -1006,16 +944,7 @@ components:
         new_avatar:
           type: string
 
-<<<<<<< HEAD
-
-<<<<<<< HEAD
 # Actors
-=======
-    # Actors
->>>>>>> 0b3f692 (users and films done)
-=======
-# Actors
->>>>>>> 5339b0e (№38 feat: API for rk2)
 
     NewActorRequest:
       required:

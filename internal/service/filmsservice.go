@@ -8,7 +8,7 @@ import (
 )
 
 type FilmsStorage interface {
-	GetFilmByUuid(uuid string) (domain.FilmData, error)
+	GetFilmDataByUuid(uuid string) (domain.FilmData, error)
 	AddFilm(film domain.FilmDataToAdd) error
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
@@ -31,8 +31,8 @@ func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStora
 	}
 }
 
-func (service *FilmsService) GetFilmByUuid(uuid string) (domain.FilmData, error) {
-	film, err := service.storage.GetFilmByUuid(uuid)
+func (service *FilmsService) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
+	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("service error at GetFilmByUuid: %v", myerrors.ErrInternalServerError)
 		return domain.FilmData{}, err
