@@ -407,10 +407,14 @@ paths:
           description: Unknown error
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Profile
 =======
   # Profile
 >>>>>>> 0b3f692 (users and films done)
+=======
+# Profile
+>>>>>>> 5339b0e (№38 feat: API for rk2)
 
   /profile/{uuid}/data:
     get:
@@ -558,10 +562,14 @@ paths:
           description: Unknown error
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Actors
 =======
   # Actors
 >>>>>>> 0b3f692 (users and films done)
+=======
+# Actors
+>>>>>>> 5339b0e (№38 feat: API for rk2)
 
   /actors/all:
     get:
@@ -914,10 +922,14 @@ components:
                 example: '2011-04-11T10:20:30'
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Profile
 =======
     # Profile
 >>>>>>> 0b3f692 (users and films done)
+=======
+# Profile
+>>>>>>> 5339b0e (№38 feat: API for rk2)
 
     ProfileResponse:
       required:
@@ -994,12 +1006,16 @@ components:
         new_avatar:
           type: string
 
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 # Actors
 =======
     # Actors
 >>>>>>> 0b3f692 (users and films done)
+=======
+# Actors
+>>>>>>> 5339b0e (№38 feat: API for rk2)
 
     NewActorRequest:
       required:

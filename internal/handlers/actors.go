@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
 type actorData struct {

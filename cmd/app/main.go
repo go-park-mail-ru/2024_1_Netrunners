@@ -16,6 +16,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
@@ -48,6 +49,7 @@ func main() {
 
 	cacheStorage := mycache.NewSessionStorage()
 	authStorage, err := database.NewUsersStorage(pool)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,19 +57,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	actorsStorage, err := database.NewActorsStorage(pool)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	sessionService := service.InitSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
+	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
 	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
 
+	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sugarLogger)
+	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
 	err = filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST", "OPTIONS")
@@ -83,6 +93,22 @@ func main() {
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/films",
+		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+
+	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+
+	router.Use(middleware.CorsMiddleware)
+	router.Use(middleware.PanicMiddleware)
 
 	server := &http.Server{
 		Handler: router,

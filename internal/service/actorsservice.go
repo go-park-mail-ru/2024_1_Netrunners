@@ -1,9 +1,8 @@
 package service
 
 import (
-	"go.uber.org/zap"
-
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"go.uber.org/zap"
 )
 
 type ActorsStorage interface {
