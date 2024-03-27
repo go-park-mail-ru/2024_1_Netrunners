@@ -1,16 +1,15 @@
 create database netrunnerflix
 
-create table if not exists users (
-    id serial primary key unique not null,
-    uuid uuid default gen_random_uuid() unique not null,
-    email varchar(30) unique not null,
-    name text not null,
-    password varchar(64) not null,
-    registered_at timestamp default now() not null,
-    birthday timestamp default now() not null,
-    is_admin boolean default false not null,
-    version smallint default 0
-);
+create table if not exists users
+(
+    id            serial primary key unique                  not null,
+    uuid          uuid      default gen_random_uuid() unique not null,
+    email         varchar(30) unique                         not null,
+    name          text                                       not null,
+    password      varchar(64)                                not null,
+    registered_at timestamp default now()                    not null,
+    birthday      timestamp default now()                    not null,
+    is_admin      boolean   default false                    not null
 
 create table if not exists actors (
     id serial primary key unique not null,
@@ -53,6 +52,12 @@ create table if not exists comments (
 create table if not exists film_actors (
     film integer not null,
     actor integer not null,
+    foreign key (film) references films (id) on delete cascade,
+    foreign key (actor) references actors (id) on delete cascade
+);
+
+ALTER TABLE actors
+    ALTER COLUMN birthday SET DEFAULT NOW();
     foreign key (film) references films (id) on delete cascade,
     foreign key (actor) references actors (id) on delete cascade
 );

@@ -1,13 +1,17 @@
 package domain
 
+import "time"
+
 type User struct {
-	Email    string `json:"login"`
-	Name     string `json:"username"`
-	Password string `json:"password"`
-	Status   string
-	Version  uint8
-	IsAdmin  bool
-	Avatar   string
+	Uuid         string
+	Email        string `json:"login"`
+	Name         string `json:"username"`
+	Password     string `json:"password"`
+	Version      uint8
+	IsAdmin      bool
+	Avatar       string
+	RegisteredAt time.Time
+	Birthday     time.Time
 }
 
 type UserSignUp struct {

@@ -2,13 +2,18 @@ package domain
 
 import "time"
 
+type ActorToAdd struct {
+	Name string
+	Data string
+}
+
 type ActorData struct {
-	Uuid     string
-	Name     string
-	Data     string
-	Avatar   string
-	Birthday time.Time
-	Films    []FilmLink
+	Uuid     string     `json:"uuid"`
+	Name     string     `json:"name"`
+	Data     string     `json:"data"`
+	Avatar   string     `json:"avatar"`
+	Birthday time.Time  `json:"birthday"`
+	Films    []FilmLink `json:"films"`
 }
 
 type ActorPreview struct {

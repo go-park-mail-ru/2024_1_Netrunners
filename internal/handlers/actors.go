@@ -3,24 +3,17 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
-type actorData struct {
-	Name     string     `json:"name"`
-	Data     string     `json:"data"`
-	Avatar   string     `json:"avatar"`
-	Birthday time.Time  `json:"birthday"`
-	Films    []filmLink `json:"films"`
-}
-
 type actorResponse struct {
-	Status int       `json:"status"`
-	Actor  actorData `json:"actor"`
+	Status int              `json:"status"`
+	Actor  domain.ActorData `json:"actor"`
 }
 
 type ActorsHandlers struct {
@@ -47,10 +40,10 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 		return
 	}
 
-	actorFilms := make([]filmLink, 0, len(actor.Films))
+	actorFilms := make([]domain.FilmLink, 0, len(actor.Films))
 
 	for _, film := range actor.Films {
-		actorFilms = append(actorFilms, filmLink{
+		actorFilms = append(actorFilms, domain.FilmLink{
 			Uuid:  film.Uuid,
 			Title: film.Title,
 		})
@@ -58,7 +51,8 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 
 	response := actorResponse{
 		Status: http.StatusOK,
-		Actor: actorData{
+		Actor: domain.ActorData{
+			Uuid:     actorUuid,
 			Name:     actor.Name,
 			Data:     actor.Data,
 			Birthday: actor.Birthday,

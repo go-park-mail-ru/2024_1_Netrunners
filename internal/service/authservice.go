@@ -8,96 +8,100 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 type usersStorage interface {
-	CreateUser(user domain.User) error
-	RemoveUser(login string) error
-	HasUser(login, password string) error
-	GetUser(login string) (domain.User, error)
-	ChangeUserPassword(login, newPassword string) error
-	ChangeUserName(login, newName string) (domain.User, error)
+	CreateUser(user domain.UserSignUp) error
+	RemoveUser(email string) error
+	HasUser(email, password string) error
+	GetUser(email string) (domain.User, error)
+	ChangeUserPassword(email, newPassword string) error
+	ChangeUserName(email, newName string) (domain.User, error)
+	GetUserDataByUuid(uuid string) (domain.User, error)
+	GetUserPreview(uuid string) (domain.UserPreview, error)
 }
 
 type AuthService struct {
 	storage   usersStorage
 	secretKey string
+	logger    *zap.SugaredLogger
 }
 
-func InitAuthService(storage usersStorage) *AuthService {
+func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthService {
 	return &AuthService{
 		storage:   storage,
+		logger:    logger,
 		secretKey: os.Getenv("SECRETKEY"),
 	}
 }
 
-func (authService *AuthService) CreateUser(user domain.User) error {
-	err := authService.storage.CreateUser(user)
+func (service *AuthService) CreateUser(user domain.UserSignUp) error {
+	err := service.storage.CreateUser(user)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at CreateUser: %v", err)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) RemoveUser(login string) error {
-	err := authService.storage.RemoveUser(login)
+func (service *AuthService) RemoveUser(login string) error {
+	err := service.storage.RemoveUser(login)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at RemoveUser: %v", myerrors.ErrInternalServerError)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) HasUser(login, password string) error {
-	err := authService.storage.HasUser(login, password)
+func (service *AuthService) HasUser(login, password string) error {
+	err := service.storage.HasUser(login, password)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at HasUser: %v", myerrors.ErrInternalServerError)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) GetUser(login string) (domain.User, error) {
-	user, err := authService.storage.GetUser(login)
+func (service *AuthService) GetUser(login string) (domain.User, error) {
+	user, err := service.storage.GetUser(login)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at GetUser: %v", myerrors.ErrInternalServerError)
 		return domain.User{}, err
 	}
 	return user, nil
 }
 
-func (authService *AuthService) ChangeUserPassword(login, newPassword string) error {
-	err := authService.storage.ChangeUserPassword(login, newPassword)
+func (service *AuthService) ChangeUserPassword(login, newPassword string) error {
+	err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at ChangeUserPassword: %v", myerrors.ErrInternalServerError)
 		return err
 	}
 	return nil
 }
 
-func (authService *AuthService) ChangeUserName(login, newName string) (domain.User, error) {
-	user, err := authService.storage.GetUser(login)
+func (service *AuthService) ChangeUserName(login, newName string) (domain.User, error) {
+	user, err := service.storage.ChangeUserName(login, newName)
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
+		service.logger.Errorf("service error at ChangeUserName: %v", myerrors.ErrInternalServerError)
 		return domain.User{}, err
 	}
 	return user, nil
 }
 
-func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
+func (service *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
 	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(authService.secretKey), nil
+		return []byte(service.secretKey), nil
 	})
 	if err != nil {
-		fmt.Printf("creating user error: %v", err)
 		return nil, err
 	}
 
@@ -113,7 +117,7 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 	if !ok {
 		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
 	}
-	_, ok = claims["Status"]
+	_, ok = claims["IsAdmin"]
 	if !ok {
 		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
 	}
@@ -127,10 +131,11 @@ func (authService *AuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims,
 }
 
 func ValidateLogin(e string) error {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
 	if emailRegex.MatchString(e) {
 		return nil
 	}
+	fmt.Println(e)
 	return myerrors.ErrLoginIsNotValid
 }
 
@@ -151,43 +156,46 @@ func ValidatePassword(password string) error {
 type customClaims struct {
 	jwt.StandardClaims
 	Login   string
-	Status  string
+	IsAdmin bool
 	Version uint8
 }
 
-func (authService *AuthService) GenerateTokens(login string, status string, version uint8) (accessTokenSigned string,
-	refreshTokenSigned string, err error) {
-	accessCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		Status:  status,
-		Version: version,
-	}
-
-	refreshCustomClaims := customClaims{
+func (service *AuthService) GenerateTokens(login string, isAdmin bool, version uint8) (accessTokenSigned string,
+	err error) {
+	tokenCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    "NETrunnerFLIX",
 		},
 		Login:   login,
-		Status:  status,
+		IsAdmin: isAdmin,
 		Version: version,
 	}
 
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessCustomClaims)
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshCustomClaims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
 
-	accessTokenSigned, err = accessToken.SignedString([]byte(authService.secretKey))
+	tokenSigned, err := token.SignedString([]byte(service.secretKey))
 	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
-	}
-	refreshTokenSigned, err = refreshToken.SignedString([]byte(authService.secretKey))
-	if err != nil {
-		return "", "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
+		return "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
 	}
 
-	return accessTokenSigned, refreshTokenSigned, nil
+	return tokenSigned, nil
+}
+
+func (service *AuthService) GetUserDataByUuid(uuid string) (domain.User, error) {
+	user, err := service.storage.GetUserDataByUuid(uuid)
+	if err != nil {
+		service.logger.Errorf("service error at GetUserDataByUuid: %v", myerrors.ErrInternalServerError)
+		return domain.User{}, err
+	}
+	return user, nil
+}
+
+func (service *AuthService) GetUserPreview(uuid string) (domain.UserPreview, error) {
+	userPreview, err := service.storage.GetUserPreview(uuid)
+	if err != nil {
+		service.logger.Errorf("service error at GetUserPreview: %v", myerrors.ErrInternalServerError)
+		return domain.UserPreview{}, err
+	}
+	return userPreview, nil
 }
