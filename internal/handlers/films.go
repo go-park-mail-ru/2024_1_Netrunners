@@ -3,10 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
-	"net/http"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
