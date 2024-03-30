@@ -25,14 +25,15 @@ func NewFilmsStorage(pool *pgxpool.Pool) (*FilmsStorage, error) {
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(),
-		`select f.uuid, f.title, d.name, f.published_at, f.duration, avg(c.score), count(c.id)
-			from films f
-			left join comments c on f.id = c.film
-			join directors d on f.director = d.id
-			where f.uuid = $1
-			group by f.uuid, f.title, d.name, f.duration;`, uuid).Scan(
-		&film.Preview,
+		`SELECT f.uuid, f.title, f.avatar, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			JOIN director d ON f.director = d.id
+			WHERE f.uuid = $1
+			GROUP BY f.uuid, f.title,  f.avatar, d.name, f.published_at, f.duration;`, uuid).Scan(
+		&film.Uuid,
 		&film.Title,
+		&film.Preview,
 		&film.Director,
 		&film.Data,
 		&film.Duration,
@@ -63,16 +64,16 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 
 	var directorFlag int
 	err = storage.pool.QueryRow(context.Background(),
-		`select count(*)
-			from directors
-			where name = $1;`, film.Director).Scan(&directorFlag)
+		`SELECT COUNT(*)
+			FROM director
+			WHERE name = $1;`, film.Director).Scan(&directorFlag)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 	if directorFlag == 0 {
 		_, err = storage.pool.Exec(context.Background(),
-			`insert into directors (name) values ($1);`, film.Director)
+			`INSERT INTO director (name) VALUES ($1);`, film.Director)
 		if err != nil {
 			return fmt.Errorf("error at inserting into data in AddFilm: %w",
 				myerrors.ErrInternalServerError)
@@ -81,17 +82,18 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 
 	var directorID int
 	err = storage.pool.QueryRow(context.Background(),
-		`select id
-			from directors
-			where name = $1;`, film.Director).Scan(&directorID)
+		`SELECT id
+			FROM director
+			WHERE name = $1;`, film.Director).Scan(&directorID)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	_, err = storage.pool.Exec(context.Background(),
-		`insert into films (title, data, duration, director) 
-    		values ($1, $2, $3, $4);`, film.Title, film.Data, film.Duration, directorID)
+		`INSERT INTO film (title, avatar, director, data, age_limit, duration, published_at) 
+    		VALUES ($1, $2, $3, $4, $5, $6, $7);`, film.Title, film.Preview, directorID, film.Data, film.AgeLimit,
+		film.Duration, film.PublishedAt)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in AddFilm: %w",
 			myerrors.ErrInternalServerError)
@@ -99,9 +101,9 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 
 	var filmID int
 	err = storage.pool.QueryRow(context.Background(),
-		`select id
-			from films
-			where title = $1;`, film.Title).Scan(&filmID)
+		`SELECT id
+			FROM film
+			WHERE title = $1;`, film.Title).Scan(&filmID)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in AddFilm: %w",
 			myerrors.ErrInternalServerError)
@@ -111,16 +113,16 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	for _, actor := range ActorsCast {
 		var actorFlag int
 		err = storage.pool.QueryRow(context.Background(),
-			`select count(*)
-			from actors
-			where actors.name = $1;`, actor.Name).Scan(&actorFlag)
+			`SELECT COUNT(*)
+			FROM actor
+			WHERE actor.name = $1;`, actor.Name).Scan(&actorFlag)
 		if err != nil {
 			return fmt.Errorf("error at inserting into data in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 		if actorFlag == 0 {
 			_, err = storage.pool.Exec(context.Background(),
-				`insert into actors (name, data) values ($1, $2);`, actor.Name, actor.Data)
+				`INSERT INTO actor (name, data) VALUES ($1, $2);`, actor.Name, actor.Data)
 			if err != nil {
 				return fmt.Errorf("error at inserting into data in AddFilm: %w",
 					myerrors.ErrInternalServerError)
@@ -129,16 +131,16 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 
 		var actorID int
 		err = storage.pool.QueryRow(context.Background(),
-			`select id
-			from actors
-			where actors.name = $1;`, actor.Name).Scan(&actorID)
+			`SELECT id
+			FROM actor
+			WHERE actor.name = $1;`, actor.Name).Scan(&actorID)
 		if err != nil {
 			return fmt.Errorf("error at inserting into data in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 
 		_, err = storage.pool.Exec(context.Background(),
-			`insert into film_actors (film, actor) values ($1, $2);`, filmID, actorID)
+			`INSERT INTO film_actor (film, actor) VALUES ($1, $2);`, filmID, actorID)
 		if err != nil {
 			return fmt.Errorf("error at inserting into data in AddFilm: %w",
 				myerrors.ErrInternalServerError)
@@ -150,8 +152,8 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 
 func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 	_, err := storage.pool.Exec(context.Background(),
-		`delete from films
-			where uuid = $1;`, uuid)
+		`DELETE FROM film
+			WHERE uuid = $1;`, uuid)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in RemoveFilm: %w", myerrors.ErrInternalServerError)
 	}
@@ -162,14 +164,15 @@ func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, error) {
 	var filmPreview domain.FilmPreview
 	err := storage.pool.QueryRow(context.Background(),
-		`select f.uuid, f.title, d.name, f.duration, avg(comments.score), count(comments.id)
-			from films f
-			left join comments c on f.id = c.film
-			join directors d on f.director = d.id
-			where f.uuid = $1
-			group by f.uuid, f.title, d.name, f.duration;`, uuid).Scan(
-		&filmPreview.Preview,
+		`SELECT f.uuid, f.title, f.avatar, d.name, f.duration, AVG(c.score), COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			JOIN director d ON f.director = d.id
+			WHERE f.uuid = $1
+			GROUP BY f.uuid, f.title, f.avatar, d.name, f.duration;`, uuid).Scan(
+		&filmPreview.Uuid,
 		&filmPreview.Title,
+		&filmPreview.Preview,
 		&filmPreview.Director,
 		&filmPreview.Duration,
 		&filmPreview.AverageScore,
@@ -184,10 +187,10 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`select f.uuid, f.title, f.director, f.duration, count(c.id)
-			from films f
-			left join comments c on f.id = c.film
-			group by f.uuid, f.title, f.director, f.duration;`)
+		`SELECT f.uuid, f.title, f.avatar, f.director, f.duration, COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			GROUP BY f.uuid, f.title, f.avatar, f.director, f.duration;`)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
 			myerrors.ErrInternalServerError)
@@ -196,6 +199,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	films := make([]domain.FilmPreview, 0)
 	var (
 		FilmUuid     string
+		FilmPreview  string
 		FilmTitle    string
 		FilmDirector string
 		FilmDuration int
@@ -203,10 +207,11 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		FilmRating int
 	)
 	_, err = pgx.ForEachRow(rows,
-		[]any{&FilmUuid, &FilmTitle, &FilmDirector, &FilmDuration, &FilmRating}, func() error {
+		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmRating}, func() error {
 			film := domain.FilmPreview{
-				Preview:  FilmUuid,
+				Uuid:     FilmUuid,
 				Title:    FilmTitle,
+				Preview:  FilmPreview,
 				Director: FilmDirector,
 				Duration: FilmDuration,
 				// AverageScore: FilmScore,
@@ -227,11 +232,11 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`select comments.uuid, users.name as author_name, comments.text, comments.score, comments.added_at
-			from comments
-			join users on comments.author = users.id
-			join films on comments.film = films.id
-			where film.uuid = $1;`, uuid)
+		`SELECT comment.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+			FROM comment
+			JOIN users ON comment.author = users.id
+			JOIN film ON comment.film = film.id
+			WHERE film.uuid = $1;`, uuid)
 	if err != nil {
 		return nil,
 			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
@@ -269,11 +274,11 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`select a.uuid, a.name
-			from actors a
-			join film_actors fa on a.id = fa.actor
-			join films f on fa.film = f.id
-			where f.uuid = $1;`, uuid)
+		`SELECT a.uuid, a.name
+			FROM actor a
+			JOIN film_actor fa ON a.id = fa.actor
+			JOIN film f ON fa.film = f.id
+			WHERE f.uuid = $1;`, uuid)
 	if err != nil {
 		return nil,
 			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)

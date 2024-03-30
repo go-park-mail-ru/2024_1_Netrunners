@@ -1,63 +1,80 @@
-create database netrunnerflix
+CREATE DATABASE netrunnerflix;
 
-create table if not exists users
+CREATE SEQUENCE IF NOT EXISTS users_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS users
 (
-    id            serial primary key unique                  not null,
-    uuid          uuid      default gen_random_uuid() unique not null,
-    email         varchar(30) unique                         not null,
-    name          text                                       not null,
-    password      varchar(64)                                not null,
-    registered_at timestamp default now()                    not null,
-    birthday      timestamp default now()                    not null,
-    is_admin      boolean   default false                    not null
-
-create table if not exists actors (
-    id serial primary key unique not null,
-    uuid uuid default gen_random_uuid() unique not null,
-    name text not null,
-    data text not null,
-    birthday timestamp default now() not null
+	id            INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('users_id_seq') NOT NULL,
+	uuid          UUID UNIQUE                DEFAULT gen_random_uuid()       NOT NULL,
+	email         TEXT UNIQUE CHECK (LENGTH(email) <= 30)                    NOT NULL,
+	name          TEXT                       DEFAULT 'user'                  NOT NULL,
+	password      TEXT CHECK (LENGTH(email) <= 64)                           NOT NULL,
+	registered_at TIMESTAMP                  DEFAULT NOW()                   NOT NULL,
+	birthday      TIMESTAMP                  DEFAULT NOW()                   NOT NULL,
+	is_admin      BOOLEAN                    DEFAULT FALSE                   NOT NULL
 );
 
-create table if not exists directors (
-    id serial primary key unique not null,
-    name text not null,
-    birthday timestamp default now() not null
+CREATE SEQUENCE IF NOT EXISTS actor_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS actor
+(
+	id       INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('actor_id_seq')     NOT NULL,
+	uuid     UUID UNIQUE                DEFAULT gen_random_uuid()           NOT NULL,
+	avatar   TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
+	name     TEXT                                                           NOT NULL,
+	data     TEXT                       DEFAULT ''                          NOT NULL,
+	birthday TIMESTAMP                  DEFAULT NOW()                       NOT NULL
 );
 
-create table if not exists films (
-    id serial primary key unique not null,
-    uuid uuid default gen_random_uuid() unique not null,
-    title text not null,
-    director integer not null,
-    data text not null,
-    age_limit integer check (age_limit >= 0 and age_limit <= 18) not null,
-    duration smallint check (duration > 0) not null,
-    published_at timestamp default now() not null,
-    foreign key (director) references directors (id)
+CREATE SEQUENCE IF NOT EXISTS director_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS director
+(
+	id       INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('director_id_seq')  NOT NULL,
+	uuid     UUID UNIQUE                DEFAULT gen_random_uuid()           NOT NULL,
+	avatar   TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
+	name     TEXT                                                           NOT NULL,
+	birthday TIMESTAMP                  DEFAULT NOW()                       NOT NULL
 );
 
-create table if not exists comments (
-    id serial primary key unique not null,
-    uuid uuid default gen_random_uuid() unique not null,
-    text text not null,
-    score smallint check (score >= 0 and score <= 10) not null,
-    author integer,
-    film integer not null,
-    added_at timestamp default now() not null,
-    foreign key (author) references users (id) on delete set null,
-    foreign key (film) references films (id) on delete cascade
+CREATE SEQUENCE IF NOT EXISTS film_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS film
+(
+	id           INTEGER PRIMARY KEY UNIQUE                          DEFAULT NEXTVAL('film_id_seq')      NOT NULL,
+	uuid         UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
+	title        TEXT                                                                                    NOT NULL,
+	avatar       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
+	director     INTEGER                                                                                 NOT NULL,
+	data         TEXT                                                DEFAULT ''                          NOT NULL,
+	age_limit    SMALLINT CHECK (age_limit >= 0 AND age_limit <= 18) DEFAULT 18                          NOT NULL,
+	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                         NOT NULL,
+	published_at TIMESTAMP                                           DEFAULT NOW()                       NOT NULL,
+	FOREIGN KEY (director) REFERENCES director (id)
 );
 
-create table if not exists film_actors (
-    film integer not null,
-    actor integer not null,
-    foreign key (film) references films (id) on delete cascade,
-    foreign key (actor) references actors (id) on delete cascade
+CREATE SEQUENCE IF NOT EXISTS comment_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS comment
+(
+	id       INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('comment_id_seq') NOT NULL,
+	uuid     UUID UNIQUE                DEFAULT gen_random_uuid()         NOT NULL,
+	text     TEXT                                                         NOT NULL,
+	score    SMALLINT CHECK (score >= 0 AND score <= 10)                  NOT NULL,
+	author   INTEGER                                                      NOT NULL,
+	film     INTEGER                                                      NOT NULL,
+	added_at TIMESTAMP                  DEFAULT NOW()                     NOT NULL,
+	FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
+	FOREIGN KEY (film) REFERENCES film (id) ON DELETE CASCADE
 );
 
-ALTER TABLE actors
-    ALTER COLUMN birthday SET DEFAULT NOW();
-    foreign key (film) references films (id) on delete cascade,
-    foreign key (actor) references actors (id) on delete cascade
+CREATE SEQUENCE IF NOT EXISTS film_actor_id_seq START 1;
+
+CREATE TABLE IF NOT EXISTS film_actor
+(
+	id    INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('film_actor_id_seq') NOT NULL,
+	film  INTEGER                                                         NOT NULL,
+	actor INTEGER                                                         NOT NULL,
+	FOREIGN KEY (film) REFERENCES film (id) ON DELETE CASCADE,
+	FOREIGN KEY (actor) REFERENCES actor (id) ON DELETE CASCADE
 );

@@ -160,8 +160,7 @@ type customClaims struct {
 	Version uint8
 }
 
-func (service *AuthService) GenerateTokens(login string, isAdmin bool, version uint8) (accessTokenSigned string,
-	err error) {
+func (service *AuthService) GenerateTokens(login string, isAdmin bool, version uint8) (tokenSigned string, err error) {
 	tokenCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
@@ -174,7 +173,7 @@ func (service *AuthService) GenerateTokens(login string, isAdmin bool, version u
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
 
-	tokenSigned, err := token.SignedString([]byte(service.secretKey))
+	tokenSigned, err = token.SignedString([]byte(service.secretKey))
 	if err != nil {
 		return "", fmt.Errorf("%v, %w", err, myerrors.ErrInternalServerError)
 	}

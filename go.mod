@@ -1,11 +1,14 @@
 module github.com/go-park-mail-ru/2024_1_Netrunners
 
-go 1.20
+go 1.21
+
+toolchain go1.22rc1
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.5.5
+	github.com/pashagolub/pgxmock/v3 v3.3.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0

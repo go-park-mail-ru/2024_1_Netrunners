@@ -21,3 +21,11 @@ type ActorPreview struct {
 	Name   string
 	Avatar string
 }
+
+func NewMockActor() *ActorData {
+	return &ActorData{
+		Uuid: "1",
+		Name: "Danya",
+		Data: "Pizza",
+	}
+}

@@ -15,12 +15,14 @@ type FilmData struct {
 }
 
 type FilmDataToAdd struct {
-	Preview  string
-	Title    string
-	Director string
-	Duration int
-	Data     string
-	Actors   []ActorData
+	Title       string
+	Preview     string
+	Director    string
+	Data        string
+	AgeLimit    uint8
+	Duration    int
+	PublishedAt time.Time
+	Actors      []ActorData
 }
 
 type FilmPreview struct {

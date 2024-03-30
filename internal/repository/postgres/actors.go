@@ -4,18 +4,27 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/jackc/pgx/v5"
 )
 
-type ActorsStorage struct {
-	pool *pgxpool.Pool
+type PgxIface interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
+	Close()
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }
 
-func NewActorsStorage(pool *pgxpool.Pool) (*ActorsStorage, error) {
+type ActorsStorage struct {
+	pool PgxIface
+}
+
+func NewActorsStorage(pool PgxIface) (*ActorsStorage, error) {
 	return &ActorsStorage{
 		pool: pool,
 	}, nil
@@ -23,8 +32,8 @@ func NewActorsStorage(pool *pgxpool.Pool) (*ActorsStorage, error) {
 
 func (storage *ActorsStorage) GetAllActorsPreviews() ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`select uuid, name
-		from actors;`)
+		`SELECT uuid, name
+		FROM actor;`)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
 	}
@@ -60,10 +69,11 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 
 	var actor domain.ActorData
 	err = tx.QueryRow(context.Background(),
-		`select uuid, name, data, birthday
-		from actors
-		where uuid = $1;`, actorUuid).Scan(
+		`SELECT uuid, avatar, name, data, birthday
+		FROM actor
+		WHERE uuid = $1;`, actorUuid).Scan(
 		&actor.Uuid,
+		&actor.Avatar,
 		&actor.Name,
 		&actor.Data,
 		&actor.Birthday)
@@ -73,9 +83,9 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 	}
 
 	rows, err := tx.Query(context.Background(),
-		`select f.uuid, f.title
-		from films f left join (film_actors fa left join actors a on fa.actor = a.id) faa on f.id = faa.film
-		where faa.uuid = $1`, actorUuid)
+		`SELECT f.uuid, f.title
+		FROM film f LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
+		WHERE faa.uuid = $1`, actorUuid)
 	if err != nil {
 		return domain.ActorData{},
 			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
@@ -108,9 +118,9 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`select a.uuid, a.name
-		from actors a left join (film_actors fa left join films f on fa.film = f.id) faf on a.id = faf.actor
-		where faf.uuid = $1;`, filmUuid)
+		`SELECT a.uuid, a.name
+		FROM actor a LEFT JOIN (film_actor fa LEFT JOIN film f ON fa.film = f.id) faf ON a.id = faf.actor
+		WHERE faf.uuid = $1;`, filmUuid)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
 	}
