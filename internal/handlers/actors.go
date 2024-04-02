@@ -54,6 +54,7 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 		Actor: domain.ActorData{
 			Uuid:     actorUuid,
 			Name:     actor.Name,
+			Avatar:   actor.Avatar,
 			Data:     actor.Data,
 			Birthday: actor.Birthday,
 			Films:    actorFilms,

@@ -32,7 +32,7 @@ func NewActorsStorage(pool PgxIface) (*ActorsStorage, error) {
 
 func (storage *ActorsStorage) GetAllActorsPreviews() ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`SELECT uuid, name
+		`SELECT uuid, name, avatar
 		FROM actor;`)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
@@ -40,13 +40,15 @@ func (storage *ActorsStorage) GetAllActorsPreviews() ([]domain.ActorPreview, err
 
 	actors := make([]domain.ActorPreview, 0)
 	var (
-		ActorUuid string
-		ActorName string
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
 	)
 	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
 		actor := domain.ActorPreview{
-			Uuid: ActorUuid,
-			Name: ActorName,
+			Uuid:   ActorUuid,
+			Name:   ActorName,
+			Avatar: ActorAvatar,
 		}
 
 		actors = append(actors, actor)
@@ -118,7 +120,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`SELECT a.uuid, a.name
+		`SELECT a.uuid, a.name, a.avatar
 		FROM actor a LEFT JOIN (film_actor fa LEFT JOIN film f ON fa.film = f.id) faf ON a.id = faf.actor
 		WHERE faf.uuid = $1;`, filmUuid)
 	if err != nil {
@@ -127,13 +129,15 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 
 	actors := make([]domain.ActorPreview, 0)
 	var (
-		ActorUuid string
-		ActorName string
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
 	)
 	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
 		actor := domain.ActorPreview{
-			Uuid: ActorUuid,
-			Name: ActorName,
+			Uuid:   ActorUuid,
+			Name:   ActorName,
+			Avatar: ActorAvatar,
 		}
 
 		actors = append(actors, actor)

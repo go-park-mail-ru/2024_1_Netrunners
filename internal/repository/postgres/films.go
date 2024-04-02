@@ -25,12 +25,12 @@ func NewFilmsStorage(pool *pgxpool.Pool) (*FilmsStorage, error) {
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(),
-		`SELECT f.uuid, f.title, f.avatar, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+		`SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
 			FROM film f
 			LEFT JOIN comment c ON f.id = c.film
 			JOIN director d ON f.director = d.id
 			WHERE f.uuid = $1
-			GROUP BY f.uuid, f.title,  f.avatar, d.name, f.published_at, f.duration;`, uuid).Scan(
+			GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
 		&film.Uuid,
 		&film.Title,
 		&film.Preview,
@@ -91,7 +91,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	}
 
 	_, err = storage.pool.Exec(context.Background(),
-		`INSERT INTO film (title, avatar, director, data, age_limit, duration, published_at) 
+		`INSERT INTO film (title, banner, director, data, age_limit, duration, published_at) 
     		VALUES ($1, $2, $3, $4, $5, $6, $7);`, film.Title, film.Preview, directorID, film.Data, film.AgeLimit,
 		film.Duration, film.PublishedAt)
 	if err != nil {
@@ -164,12 +164,12 @@ func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, error) {
 	var filmPreview domain.FilmPreview
 	err := storage.pool.QueryRow(context.Background(),
-		`SELECT f.uuid, f.title, f.avatar, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		`SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 			FROM film f
 			LEFT JOIN comment c ON f.id = c.film
 			JOIN director d ON f.director = d.id
 			WHERE f.uuid = $1
-			GROUP BY f.uuid, f.title, f.avatar, d.name, f.duration;`, uuid).Scan(
+			GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`, uuid).Scan(
 		&filmPreview.Uuid,
 		&filmPreview.Title,
 		&filmPreview.Preview,
@@ -187,10 +187,10 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	rows, err := storage.pool.Query(context.Background(),
-		`SELECT f.uuid, f.title, f.avatar, f.director, f.duration, COUNT(c.id)
+		`SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
 			FROM film f
 			LEFT JOIN comment c ON f.id = c.film
-			GROUP BY f.uuid, f.title, f.avatar, f.director, f.duration;`)
+			GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
 			myerrors.ErrInternalServerError)
