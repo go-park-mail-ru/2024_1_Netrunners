@@ -1,3 +1,4 @@
+```mermaid
 ---
 title: netrunnerflix
 ---
@@ -7,4 +8,4 @@ erDiagram
     ACTOR }o--o{ FILM : "performed in"
     DIRECTOR ||--o{ FILM : "directed"
     FILM ||--o{ COMMENT : "commented on"
-    
+```
