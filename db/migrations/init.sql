@@ -19,12 +19,16 @@ CREATE SEQUENCE IF NOT EXISTS actor_id_seq START 1;
 
 CREATE TABLE IF NOT EXISTS actor
 (
-	id       INTEGER PRIMARY KEY UNIQUE DEFAULT NEXTVAL('actor_id_seq')     NOT NULL,
-	uuid     UUID UNIQUE                DEFAULT gen_random_uuid()           NOT NULL,
-	name     TEXT UNIQUE                                                    NOT NULL,
-	avatar   TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
-	data     TEXT                       DEFAULT ''                          NOT NULL,
-	birthday TIMESTAMP                  DEFAULT NOW()                       NOT NULL
+	id          INTEGER PRIMARY KEY UNIQUE   DEFAULT NEXTVAL('actor_id_seq')     NOT NULL,
+	uuid        UUID UNIQUE                  DEFAULT gen_random_uuid()           NOT NULL,
+	name        TEXT UNIQUE                                                      NOT NULL,
+	avatar      TEXT                         DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
+	birthday    TIMESTAMP                    DEFAULT NOW()                       NOT NULL,
+	career      TEXT                         DEFAULT ''                          NOT NULL,
+	height      INTEGER CHECK (height < 300) DEFAULT 192                         NOT NULL,
+	birth_place TEXT                         DEFAULT 'Russia, Angarsk'           NOT NULL,
+	genres      TEXT                         DEFAULT 'Riddim'                    NOT NULL,
+	spouse      TEXT                         DEFAULT 'Светлана Ходченкова'       NOT NULL
 );
 
 CREATE SEQUENCE IF NOT EXISTS director_id_seq START 1;

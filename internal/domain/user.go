@@ -29,6 +29,7 @@ func NewMockUser() User {
 	return User{
 		Uuid:         "1",
 		Email:        "cakethefake@gmail.com",
+		Avatar:       "",
 		Name:         "Danya",
 		Password:     "123456789",
 		IsAdmin:      true,

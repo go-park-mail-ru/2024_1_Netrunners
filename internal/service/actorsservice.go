@@ -7,7 +7,6 @@ import (
 )
 
 type ActorsStorage interface {
-	GetAllActorsPreviews() ([]domain.ActorPreview, error)
 	GetActorByUuid(actorUuid string) (domain.ActorData, error)
 	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
 }
@@ -24,16 +23,6 @@ func NewActorsService(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsS
 	}
 }
 
-func (service *ActorsService) GetAllActorsPreviews() ([]domain.ActorPreview, error) {
-	actors, err := service.storage.GetAllActorsPreviews()
-	if err != nil {
-		service.logger.Errorf("service error at GetAllActorsPreviews: %v", err)
-		return nil, err
-	}
-
-	return actors, nil
-}
-
 func (service *ActorsService) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
@@ -47,8 +36,8 @@ func (service *ActorsService) GetActorByUuid(actorUuid string) (domain.ActorData
 func (service *ActorsService) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetActorsByFilm(filmUuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetActorsByFilm: %v", err)
-		return nil, err
+		service.logger.Errorf("service error at GetActorByUuid: %v", err)
+		return []domain.ActorPreview{}, err
 	}
 
 	return actors, nil

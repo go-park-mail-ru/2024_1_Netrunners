@@ -52,13 +52,51 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 	response := actorResponse{
 		Status: http.StatusOK,
 		Actor: domain.ActorData{
-			Uuid:     actorUuid,
-			Name:     actor.Name,
-			Avatar:   actor.Avatar,
-			Data:     actor.Data,
-			Birthday: actor.Birthday,
-			Films:    actorFilms,
+			Uuid:       actorUuid,
+			Name:       actor.Name,
+			Avatar:     actor.Avatar,
+			Birthday:   actor.Birthday,
+			Career:     actor.Career,
+			Height:     actor.Height,
+			BirthPlace: actor.BirthPlace,
+			Genres:     actor.Genres,
+			Spouse:     actor.Spouse,
+			Films:      actorFilms,
 		},
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		actorsHandlers.logger.Errorf("error at marshalling: %v\n", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+	}
+}
+
+type actorsByFilmResponse struct {
+	Status int
+	Actors []domain.ActorPreview
+}
+
+func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
+	filmUuid := mux.Vars(r)["uuid"]
+
+	actors, err := actorsHandlers.actorsService.GetActorsByFilm(filmUuid)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+		}
+		return
+	}
+
+	response := actorsByFilmResponse{
+		Status: http.StatusOK,
+		Actors: actors,
 	}
 
 	jsonResponse, err := json.Marshal(response)

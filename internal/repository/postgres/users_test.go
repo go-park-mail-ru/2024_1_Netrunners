@@ -38,8 +38,8 @@ func TestUsersStorage_GetUser(t *testing.T) {
 
 	newUser := domain.NewMockUser()
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday", "is_admin"}).
-		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs("cakethefake@gmail.com").
@@ -129,8 +129,8 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 	newUser := domain.NewMockUser()
 	uuid := "1"
 
-	mockRows := pgxmock.NewRows([]string{"email", "name", "password", "registered_at", "birthday", "is_admin"}).
-		AddRow(newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).

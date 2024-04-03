@@ -5,32 +5,102 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/jackc/pgx/v5"
 )
 
 type FilmsStorage struct {
-	pool *pgxpool.Pool
+	pool PgxIface
 }
 
-func NewFilmsStorage(pool *pgxpool.Pool) (*FilmsStorage, error) {
+func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 	return &FilmsStorage{
 		pool: pool,
 	}, nil
 }
 
+const getFilmDataByUuid = `
+		SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, COUNT(c.id)
+		FROM film f
+		LEFT JOIN comment c ON f.id = c.film
+		JOIN director d ON f.director = d.id
+		WHERE f.uuid = $1
+		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration;`
+
+const getAmountOfDirectorsByName = `
+		SELECT COUNT(*)
+		FROM director
+		WHERE name = $1;`
+
+const insertDirector = `
+		INSERT INTO director (name) VALUES ($1);`
+
+const getDirectorsIdByName = `
+		SELECT id
+		FROM director
+		WHERE name = $1;`
+
+const insertFilm = `
+		INSERT INTO film (title, banner, director, data, age_limit, duration, published_at) 
+    	VALUES ($1, $2, $3, $4, $5, $6, $7);`
+
+const getFilmIdByTitle = `
+		SELECT id
+		FROM film
+		WHERE title = $1;`
+
+const getAmountOfActorsByName = `
+		SELECT COUNT(*)
+		FROM actor
+		WHERE actor.name = $1;`
+
+const insertActor = `
+		INSERT INTO actor (name) VALUES ($1);`
+
+const getActorId = `
+		SELECT id
+		FROM actor
+		WHERE actor.name = $1;`
+
+const insertIntoFilmActors = `
+		INSERT INTO film_actor (film, actor) VALUES ($1, $2);`
+
+const deleteFilm = `
+		DELETE FROM film
+		WHERE uuid = $1;`
+
+const getFilmPreview = `
+		SELECT f.uuid, f.title, f.banner, d.name, f.duration, COUNT(c.id)
+		FROM film f
+		LEFT JOIN comment c ON f.id = c.film
+		JOIN director d ON f.director = d.id
+		WHERE f.uuid = $1
+		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
+
+const getAllFilmsPreviews = `
+		SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
+		FROM film f
+		LEFT JOIN comment c ON f.id = c.film
+		GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`
+
+const getAllFilmComments = `
+		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+		FROM comment
+		JOIN users ON comment.author = users.id
+		JOIN film ON comment.film = film.id
+		WHERE film.uuid = $1;`
+
+const getAllFilmActors = `
+		SELECT a.uuid, a.name
+		FROM actor a
+		JOIN film_actor fa ON a.id = fa.actor
+		JOIN film f ON fa.film = f.id
+		WHERE f.uuid = $1;`
+
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
-	err := storage.pool.QueryRow(context.Background(),
-		`SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
-			FROM film f
-			LEFT JOIN comment c ON f.id = c.film
-			JOIN director d ON f.director = d.id
-			WHERE f.uuid = $1
-			GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
+	err := storage.pool.QueryRow(context.Background(), getFilmDataByUuid, uuid).Scan(
 		&film.Uuid,
 		&film.Title,
 		&film.Preview,
@@ -38,11 +108,11 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.Data,
 		&film.Duration,
 		&film.Date,
-		&film.AverageScore,
+		// &film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
 		return domain.FilmData{},
-			fmt.Errorf("error at begin transaction in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
+			fmt.Errorf("error at recieving data in getFilmDataByUuid in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	return film, nil
@@ -63,86 +133,66 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	}()
 
 	var directorFlag int
-	err = storage.pool.QueryRow(context.Background(),
-		`SELECT COUNT(*)
-			FROM director
-			WHERE name = $1;`, film.Director).Scan(&directorFlag)
+	err = storage.pool.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in AddFilm: %w",
+		return fmt.Errorf("error at recieving data in getAmountOfDirectorsByName in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 	if directorFlag == 0 {
-		_, err = storage.pool.Exec(context.Background(),
-			`INSERT INTO director (name) VALUES ($1);`, film.Director)
+		_, err = storage.pool.Exec(context.Background(), insertDirector, film.Director)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in AddFilm: %w",
+			return fmt.Errorf("error at inserting into data in insertDirector in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 	}
 
 	var directorID int
-	err = storage.pool.QueryRow(context.Background(),
-		`SELECT id
-			FROM director
-			WHERE name = $1;`, film.Director).Scan(&directorID)
+	err = storage.pool.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in AddFilm: %w",
+		return fmt.Errorf("error at recieving data from getDirectorsIdByName in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 
-	_, err = storage.pool.Exec(context.Background(),
-		`INSERT INTO film (title, banner, director, data, age_limit, duration, published_at) 
-    		VALUES ($1, $2, $3, $4, $5, $6, $7);`, film.Title, film.Preview, directorID, film.Data, film.AgeLimit,
-		film.Duration, film.PublishedAt)
+	_, err = storage.pool.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
+		film.AgeLimit, film.Duration, film.PublishedAt)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in AddFilm: %w",
+		return fmt.Errorf("error at inserting into data in insertFilm in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	var filmID int
-	err = storage.pool.QueryRow(context.Background(),
-		`SELECT id
-			FROM film
-			WHERE title = $1;`, film.Title).Scan(&filmID)
+	err = storage.pool.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in AddFilm: %w",
+		return fmt.Errorf("error at recieving data in getFilmIdByTitle in AddFilm: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	ActorsCast := film.Actors
 	for _, actor := range ActorsCast {
 		var actorFlag int
-		err = storage.pool.QueryRow(context.Background(),
-			`SELECT COUNT(*)
-			FROM actor
-			WHERE actor.name = $1;`, actor.Name).Scan(&actorFlag)
+		err = storage.pool.QueryRow(context.Background(), getAmountOfActorsByName, actor.Name).Scan(&actorFlag)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in AddFilm: %w",
+			return fmt.Errorf("error at recieving data in getAmountOfActorsByName in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 		if actorFlag == 0 {
-			_, err = storage.pool.Exec(context.Background(),
-				`INSERT INTO actor (name, data) VALUES ($1, $2);`, actor.Name, actor.Data)
+			_, err = storage.pool.Exec(context.Background(), insertActor, actor.Name)
 			if err != nil {
-				return fmt.Errorf("error at inserting into data in AddFilm: %w",
+				return fmt.Errorf("error at inserting into data in insertActor AddFilm: %w",
 					myerrors.ErrInternalServerError)
 			}
 		}
 
 		var actorID int
-		err = storage.pool.QueryRow(context.Background(),
-			`SELECT id
-			FROM actor
-			WHERE actor.name = $1;`, actor.Name).Scan(&actorID)
+		err = storage.pool.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in AddFilm: %w",
+			return fmt.Errorf("error at recieving data in getActorId in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 
-		_, err = storage.pool.Exec(context.Background(),
-			`INSERT INTO film_actor (film, actor) VALUES ($1, $2);`, filmID, actorID)
+		_, err = storage.pool.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in AddFilm: %w",
+			return fmt.Errorf("error at inserting into data in insertIntoFilmActors in AddFilm: %w",
 				myerrors.ErrInternalServerError)
 		}
 	}
@@ -151,9 +201,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 }
 
 func (storage *FilmsStorage) RemoveFilm(uuid string) error {
-	_, err := storage.pool.Exec(context.Background(),
-		`DELETE FROM film
-			WHERE uuid = $1;`, uuid)
+	_, err := storage.pool.Exec(context.Background(), deleteFilm, uuid)
 	if err != nil {
 		return fmt.Errorf("error at inserting into data in RemoveFilm: %w", myerrors.ErrInternalServerError)
 	}
@@ -162,35 +210,25 @@ func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 }
 
 func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, error) {
-	var filmPreview domain.FilmPreview
-	err := storage.pool.QueryRow(context.Background(),
-		`SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
-			FROM film f
-			LEFT JOIN comment c ON f.id = c.film
-			JOIN director d ON f.director = d.id
-			WHERE f.uuid = $1
-			GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`, uuid).Scan(
-		&filmPreview.Uuid,
-		&filmPreview.Title,
-		&filmPreview.Preview,
-		&filmPreview.Director,
-		&filmPreview.Duration,
-		&filmPreview.AverageScore,
-		&filmPreview.ScoresCount)
+	var film domain.FilmPreview
+	err := storage.pool.QueryRow(context.Background(), getFilmPreview, uuid).Scan(
+		&film.Uuid,
+		&film.Title,
+		&film.Preview,
+		&film.Director,
+		&film.Duration,
+		// &film.AverageScore,
+		&film.ScoresCount)
 	if err != nil {
 		return domain.FilmPreview{},
 			fmt.Errorf("error at begin transaction in GetFilmPreview: %w", myerrors.ErrInternalServerError)
 	}
 
-	return filmPreview, nil
+	return film, nil
 }
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(),
-		`SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
-			FROM film f
-			LEFT JOIN comment c ON f.id = c.film
-			GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`)
+	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
 			myerrors.ErrInternalServerError)
@@ -230,55 +268,8 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	return films, nil
 }
 
-func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
-	rows, err := storage.pool.Query(context.Background(),
-		`SELECT comment.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
-			FROM comment
-			JOIN users ON comment.author = users.id
-			JOIN film ON comment.film = film.id
-			WHERE film.uuid = $1;`, uuid)
-	if err != nil {
-		return nil,
-			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
-	}
-
-	comments := make([]domain.Comment, 0)
-	var (
-		CommentUuid    string
-		CommentAuthor  string
-		CommentText    string
-		CommentScore   int
-		CommentAddedAt time.Time
-	)
-	_, err = pgx.ForEachRow(rows,
-		[]any{&CommentUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt}, func() error {
-			comment := domain.Comment{
-				Uuid:    CommentUuid,
-				Author:  CommentAuthor,
-				Text:    CommentText,
-				Score:   CommentScore,
-				AddedAt: CommentAddedAt,
-			}
-
-			comments = append(comments, comment)
-
-			return nil
-		})
-	if err != nil {
-		return nil, fmt.Errorf("error at inserting into data in GetAllFilmComments: %w",
-			myerrors.ErrInternalServerError)
-	}
-
-	return comments, nil
-}
-
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
-	rows, err := storage.pool.Query(context.Background(),
-		`SELECT a.uuid, a.name
-			FROM actor a
-			JOIN film_actor fa ON a.id = fa.actor
-			JOIN film f ON fa.film = f.id
-			WHERE f.uuid = $1;`, uuid)
+	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
 	if err != nil {
 		return nil,
 			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
@@ -286,14 +277,15 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 
 	actors := make([]domain.ActorPreview, 0)
 	var (
-		ActorUuid string
-		ActorName string
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
 	)
-	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
+	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName, &ActorAvatar}, func() error {
 		actor := domain.ActorPreview{
 			Uuid:   ActorUuid,
 			Name:   ActorName,
-			Avatar: ActorUuid,
+			Avatar: ActorAvatar,
 		}
 
 		actors = append(actors, actor)
@@ -301,9 +293,48 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error at inserting into data in GetAllFilmActors: %w",
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmActors: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	return actors, nil
+}
+
+func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
+	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
+	if err != nil {
+		return nil,
+			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
+	}
+
+	comments := make([]domain.Comment, 0)
+	var (
+		CommentUuid     string
+		CommentFilmUuid string
+		CommentAuthor   string
+		CommentText     string
+		CommentScore    int
+		CommentAddedAt  time.Time
+	)
+	_, err = pgx.ForEachRow(rows,
+		[]any{&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt}, func() error {
+			comment := domain.Comment{
+				Uuid:     CommentUuid,
+				FilmUuid: CommentFilmUuid,
+				Author:   CommentAuthor,
+				Text:     CommentText,
+				Score:    CommentScore,
+				AddedAt:  CommentAddedAt,
+			}
+
+			comments = append(comments, comment)
+
+			return nil
+		})
+	if err != nil {
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmComments: %w",
+			err)
+	}
+
+	return comments, nil
 }
