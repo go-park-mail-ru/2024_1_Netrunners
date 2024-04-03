@@ -452,7 +452,7 @@ paths:
                 $ref: '#/components/schemas/StatusResponse'
         default:
           description: Unknown error
-          
+
   /profile/{uuid}/preview:
     get:
       tags:
@@ -550,35 +550,6 @@ paths:
           description: Unknown error
 
 # Actors
-
-  /actors/all:
-    get:
-      tags:
-        - Actors
-      summary: Get all actors
-      security:
-        - AccessCookie: []
-      responses:
-        '200':
-          description: Success
-          content:
-            application/form:
-              schema:
-                $ref: '#/components/schemas/ActorsResponse'
-        '401':
-          description: Not authorized
-          content:
-            application/form:
-              schema:
-                $ref: '#/components/schemas/StatusResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/form:
-              schema:
-                $ref: '#/components/schemas/StatusResponse'
-        default:
-          description: Unknown error
 
   /actors/{uuid}:
     get:
@@ -1012,19 +983,33 @@ components:
     NewActorRequest:
       required:
         - name
-        - data
-        - birthday
         - avatar
+        - birthday
+        - career
+        - height
+        - birth_place
+        - genres
+        - spouse
       properties:
         name:
           type: string
           example: 'Evgenij Gennadjevich'
-        data:
+        avatar:
           type: string
         birthday:
           type: string
           example: '2011-04-11T10:20:30'
-        avatar:
+        career:
+          type: string
+        height:
+          type: integer
+          example: 135
+        birth_place:
+          type: string
+          example: 'New Jersey'
+        genres:
+          type: string
+        spouse:
           type: string
 
     ActorsResponse:
@@ -1060,21 +1045,39 @@ components:
         actor:
           type: object
           required:
+            - uuid
             - name
-            - data
-            - birthday
             - avatar
+            - birthday
+            - career
+            - height
+            - birth_place
+            - genres
+            - spouse
             - films
           properties:
+            uuid:
+              type: string
+              example: 'frfdF48AfJ1MAFfKF13KFAOS'
             name:
               type: string
               example: 'Evgenij Gennadjevich'
-            data:
+            avatar:
               type: string
             birthday:
               type: string
               example: '2011-04-11T10:20:30'
-            avatar:
+            career:
+              type: string
+            height:
+              type: integer
+              example: 135
+            birth_place:
+              type: string
+              example: 'New Jersey'
+            genres:
+              type: string
+            spouse:
               type: string
             films:
               type: array
@@ -1083,6 +1086,7 @@ components:
                 required:
                   - uuid
                   - title
+                  - data
                 properties:
                   uuid:
                     type: string
@@ -1090,3 +1094,5 @@ components:
                   title:
                     type: string
                     example: 'Fast & Furious'
+                  data:
+                    type: string
