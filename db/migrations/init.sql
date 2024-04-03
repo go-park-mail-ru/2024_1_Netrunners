@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS users
 	avatar        TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
 	name          TEXT                       DEFAULT 'user'                      NOT NULL,
 	password      TEXT CHECK (LENGTH(email) <= 64)                               NOT NULL,
-	registered_at TIMESTAMPTZ                DEFAULT NOW()                       NOT NULL,
-	birthday      TIMESTAMPTZ                DEFAULT NOW()                       NOT NULL,
+	registered_at TIMESTAMP                  DEFAULT NOW()                       NOT NULL,
+	birthday      TIMESTAMP                  DEFAULT NOW()                       NOT NULL,
 	is_admin      BOOLEAN                    DEFAULT FALSE                       NOT NULL
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS director
 	uuid     UUID UNIQUE                DEFAULT gen_random_uuid()           NOT NULL,
 	name     TEXT UNIQUE                                                    NOT NULL,
 	avatar   TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
-	birthday TIMESTAMPTZ                DEFAULT NOW()                       NOT NULL
+	birthday TIMESTAMP                  DEFAULT NOW()                       NOT NULL
 );
 
 CREATE SEQUENCE IF NOT EXISTS film_id_seq START 1;
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS film
 	director     INTEGER,
 	age_limit    SMALLINT CHECK (age_limit >= 0 AND age_limit <= 18) DEFAULT 18                          NOT NULL,
 	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                         NOT NULL,
-	published_at TIMESTAMPTZ                                         DEFAULT NOW()                       NOT NULL,
+	published_at TIMESTAMP                                           DEFAULT NOW()                       NOT NULL,
 	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL
 );
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS comment
 	score    SMALLINT CHECK (score >= 0 AND score <= 10)                  NOT NULL,
 	author   INTEGER,
 	film     INTEGER                                                      NOT NULL,
-	added_at TIMESTAMPTZ                DEFAULT NOW()                     NOT NULL,
+	added_at TIMESTAMP                  DEFAULT NOW()                     NOT NULL,
 	FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
 	FOREIGN KEY (film) REFERENCES film (id) ON DELETE CASCADE
 );

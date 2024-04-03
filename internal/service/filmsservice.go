@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
