@@ -18,18 +18,18 @@ func NewMockActor() domain.ActorData {
 		Genres:     "Riddim",
 		Spouse:     "Дабстеп",
 		Films: []domain.FilmLink{
-			{"1", "Fast n Furious 1"},
-			{"2", "Fast n Furious 2"},
-			{"3", "Fast n Furious 3"},
+			{Uuid: "1", Title: "Fast n Furious 1"},
+			{Uuid: "2", Title: "Fast n Furious 2"},
+			{Uuid: "3", Title: "Fast n Furious 3"},
 		},
 	}
 }
 
 func NewMockActorPreview() []domain.ActorPreview {
 	return []domain.ActorPreview{
-		{"1", "Fast n Furious 1", "avatar"},
-		{"2", "Fast n Furious 2", "avatar"},
-		{"3", "Fast n Furious 3", "avatar"},
+		{Uuid: "1", Name: "Fast n Furious 1", Avatar: "avatar"},
+		{Uuid: "2", Name: "Fast n Furious 2", Avatar: "avatar"},
+		{Uuid: "3", Name: "Fast n Furious 3", Avatar: "avatar"},
 	}
 }
 
@@ -54,8 +54,11 @@ func NewMockFilmDataToAdd() domain.FilmDataToAdd {
 		AgeLimit: 18,
 		Duration: 240,
 		Actors: []domain.ActorData{
-			{"1", "Fast n Furious 1", "avatar", time.Now(), "", 100,
-				"", "", "", []domain.FilmLink{{"1", "Fast n Furious 1"}}},
+			{Uuid: "1", Name: "Fast n Furious 1", Avatar: "avatar", Birthday: time.Now(), Career: "", Height: 100,
+				BirthPlace: "", Genres: "", Spouse: "", Films: []domain.FilmLink{
+					{Uuid: "1", Title: "Fast n Furious 1"},
+				},
+			},
 		},
 	}
 }
@@ -97,17 +100,17 @@ func NewMockFilmPreviews() []domain.FilmPreview {
 
 func NewMockFilmActors() []domain.ActorPreview {
 	return []domain.ActorPreview{
-		{"1", "Fast n Furious 1", "avatar"},
-		{"2", "Fast n Furious 2", "avatar"},
-		{"3", "Fast n Furious 3", "avatar"},
+		{Uuid: "1", Name: "Fast n Furious 1", Avatar: "avatar"},
+		{Uuid: "2", Name: "Fast n Furious 2", Avatar: "avatar"},
+		{Uuid: "3", Name: "Fast n Furious 3", Avatar: "avatar"},
 	}
 }
 
 func NewMockFilmComments() []domain.Comment {
 	return []domain.Comment{
-		{"1", "1", "Fast n Furious 1", "comment1", 1, time.Now()},
-		{"2", "1", "Fast n Furious 2", "comment2", 1, time.Now()},
-		{"3", "1", "Fast n Furious 3", "comment3", 1, time.Now()},
+		{Uuid: "1", FilmUuid: "1", Author: "Fast n Furious 1", Text: "comment1", Score: 1, AddedAt: time.Now()},
+		{Uuid: "2", FilmUuid: "1", Author: "Fast n Furious 2", Text: "comment1", Score: 1, AddedAt: time.Now()},
+		{Uuid: "3", FilmUuid: "1", Author: "Fast n Furious 3", Text: "comment1", Score: 1, AddedAt: time.Now()},
 	}
 }
 
