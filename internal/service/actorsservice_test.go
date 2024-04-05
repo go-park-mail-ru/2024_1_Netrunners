@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
 )
 
@@ -23,13 +24,13 @@ func TestActorsService_GetActorByUuid(t *testing.T) {
 		Uuid:       "1",
 		Name:       "Danya",
 		Avatar:     "http://avatar",
-		Birthday:   domain.NewMockActor().Birthday,
+		Birthday:   database.NewMockActor().Birthday,
 		Career:     "career",
 		Height:     192,
 		BirthPlace: "Angarsk",
 		Genres:     "Riddim",
 		Spouse:     "Дабстеп",
-		Films:      domain.NewMockActor().Films,
+		Films:      database.NewMockActor().Films,
 	}
 
 	mockStorage.EXPECT().GetActorByUuid("1").Return(expectedActor, nil)
@@ -48,7 +49,7 @@ func TestActorsService_GetActorsByFilm(t *testing.T) {
 	mockStorage := mockService.NewMockActorsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	expectedActors := domain.NewMockActorPreview()
+	expectedActors := database.NewMockActorPreview()
 	mockStorage.EXPECT().GetActorsByFilm("1").Return(expectedActors, nil)
 
 	actorsService := NewActorsService(mockStorage, mockLogger)

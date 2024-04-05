@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS film
 (
 	id           INTEGER PRIMARY KEY UNIQUE                          DEFAULT NEXTVAL('film_id_seq')      NOT NULL,
 	uuid         UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
-	title        TEXT UNIQUE                                                                             NOT NULL,
+	title        TEXT                                                                                    NOT NULL,
 	data         TEXT                                                DEFAULT ''                          NOT NULL,
 	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
 	s3_link      TEXT                                                DEFAULT 'https://shorturl.at/jHIMO' NOT NULL,

@@ -1,13 +1,12 @@
 package database
 
 import (
-	"github.com/jackc/pgx/v5"
 	"testing"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
-
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
@@ -17,7 +16,7 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmData := domain.NewMockFilmData()
+	newFilmData := NewMockFilmData()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "data", "duration", "published_at", "scores"}).
@@ -44,7 +43,7 @@ func TestFilmsStorage_AddFilm(t *testing.T) {
 	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewFilmsStorage(mock)
 
-	newFilm := domain.NewMockFilmDataToAdd()
+	newFilm := NewMockFilmDataToAdd()
 
 	mockGetAmountOfDirectorsByName := pgxmock.NewRows([]string{"name"}).
 		AddRow(0)
@@ -121,12 +120,12 @@ func TestFilmsStorage_GetFilmPreview(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmPreview := domain.NewMockFilmPreview()
+	newFilmPreview := NewMockFilmPreview()
 	uuid := "1"
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "scores"}).
+	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores"}).
 		AddRow(newFilmPreview.Uuid, newFilmPreview.Title, newFilmPreview.Preview, newFilmPreview.Director,
-			newFilmPreview.Duration, newFilmPreview.ScoresCount)
+			newFilmPreview.Duration, newFilmPreview.AverageScore, newFilmPreview.ScoresCount)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).
@@ -147,13 +146,15 @@ func TestFilmsStorage_GetAllFilmsPreviews(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmPreviews := domain.NewMockFilmPreviews()
+	newFilmPreviews := NewMockFilmPreviews()
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "scores"}).
+	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores"}).
 		AddRow(newFilmPreviews[0].Uuid, newFilmPreviews[0].Title, newFilmPreviews[0].Preview,
-			newFilmPreviews[0].Director, newFilmPreviews[0].Duration, newFilmPreviews[0].ScoresCount).
+			newFilmPreviews[0].Director, newFilmPreviews[0].Duration, newFilmPreviews[0].AverageScore,
+			newFilmPreviews[0].ScoresCount).
 		AddRow(newFilmPreviews[1].Uuid, newFilmPreviews[1].Title, newFilmPreviews[1].Preview,
-			newFilmPreviews[1].Director, newFilmPreviews[1].Duration, newFilmPreviews[1].ScoresCount)
+			newFilmPreviews[1].Director, newFilmPreviews[1].Duration, newFilmPreviews[1].AverageScore,
+			newFilmPreviews[1].ScoresCount)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs().
@@ -174,7 +175,7 @@ func TestFilmsStorage_GetAllFilmActors(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmActors := domain.NewMockFilmActors()
+	newFilmActors := NewMockFilmActors()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "avatar"}).
@@ -201,7 +202,7 @@ func TestFilmsStorage_GetAllFilmComments(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmComments := domain.NewMockFilmComments()
+	newFilmComments := NewMockFilmComments()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "film_uuid", "author", "text", "score", "added_at"}).

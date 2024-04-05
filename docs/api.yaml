@@ -406,23 +406,7 @@ paths:
         default:
           description: Unknown error
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Profile
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Profile
-=======
-  # Profile
->>>>>>> 0b3f692 (users and films done)
-=======
-# Profile
->>>>>>> 5339b0e (№38 feat: API for rk2)
->>>>>>> 7d6b05b (users and films done)
-=======
-# Profile
->>>>>>> 9a387e6 (sql remade)
 
   /profile/{uuid}/data:
     get:
@@ -565,23 +549,7 @@ paths:
         default:
           description: Unknown error
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Actors
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Actors
-=======
-  # Actors
->>>>>>> 0b3f692 (users and films done)
-=======
-# Actors
->>>>>>> 5339b0e (№38 feat: API for rk2)
->>>>>>> 7d6b05b (users and films done)
-=======
-# Actors
->>>>>>> 9a387e6 (sql remade)
 
   /actors/all:
     get:
@@ -907,23 +875,7 @@ components:
                 type: string
                 example: '2011-04-11T10:20:30'
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Profile
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Profile
-=======
-    # Profile
->>>>>>> 0b3f692 (users and films done)
-=======
-# Profile
->>>>>>> 5339b0e (№38 feat: API for rk2)
->>>>>>> 7d6b05b (users and films done)
-=======
-# Profile
->>>>>>> 9a387e6 (sql remade)
 
     ProfileResponse:
       required:
@@ -992,24 +944,7 @@ components:
         new_avatar:
           type: string
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 # Actors
-=======
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-# Actors
-=======
-    # Actors
->>>>>>> 0b3f692 (users and films done)
-=======
-# Actors
->>>>>>> 5339b0e (№38 feat: API for rk2)
->>>>>>> 7d6b05b (users and films done)
-=======
-# Actors
->>>>>>> 9a387e6 (sql remade)
 
     NewActorRequest:
       required:

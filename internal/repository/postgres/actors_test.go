@@ -5,8 +5,6 @@ import (
 
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
-
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 func TestActorsStorage_GetActorByUuid(t *testing.T) {
@@ -16,7 +14,7 @@ func TestActorsStorage_GetActorByUuid(t *testing.T) {
 
 	storage, err := NewActorsStorage(mock)
 
-	newUser := domain.NewMockActor()
+	newUser := NewMockActor()
 
 	mockRowsData := pgxmock.NewRows([]string{"uuid", "name", "avatar", "birthday", "career", "height", "birth_place",
 		"genres", "spouse"}).
@@ -48,7 +46,7 @@ func TestActorsStorage_GetActorsByFilm(t *testing.T) {
 
 	storage, err := NewActorsStorage(mock)
 
-	newActorPreviews := domain.NewMockActorPreview()
+	newActorPreviews := NewMockActorPreview()
 
 	mockRowsFilms := pgxmock.NewRows([]string{"uuid", "name", "avatar"}).
 		AddRow(newActorPreviews[0].Uuid, newActorPreviews[0].Name, newActorPreviews[0].Avatar).

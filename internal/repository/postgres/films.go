@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	"github.com/jackc/pgx/v5"
 )
 
 type FilmsStorage struct {
@@ -21,7 +22,7 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 }
 
 const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
@@ -71,7 +72,7 @@ const deleteFilm = `
 		WHERE uuid = $1;`
 
 const getFilmPreview = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
@@ -79,7 +80,7 @@ const getFilmPreview = `
 		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, f.director, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`
@@ -217,11 +218,11 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 		&film.Preview,
 		&film.Director,
 		&film.Duration,
-		// &film.AverageScore,
+		&film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
 		return domain.FilmPreview{},
-			fmt.Errorf("error at begin transaction in GetFilmPreview: %w", myerrors.ErrInternalServerError)
+			fmt.Errorf("error at recieving data in GetFilmPreview: %w", err)
 	}
 
 	return film, nil
@@ -241,19 +242,19 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		FilmTitle    string
 		FilmDirector string
 		FilmDuration int
-		// FilmScore    float32
-		FilmRating int
+		FilmScore    float32
+		FilmRating   int
 	)
 	_, err = pgx.ForEachRow(rows,
-		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmRating}, func() error {
+		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating}, func() error {
 			film := domain.FilmPreview{
-				Uuid:     FilmUuid,
-				Title:    FilmTitle,
-				Preview:  FilmPreview,
-				Director: FilmDirector,
-				Duration: FilmDuration,
-				// AverageScore: FilmScore,
-				ScoresCount: FilmRating,
+				Uuid:         FilmUuid,
+				Title:        FilmTitle,
+				Preview:      FilmPreview,
+				Director:     FilmDirector,
+				Duration:     FilmDuration,
+				AverageScore: FilmScore,
+				ScoresCount:  FilmRating,
 			}
 
 			films = append(films, film)
@@ -262,7 +263,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		})
 	if err != nil {
 		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
-			myerrors.ErrInternalServerError)
+			err)
 	}
 
 	return films, nil

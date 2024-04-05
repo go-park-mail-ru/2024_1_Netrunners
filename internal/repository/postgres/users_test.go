@@ -5,8 +5,6 @@ import (
 
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
-
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 func TestUsersStorage_CreateUser(t *testing.T) {
@@ -16,7 +14,7 @@ func TestUsersStorage_CreateUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := domain.NewMockUserSignUp()
+	newUser := NewMockUserSignUp()
 
 	mock.ExpectExec("INSERT").
 		WithArgs(newUser.Email, newUser.Name, newUser.Password).
@@ -36,7 +34,7 @@ func TestUsersStorage_GetUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := domain.NewMockUser()
+	newUser := NewMockUser()
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
@@ -80,7 +78,7 @@ func TestUsersStorage_HasUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := domain.NewMockUser()
+	newUser := NewMockUser()
 	email := "cakethefake@gmail.com"
 	password := "123456789"
 
@@ -126,7 +124,7 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := domain.NewMockUser()
+	newUser := NewMockUser()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
@@ -142,8 +140,4 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 
 	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
-}
-
-func TestUsersStorage_GetUserPreview(t *testing.T) {
-
 }

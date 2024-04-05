@@ -1,8 +1,9 @@
 package service
 
 import (
-	"go.uber.org/zap"
 	"testing"
+
+	"go.uber.org/zap"
 
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
 	"github.com/golang/mock/gomock"
