@@ -115,7 +115,6 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		return domain.FilmData{},
 			fmt.Errorf("error at recieving data in getFilmDataByUuid in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
 	}
-
 	return film, nil
 }
 
@@ -211,21 +210,20 @@ func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 }
 
 func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, error) {
-	var film domain.FilmPreview
+	var filmPreview domain.FilmPreview
 	err := storage.pool.QueryRow(context.Background(), getFilmPreview, uuid).Scan(
-		&film.Uuid,
-		&film.Title,
-		&film.Preview,
-		&film.Director,
-		&film.Duration,
-		&film.AverageScore,
-		&film.ScoresCount)
+		&filmPreview.Uuid,
+		&filmPreview.Title,
+		&filmPreview.Preview,
+		&filmPreview.Director,
+		&filmPreview.Duration,
+		&filmPreview.AverageScore,
+		&filmPreview.ScoresCount)
 	if err != nil {
 		return domain.FilmPreview{},
 			fmt.Errorf("error at recieving data in GetFilmPreview: %w", err)
 	}
-
-	return film, nil
+	return filmPreview, nil
 }
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {

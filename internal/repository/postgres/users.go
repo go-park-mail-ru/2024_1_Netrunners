@@ -80,7 +80,6 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		return domain.User{},
 			fmt.Errorf("error at recieving data in GetUser: %w", err)
 	}
-
 	return user, nil
 }
 
@@ -157,7 +156,6 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		return domain.User{}, fmt.Errorf("error at commit transaction in ChangeUserName: %w",
 			myerrors.ErrInternalServerError)
 	}
-
 	return user, nil
 }
 
@@ -176,7 +174,6 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 		return domain.User{},
 			fmt.Errorf("error at recieving data in GetUserDataByUuid: %w", err)
 	}
-
 	return user, nil
 }
 
@@ -190,6 +187,5 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 		return domain.UserPreview{},
 			fmt.Errorf("error at recieving data in GetUserPreview: %w", myerrors.ErrInternalServerError)
 	}
-
 	return userPreview, nil
 }
