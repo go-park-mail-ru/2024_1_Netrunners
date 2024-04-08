@@ -8,12 +8,16 @@ type ActorToAdd struct {
 }
 
 type ActorData struct {
-	Uuid     string     `json:"uuid"`
-	Name     string     `json:"name"`
-	Data     string     `json:"data"`
-	Avatar   string     `json:"avatar"`
-	Birthday time.Time  `json:"birthday"`
-	Films    []FilmLink `json:"films"`
+	Uuid       string    `json:"uuid"`
+	Name       string    `json:"name"`
+	Avatar     string    `json:"avatar"`
+	Birthday   time.Time `json:"birthday"`
+	Career     string
+	Height     uint8
+	BirthPlace string
+	Genres     string
+	Spouse     string
+	Films      []FilmLink `json:"films"`
 }
 
 type ActorPreview struct {

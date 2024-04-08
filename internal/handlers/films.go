@@ -37,6 +37,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 			fmt.Printf("error at writing response: %v\n", err)
 		}
 	}
+
 	response := filmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  films,
@@ -104,7 +105,6 @@ type filmCommentsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-
 	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(uuid)
 	if err != nil {
 		err = WriteError(w, err)
@@ -149,7 +149,6 @@ type filmActorsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-
 	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(uuid)
 	if err != nil {
 		err = WriteError(w, err)

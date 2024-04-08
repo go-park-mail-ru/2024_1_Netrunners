@@ -1,10 +1,9 @@
 package service
 
 import (
-	"go.uber.org/zap"
-
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"go.uber.org/zap"
 )
 
 type FilmsStorage interface {
@@ -105,12 +104,20 @@ func (service *FilmsService) AddSomeData() error {
 			Data:     "Dozer Dozer Dozer Dozer",
 			Actors: []domain.ActorData{
 				{
-					Name: "Стас Ярушин",
-					Data: "Легенда отечественного кинопроизводства",
+					Name:       "Стас Ярушин",
+					Career:     "универский типос",
+					Height:     154,
+					BirthPlace: "Ангарск",
+					Genres:     "Хип-Хоп",
+					Spouse:     "Светлана Ходченкова <3",
 				},
 				{
-					Name: "Дмитрий Нагиев",
-					Data: "Физрук там тоси боси",
+					Name:       "Дмитрий Нагиев",
+					Career:     "физрукский типос",
+					Height:     215,
+					BirthPlace: "Шахты",
+					Genres:     "RnB",
+					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
 				},
 			},
 		},
@@ -122,12 +129,20 @@ func (service *FilmsService) AddSomeData() error {
 			Data:     "Dima Dima Dima Dima",
 			Actors: []domain.ActorData{
 				{
-					Name: "Костя Воронин",
-					Data: "Типос из культового сериала",
+					Name:       "Костя Воронин",
+					Career:     "Костик",
+					Height:     181,
+					BirthPlace: "Россия",
+					Genres:     "Riddim",
+					Spouse:     "Taylor Swift",
 				},
 				{
-					Name: "Tom Hanks",
-					Data: "Вроде у него своя пиццерия хз не шарю",
+					Name:       "Tom Hanks",
+					Career:     "пиццерийных дел мастер",
+					Height:     178,
+					BirthPlace: "Омерика",
+					Genres:     "Riddim",
+					Spouse:     "Вроде Ваенга хз",
 				},
 			},
 		},
@@ -139,12 +154,20 @@ func (service *FilmsService) AddSomeData() error {
 			Data:     "Dima Dima Dima Dima",
 			Actors: []domain.ActorData{
 				{
-					Name: "Дональд Дак",
-					Data: "Ну утка",
+					Name:       "Дональд Дак",
+					Career:     "пиццерийных дел мастер",
+					Height:     178,
+					BirthPlace: "Омерика",
+					Genres:     "Riddim",
+					Spouse:     "Вроде Ваенга хз",
 				},
 				{
-					Name: "Дмитрий Нагиев",
-					Data: "Физрук там тоси боси",
+					Name:       "Дмитрий Нагиев",
+					Career:     "физрукский типос",
+					Height:     215,
+					BirthPlace: "Шахты",
+					Genres:     "RnB",
+					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
 				},
 			},
 		},

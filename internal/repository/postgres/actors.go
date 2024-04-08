@@ -5,80 +5,70 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
-type ActorsStorage struct {
-	pool *pgxpool.Pool
+type PgxIface interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
+	Close()
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }
 
-func NewActorsStorage(pool *pgxpool.Pool) (*ActorsStorage, error) {
+type ActorsStorage struct {
+	pool PgxIface
+}
+
+func NewActorsStorage(pool PgxIface) (*ActorsStorage, error) {
 	return &ActorsStorage{
 		pool: pool,
 	}, nil
 }
 
-func (storage *ActorsStorage) GetAllActorsPreviews() ([]domain.ActorPreview, error) {
-	rows, err := storage.pool.Query(context.Background(),
-		`select uuid, name
-		from actors;`)
-	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
-	}
+const getActorDataByUuid = `
+		SELECT uuid, name, avatar, birthday, career, height, birth_place, genres, spouse
+		FROM actor
+		WHERE uuid = $1;
+`
 
-	actors := make([]domain.ActorPreview, 0)
-	var (
-		ActorUuid string
-		ActorName string
-	)
-	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
-		actor := domain.ActorPreview{
-			Uuid: ActorUuid,
-			Name: ActorName,
-		}
+const getActorsFilms = `
+		SELECT f.uuid, f.title, f.banner
+		FROM film f LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
+		WHERE faa.uuid = $1;
+`
 
-		actors = append(actors, actor)
-
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
-	}
-
-	return actors, nil
-}
+const getActorsByFilm = `
+		SELECT a.uuid, a.name, a.avatar
+		FROM actor a LEFT JOIN (film_actor fa LEFT JOIN film f ON fa.film = f.id) faf ON a.id = faf.actor
+		WHERE faf.uuid = $1;
+`
 
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
-	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
-	if err != nil {
-		return domain.ActorData{},
-			fmt.Errorf("error at begin transaction in GetActorByUuid: %w", myerrors.ErrInternalServerError)
-	}
-
 	var actor domain.ActorData
-	err = tx.QueryRow(context.Background(),
-		`select uuid, name, data, birthday
-		from actors
-		where uuid = $1;`, actorUuid).Scan(
+	err := storage.pool.QueryRow(context.Background(), getActorDataByUuid, actorUuid).Scan(
 		&actor.Uuid,
 		&actor.Name,
-		&actor.Data,
-		&actor.Birthday)
+		&actor.Avatar,
+		&actor.Birthday,
+		&actor.Career,
+		&actor.Height,
+		&actor.BirthPlace,
+		&actor.Genres,
+		&actor.Spouse)
 	if err != nil {
 		return domain.ActorData{},
 			fmt.Errorf("error at recieving data in GetActorByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
-	rows, err := tx.Query(context.Background(),
-		`select f.uuid, f.title
-		from films f left join (film_actors fa left join actors a on fa.actor = a.id) faa on f.id = faa.film
-		where faa.uuid = $1`, actorUuid)
+	rows, err := storage.pool.Query(context.Background(), getActorsFilms, actorUuid)
 	if err != nil {
 		return domain.ActorData{},
-			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+			fmt.Errorf("error at recieving films in GetActorByUuid: %w", err)
 	}
 
 	films := make([]domain.FilmLink, 0)
@@ -107,23 +97,22 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 }
 
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
-	rows, err := storage.pool.Query(context.Background(),
-		`select a.uuid, a.name
-		from actors a left join (film_actors fa left join films f on fa.film = f.id) faf on a.id = faf.actor
-		where faf.uuid = $1;`, filmUuid)
+	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
+		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w", err)
 	}
 
 	actors := make([]domain.ActorPreview, 0)
 	var (
-		ActorUuid string
-		ActorName string
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
 	)
-	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
+	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName, &ActorAvatar}, func() error {
 		actor := domain.ActorPreview{
-			Uuid: ActorUuid,
-			Name: ActorName,
+			Uuid:   ActorUuid,
+			Name:   ActorName,
+			Avatar: ActorAvatar,
 		}
 
 		actors = append(actors, actor)
@@ -131,7 +120,7 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllActorsPreviews: %w", myerrors.ErrInternalServerError)
+		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w", err)
 	}
 
 	return actors, nil
