@@ -39,7 +39,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 	}
 
 	for _, film := range films {
-		EscapeFilmPreview(&film)
+		escapeFilmPreview(&film)
 	}
 
 	response := filmsPreviewsResponse{
@@ -77,7 +77,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		return
 	}
 
-	EscapeFilmData(&filmData)
+	escapeFilmData(&filmData)
 
 	response := filmDataResponse{
 		Status:   http.StatusOK,
@@ -123,7 +123,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	}
 
 	for _, comment := range comments {
-		EscapeComment(&comment)
+		escapeComment(&comment)
 	}
 
 	response := filmCommentsResponse{
@@ -170,7 +170,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	}
 
 	for _, actor := range actors {
-		EscapeActorPreview(&actor)
+		escapeActorPreview(&actor)
 	}
 
 	response := filmActorsResponse{

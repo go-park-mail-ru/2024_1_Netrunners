@@ -63,19 +63,19 @@ func WriteError(w http.ResponseWriter, err error) error {
 	return nil
 }
 
-func EscapeUserData(user *domain.User) {
+func escapeUserData(user *domain.User) {
 	user.Name = html.EscapeString(user.Name)
 	user.Email = html.EscapeString(user.Email)
 	user.Password = html.EscapeString(user.Password)
 	user.Avatar = html.EscapeString(user.Avatar)
 }
 
-func EscapeUserPreviewData(userPreview *domain.UserPreview) {
+func escapeUserPreviewData(userPreview *domain.UserPreview) {
 	userPreview.Name = html.EscapeString(userPreview.Name)
 	userPreview.Avatar = html.EscapeString(userPreview.Avatar)
 }
 
-func EscapeActorData(actor *domain.ActorData) {
+func escapeActorData(actor *domain.ActorData) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
 	actor.Spouse = html.EscapeString(actor.Spouse)
@@ -84,25 +84,25 @@ func EscapeActorData(actor *domain.ActorData) {
 	actor.Career = html.EscapeString(actor.Career)
 }
 
-func EscapeFilmData(filmData *domain.FilmData) {
+func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Title = html.EscapeString(filmData.Title)
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
 }
 
-func EscapeActorPreview(actor *domain.ActorPreview) {
+func escapeActorPreview(actor *domain.ActorPreview) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
 }
 
-func EscapeFilmPreview(film *domain.FilmPreview) {
+func escapeFilmPreview(film *domain.FilmPreview) {
 	film.Preview = html.EscapeString(film.Preview)
 	film.Director = html.EscapeString(film.Director)
 	film.Title = html.EscapeString(film.Title)
 }
 
-func EscapeComment(comment *domain.Comment) {
+func escapeComment(comment *domain.Comment) {
 	comment.Text = html.EscapeString(comment.Text)
 	comment.Author = html.EscapeString(comment.Author)
 }

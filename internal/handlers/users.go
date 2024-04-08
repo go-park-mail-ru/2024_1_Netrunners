@@ -40,7 +40,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 		return
 	}
 
-	EscapeUserData(&user)
+	escapeUserData(&user)
 	response := profileResponse{
 		Status:   http.StatusOK,
 		UserInfo: user,
@@ -92,7 +92,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
-	EscapeUserPreviewData(&userPreview)
+	escapeUserPreviewData(&userPreview)
 
 	response := profilePreviewResponse{
 		Status:      http.StatusOK,
