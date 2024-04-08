@@ -67,8 +67,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 
 	rows, err := storage.pool.Query(context.Background(), getActorsFilms, actorUuid)
 	if err != nil {
-		return domain.ActorData{},
-			fmt.Errorf("error at recieving films in GetActorByUuid: %w", err)
+		return domain.ActorData{}, fmt.Errorf("error at recieving films in GetActorByUuid: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	films := make([]domain.FilmLink, 0)
@@ -99,7 +99,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w", err)
+		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -120,7 +121,8 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w", err)
+		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	return actors, nil

@@ -31,8 +31,9 @@ func NewActorsHandlers(actorsService *service.ActorsService, logger *zap.Sugared
 func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
 	actorUuid := mux.Vars(r)["uuid"]
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
-	actor, err := actorsHandlers.actorsService.GetActorByUuid(actorUuid, requestID)
+	actor, err := actorsHandlers.actorsService.GetActorByUuid(ctx, actorUuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -86,8 +87,9 @@ type actorsByFilmResponse struct {
 func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
 	filmUuid := mux.Vars(r)["uuid"]
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
-	actors, err := actorsHandlers.actorsService.GetActorsByFilm(filmUuid, requestID)
+	actors, err := actorsHandlers.actorsService.GetActorsByFilm(ctx, filmUuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

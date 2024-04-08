@@ -31,8 +31,9 @@ type profileResponse struct {
 func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(uuid, requestID)
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -73,6 +74,7 @@ type profilePreviewResponse struct {
 
 func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWriter, r *http.Request) {
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
 	var inputUserData domain.User
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
@@ -85,7 +87,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	}
 
 	uuid := inputUserData.Uuid
-	userPreview, err := UserPageHandlers.authService.GetUserPreview(uuid, requestID)
+	userPreview, err := UserPageHandlers.authService.GetUserPreview(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

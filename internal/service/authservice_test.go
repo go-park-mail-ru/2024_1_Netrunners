@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -27,7 +28,7 @@ func TestAuthService_HasUser(t *testing.T) {
 	mockStorage.EXPECT().HasUser(login, password).Return(nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	err := authService.HasUser(login, password, "1")
+	err := authService.HasUser(context.Background(), login, password)
 
 	assert.NoError(t, err)
 }
@@ -45,7 +46,7 @@ func TestAuthService_ChangeUserPassword(t *testing.T) {
 	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	err := authService.ChangeUserPassword(login, newPassword, "1")
+	err := authService.ChangeUserPassword(context.Background(), login, newPassword)
 
 	assert.NoError(t, err)
 }
@@ -74,7 +75,7 @@ func TestAuthService_ChangeUserName(t *testing.T) {
 	mockStorage.EXPECT().ChangeUserName(login, newName).Return(user, nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	updatedUser, err := authService.ChangeUserName(login, newName, "1")
+	updatedUser, err := authService.ChangeUserName(context.Background(), login, newName)
 
 	assert.NoError(t, err)
 	assert.Equal(t, user, updatedUser)
@@ -160,7 +161,7 @@ func TestAuthService_GetUserDataByUuid(t *testing.T) {
 	mockStorage.EXPECT().GetUserDataByUuid(uuid).Return(user, nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	retrievedUser, err := authService.GetUserDataByUuid(uuid, "1")
+	retrievedUser, err := authService.GetUserDataByUuid(context.Background(), uuid)
 
 	assert.NoError(t, err)
 	assert.Equal(t, user, retrievedUser)
@@ -183,7 +184,7 @@ func TestAuthService_GetUserPreview(t *testing.T) {
 	mockStorage.EXPECT().GetUserPreview(uuid).Return(userPreview, nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	retrievedUserPreview, err := authService.GetUserPreview(uuid, "1")
+	retrievedUserPreview, err := authService.GetUserPreview(context.Background(), uuid)
 
 	assert.NoError(t, err)
 	assert.Equal(t, userPreview, retrievedUserPreview)

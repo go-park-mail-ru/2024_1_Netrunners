@@ -34,6 +34,7 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -64,7 +65,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.authService.HasUser(login, password, requestID)
+	err = authPageHandlers.authService.HasUser(ctx, login, password)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -73,7 +74,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	user, err := authPageHandlers.authService.GetUser(login, requestID)
+	user, err := authPageHandlers.authService.GetUser(ctx, login)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -91,7 +92,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(user.Email, tokenSigned, requestID, user.Version)
+	err = authPageHandlers.sessionService.Add(ctx, user.Email, tokenSigned, user.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -122,6 +123,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 	userToken, err := r.Cookie("access")
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
 	if err != nil {
 		err = WriteError(w, err)
@@ -140,7 +142,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = authPageHandlers.sessionService.DeleteSession(tokenClaims["Login"].(string), userToken.Value, requestID)
+	err = authPageHandlers.sessionService.DeleteSession(ctx, tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -160,7 +162,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, tokenCookie)
 
-	_, err = authPageHandlers.sessionService.GetVersion(tokenClaims["Login"].(string), userToken.Value, requestID)
+	_, err = authPageHandlers.sessionService.GetVersion(ctx, tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
 		authPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] success logout", requestID))
 	}
@@ -174,6 +176,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -224,7 +227,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		Password: password,
 	}
 
-	err = authPageHandlers.authService.CreateUser(user, requestID)
+	err = authPageHandlers.authService.CreateUser(ctx, user)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -242,7 +245,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(login, tokenSigned, requestID, version)
+	err = authPageHandlers.sessionService.Add(ctx, login, tokenSigned, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -270,6 +273,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	requestID := generateRequestID()
+	ctx := reqIdCTX(requestID)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
@@ -289,7 +293,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.HasSession(tokenClaims["Login"].(string), userToken.Value, requestID)
+	err = authPageHandlers.sessionService.HasSession(ctx, tokenClaims["Login"].(string), userToken.Value)
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
@@ -310,7 +314,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = authPageHandlers.sessionService.Add(tokenClaims["Login"].(string), tokenSigned, requestID,
+	err = authPageHandlers.sessionService.Add(ctx, tokenClaims["Login"].(string), tokenSigned,
 		uint8(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
