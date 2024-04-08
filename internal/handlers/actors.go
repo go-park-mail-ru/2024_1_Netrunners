@@ -30,12 +30,13 @@ func NewActorsHandlers(actorsService *service.ActorsService, logger *zap.Sugared
 
 func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
 	actorUuid := mux.Vars(r)["uuid"]
+	requestID := generateRequestID()
 
-	actor, err := actorsHandlers.actorsService.GetActorByUuid(actorUuid)
+	actor, err := actorsHandlers.actorsService.GetActorByUuid(actorUuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+			actorsHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -67,13 +68,13 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		actorsHandlers.logger.Errorf("error at marshalling: %v\n", err)
+		actorsHandlers.logger.Errorf("[reqid=%s] error at marshalling: %v\n", requestID, err)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+		actorsHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 	}
 }
 
@@ -84,12 +85,13 @@ type actorsByFilmResponse struct {
 
 func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
 	filmUuid := mux.Vars(r)["uuid"]
+	requestID := generateRequestID()
 
-	actors, err := actorsHandlers.actorsService.GetActorsByFilm(filmUuid)
+	actors, err := actorsHandlers.actorsService.GetActorsByFilm(filmUuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+			actorsHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -101,12 +103,12 @@ func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		actorsHandlers.logger.Errorf("error at marshalling: %v\n", err)
+		actorsHandlers.logger.Errorf("[reqid=%s] error at marshalling: %v\n", requestID, err)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		actorsHandlers.logger.Errorf("error at writing response: %v\n", err)
+		actorsHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 	}
 }

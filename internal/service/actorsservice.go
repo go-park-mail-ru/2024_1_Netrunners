@@ -23,21 +23,21 @@ func NewActorsService(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsS
 	}
 }
 
-func (service *ActorsService) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
+func (service *ActorsService) GetActorByUuid(actorUuid string, requestID string) (domain.ActorData, error) {
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetActorByUuid: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at GetActorByUuid: %v", requestID, err)
 		return domain.ActorData{}, err
 	}
 
 	return actor, nil
 }
 
-func (service *ActorsService) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
+func (service *ActorsService) GetActorsByFilm(filmUuid string, requestID string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetActorsByFilm(filmUuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetActorByUuid: %v", err)
-		return []domain.ActorPreview{}, err
+		service.logger.Errorf("[reqid=%s] service error at GetActorsByFilm: %v", requestID, err)
+		return nil, err
 	}
 
 	return actors, nil

@@ -34,7 +34,7 @@ func TestGetFilmDataByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().GetFilmDataByUuid(uuid).Return(mockFilmData, nil)
 
-	filmData, err := service.GetFilmDataByUuid(uuid)
+	filmData, err := service.GetFilmDataByUuid(uuid, "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockFilmData, filmData)
@@ -54,7 +54,7 @@ func TestGetFilmDataByUuid_Error(t *testing.T) {
 
 	mockStorage.EXPECT().GetFilmDataByUuid(uuid).Return(domain.FilmData{}, mockError)
 
-	_, err := service.GetFilmDataByUuid(uuid)
+	_, err := service.GetFilmDataByUuid(uuid, "1")
 
 	assert.Error(t, err)
 }
@@ -79,7 +79,7 @@ func TestAddFilm(t *testing.T) {
 
 	mockStorage.EXPECT().AddFilm(mockFilmData).Return(nil)
 
-	err := service.AddFilm(mockFilmData)
+	err := service.AddFilm(mockFilmData, "1")
 
 	assert.NoError(t, err)
 }
@@ -106,7 +106,7 @@ func TestAddFilm_Error(t *testing.T) {
 
 	mockStorage.EXPECT().AddFilm(mockFilmData).Return(mockError)
 
-	err := service.AddFilm(mockFilmData)
+	err := service.AddFilm(mockFilmData, "1")
 
 	assert.Error(t, err)
 }
@@ -124,7 +124,7 @@ func TestRemoveFilm(t *testing.T) {
 
 	mockStorage.EXPECT().RemoveFilm(uuid).Return(nil)
 
-	err := service.RemoveFilm(uuid)
+	err := service.RemoveFilm(uuid, "1")
 
 	assert.NoError(t, err)
 }
@@ -143,7 +143,7 @@ func TestRemoveFilm_Error(t *testing.T) {
 
 	mockStorage.EXPECT().RemoveFilm(uuid).Return(mockError)
 
-	err := service.RemoveFilm(uuid)
+	err := service.RemoveFilm(uuid, "1")
 
 	assert.Error(t, err)
 }
@@ -170,7 +170,7 @@ func TestGetFilmPreview(t *testing.T) {
 
 	mockStorage.EXPECT().GetFilmPreview(uuid).Return(mockFilmPreview, nil)
 
-	filmPreview, err := service.GetFilmPreview(uuid)
+	filmPreview, err := service.GetFilmPreview(uuid, "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockFilmPreview, filmPreview)
@@ -190,7 +190,7 @@ func TestGetFilmPreview_Error(t *testing.T) {
 
 	mockStorage.EXPECT().GetFilmPreview(uuid).Return(domain.FilmPreview{}, mockError)
 
-	_, err := service.GetFilmPreview(uuid)
+	_, err := service.GetFilmPreview(uuid, "1")
 
 	assert.Error(t, err)
 }
@@ -211,7 +211,7 @@ func TestGetAllFilmsPreviews(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmsPreviews().Return(mockFilmPreviews, nil)
 
-	filmPreviews, err := service.GetAllFilmsPreviews()
+	filmPreviews, err := service.GetAllFilmsPreviews("1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockFilmPreviews, filmPreviews)
@@ -230,7 +230,7 @@ func TestGetAllFilmsPreviews_Error(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmsPreviews().Return(nil, mockError)
 
-	_, err := service.GetAllFilmsPreviews()
+	_, err := service.GetAllFilmsPreviews("1")
 
 	assert.Error(t, err)
 }
@@ -252,7 +252,7 @@ func TestGetAllFilmComments(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmComments(uuid).Return(mockComments, nil)
 
-	comments, err := service.GetAllFilmComments(uuid)
+	comments, err := service.GetAllFilmComments(uuid, "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockComments, comments)
@@ -272,7 +272,7 @@ func TestGetAllFilmComments_Error(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmComments(uuid).Return(nil, mockError)
 
-	_, err := service.GetAllFilmComments(uuid)
+	_, err := service.GetAllFilmComments(uuid, "1")
 
 	assert.Error(t, err)
 }
@@ -294,7 +294,7 @@ func TestGetAllFilmActors(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmActors(uuid).Return(mockActors, nil)
 
-	actors, err := service.GetAllFilmActors(uuid)
+	actors, err := service.GetAllFilmActors(uuid, "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockActors, actors)
@@ -314,7 +314,7 @@ func TestGetAllFilmActors_Error(t *testing.T) {
 
 	mockStorage.EXPECT().GetAllFilmActors(uuid).Return(nil, mockError)
 
-	_, err := service.GetAllFilmActors(uuid)
+	_, err := service.GetAllFilmActors(uuid, "1")
 
 	assert.Error(t, err)
 }

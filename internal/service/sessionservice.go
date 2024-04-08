@@ -24,65 +24,65 @@ func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger)
 	}
 }
 
-func (service *SessionService) Add(login string, token string, version uint8) (err error) {
+func (service *SessionService) Add(login, token, requestID string, version uint8) (err error) {
 	err = service.sessionStorage.Add(login, token, version)
 	if err != nil {
-		service.logger.Errorf("service error at AddSession: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at AddSession: %v", requestID, err)
 		return err
 	}
 	return nil
 }
 
-func (service *SessionService) DeleteSession(login string, token string) (err error) {
+func (service *SessionService) DeleteSession(login, token, requestID string) (err error) {
 	err = service.sessionStorage.DeleteSession(login, token)
 	if err != nil {
-		service.logger.Errorf("service error at DeleteSession: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at DeleteSession: %v", requestID, err)
 		return err
 	}
 	return nil
 }
 
-func (service *SessionService) Update(login string, token string) (err error) {
+func (service *SessionService) Update(login, token, requestID string) (err error) {
 	err = service.sessionStorage.Update(login, token)
 	if err != nil {
-		service.logger.Errorf("service error at Update: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at Update: %v", requestID, err)
 		return err
 	}
 	return nil
 }
 
-func (service *SessionService) CheckVersion(login string, token string,
+func (service *SessionService) CheckVersion(login, token, requestID string,
 	usersVersion uint8) (hasSession bool, err error) {
 	hasSession, err = service.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
-		service.logger.Errorf("service error at CheckVersion: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at CheckVersion: %v", requestID, err)
 		return hasSession, err
 	}
 	return hasSession, nil
 }
 
-func (service *SessionService) GetVersion(login string, token string) (version uint8, err error) {
+func (service *SessionService) GetVersion(login, token, requestID string) (version uint8, err error) {
 	version, err = service.sessionStorage.GetVersion(login, token)
 	if err != nil {
-		service.logger.Errorf("service error at GetVersion: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at GetVersion: %v", requestID, err)
 		return version, err
 	}
 	return version, nil
 }
 
-func (service *SessionService) HasSession(login string, token string) (err error) {
+func (service *SessionService) HasSession(login, token, requestID string) (err error) {
 	err = service.sessionStorage.HasSession(login, token)
 	if err != nil {
-		service.logger.Errorf("service error at HasSession: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at HasSession: %v", requestID, err)
 		return err
 	}
 	return nil
 }
 
-func (service *SessionService) CheckAllUserSessionTokens(login string) error {
+func (service *SessionService) CheckAllUserSessionTokens(login, requestID string) error {
 	err := service.sessionStorage.CheckAllUserSessionTokens(login)
 	if err != nil {
-		service.logger.Errorf("service error at CheckAllUserSessionTokens: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at CheckAllUserSessionTokens: %v", requestID, err)
 		return err
 	}
 	return nil

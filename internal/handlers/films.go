@@ -30,11 +30,13 @@ type filmsPreviewsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseWriter, r *http.Request) {
-	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews()
+	requestID := generateRequestID()
+
+	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			fmt.Printf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 	}
 
@@ -45,13 +47,13 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println(err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] error at marshaling response: %v\n", requestID, err)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		fmt.Println(err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 	}
 }
 
@@ -62,14 +64,14 @@ type filmDataResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
+	requestID := generateRequestID()
 
-	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(uuid)
+	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(uuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
-
 		return
 	}
 
@@ -82,7 +84,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -92,7 +94,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -105,14 +107,14 @@ type filmCommentsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(uuid)
+	requestID := generateRequestID()
+
+	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(uuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
-
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
-
 		return
 	}
 
@@ -125,7 +127,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -135,7 +137,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -149,11 +151,13 @@ type filmActorsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(uuid)
+	requestID := generateRequestID()
+
+	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(uuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 
 		return
@@ -168,7 +172,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -178,39 +182,38 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *http.Request) {
+	requestID := generateRequestID()
+
 	var filmData domain.FilmDataToAdd
 	err := json.NewDecoder(r.Body).Decode(&filmData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
-
 		return
 	}
 
-	err = filmsPageHandlers.filmsService.AddFilm(filmData)
+	err = filmsPageHandlers.filmsService.AddFilm(filmData, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			if err != nil {
-				filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
-			}
+			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
 
 	err = WriteSuccess(w)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 	}
 
-	filmsPageHandlers.logger.Info("film added successfully")
+	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] film added successfully", requestID))
 }

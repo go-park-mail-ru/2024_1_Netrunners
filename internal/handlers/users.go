@@ -30,12 +30,13 @@ type profileResponse struct {
 
 func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
+	requestID := generateRequestID()
 
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(uuid)
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(uuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -49,7 +50,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -59,7 +60,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -71,22 +72,24 @@ type profilePreviewResponse struct {
 }
 
 func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWriter, r *http.Request) {
+	requestID := generateRequestID()
+
 	var inputUserData domain.User
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
 
 	uuid := inputUserData.Uuid
-	userPreview, err := UserPageHandlers.authService.GetUserPreview(uuid)
+	userPreview, err := UserPageHandlers.authService.GetUserPreview(uuid, requestID)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -100,7 +103,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -110,7 +113,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("error at writing response: %v\n", err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
 		}
 		return
 	}
