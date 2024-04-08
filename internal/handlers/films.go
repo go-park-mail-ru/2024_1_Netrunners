@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,6 +37,12 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		if err != nil {
 			fmt.Printf("error at writing response: %v\n", err)
 		}
+	}
+
+	for _, film := range films {
+		film.Preview = html.EscapeString(film.Preview)
+		film.Director = html.EscapeString(film.Director)
+		film.Title = html.EscapeString(film.Title)
 	}
 
 	response := filmsPreviewsResponse{
@@ -72,6 +79,11 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 
 		return
 	}
+
+	filmData.Title = html.EscapeString(filmData.Title)
+	filmData.Data = html.EscapeString(filmData.Data)
+	filmData.Director = html.EscapeString(filmData.Director)
+	filmData.Preview = html.EscapeString(filmData.Preview)
 
 	response := filmDataResponse{
 		Status:   http.StatusOK,
@@ -116,6 +128,11 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 		return
 	}
 
+	for _, comment := range comments {
+		comment.Text = html.EscapeString(comment.Text)
+		comment.Author = html.EscapeString(comment.Author)
+	}
+
 	response := filmCommentsResponse{
 		Status:   http.StatusOK,
 		Comments: comments,
@@ -157,6 +174,11 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 		}
 
 		return
+	}
+
+	for _, actor := range actors {
+		actor.Name = html.EscapeString(actor.Name)
+		actor.Avatar = html.EscapeString(actor.Avatar)
 	}
 
 	response := filmActorsResponse{

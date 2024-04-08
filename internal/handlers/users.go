@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -39,6 +40,11 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 		}
 		return
 	}
+
+	user.Name = html.EscapeString(user.Name)
+	user.Email = html.EscapeString(user.Email)
+	user.Password = html.EscapeString(user.Password)
+	user.Avatar = html.EscapeString(user.Avatar)
 
 	response := profileResponse{
 		Status:   http.StatusOK,
@@ -90,6 +96,9 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		}
 		return
 	}
+
+	userPreview.Name = html.EscapeString(userPreview.Name)
+	userPreview.Avatar = html.EscapeString(userPreview.Avatar)
 
 	response := profilePreviewResponse{
 		Status:      http.StatusOK,

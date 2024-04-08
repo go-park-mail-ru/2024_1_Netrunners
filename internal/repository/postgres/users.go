@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v5"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -48,6 +49,13 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 			Title: film.Title,
 		})
 	}
+
+	actor.Name = html.EscapeString(actor.Name)
+	actor.Avatar = html.EscapeString(actor.Avatar)
+	actor.Spouse = html.EscapeString(actor.Spouse)
+	actor.Genres = html.EscapeString(actor.Genres)
+	actor.BirthPlace = html.EscapeString(actor.BirthPlace)
+	actor.Career = html.EscapeString(actor.Career)
 
 	response := actorResponse{
 		Status: http.StatusOK,
