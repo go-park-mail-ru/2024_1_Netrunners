@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 
 	"go.uber.org/zap"
 )
@@ -31,7 +32,7 @@ func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger)
 func (service *SessionService) Add(ctx context.Context, login, token string, version uint8) (err error) {
 	err = service.sessionStorage.Add(login, token, version)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at AddSession: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to add session: %v", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -40,7 +41,8 @@ func (service *SessionService) Add(ctx context.Context, login, token string, ver
 func (service *SessionService) DeleteSession(ctx context.Context, login, token string) (err error) {
 	err = service.sessionStorage.DeleteSession(login, token)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at DeleteSession: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to delete session: %v",
+			ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -49,7 +51,7 @@ func (service *SessionService) DeleteSession(ctx context.Context, login, token s
 func (service *SessionService) Update(ctx context.Context, login, token string) (err error) {
 	err = service.sessionStorage.Update(login, token)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at Update: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to update session: %v", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -59,7 +61,7 @@ func (service *SessionService) CheckVersion(ctx context.Context, login, token st
 	usersVersion uint8) (hasSession bool, err error) {
 	hasSession, err = service.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at CheckVersion: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to check version: %v", ctx.Value(requestId.ReqIDKey), err)
 		return hasSession, err
 	}
 	return hasSession, nil
@@ -68,7 +70,7 @@ func (service *SessionService) CheckVersion(ctx context.Context, login, token st
 func (service *SessionService) GetVersion(ctx context.Context, login, token string) (version uint8, err error) {
 	version, err = service.sessionStorage.GetVersion(login, token)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at GetVersion: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to get version: %v", ctx.Value(requestId.ReqIDKey), err)
 		return version, err
 	}
 	return version, nil
@@ -77,7 +79,7 @@ func (service *SessionService) GetVersion(ctx context.Context, login, token stri
 func (service *SessionService) HasSession(ctx context.Context, login, token string) (err error) {
 	err = service.sessionStorage.HasSession(login, token)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at HasSession: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to has session: %v", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -86,8 +88,8 @@ func (service *SessionService) HasSession(ctx context.Context, login, token stri
 func (service *SessionService) CheckAllUserSessionTokens(ctx context.Context, login string) error {
 	err := service.sessionStorage.CheckAllUserSessionTokens(login)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at CheckAllUserSessionTokens: %v",
-			ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to check all user's session tokens: %v",
+			ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil

@@ -2,8 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -61,14 +59,12 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		&actor.Genres,
 		&actor.Spouse)
 	if err != nil {
-		return domain.ActorData{},
-			fmt.Errorf("error at recieving data in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
 
 	rows, err := storage.pool.Query(context.Background(), getActorsFilms, actorUuid)
 	if err != nil {
-		return domain.ActorData{}, fmt.Errorf("error at recieving films in GetActorByUuid: %w",
-			myerrors.ErrInternalServerError)
+		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
 
 	films := make([]domain.FilmLink, 0)
@@ -87,8 +83,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		return nil
 	})
 	if err != nil {
-		return domain.ActorData{},
-			fmt.Errorf("error at recieving films in GetActorByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
 
 	actor.Films = films
@@ -99,8 +94,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w",
-			myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -121,8 +115,7 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetActorsByFilm: %w",
-			myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	return actors, nil

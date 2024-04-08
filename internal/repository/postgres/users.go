@@ -59,8 +59,7 @@ const getUserPreviewByUuid = `
 func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)
 	if err != nil {
-		return fmt.Errorf("error at inserting info into users in CreateUser: %w",
-			myerrors.ErrInternalServerError)
+		return myerrors.ErrInternalServerError
 	}
 	return nil
 }
@@ -79,8 +78,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{},
-			fmt.Errorf("error at recieving data in GetUser: %w", myerrors.ErrInternalServerError)
+		return domain.User{}, myerrors.ErrInternalServerError
 	}
 
 	return user, nil
@@ -89,8 +87,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 func (storage *UsersStorage) RemoveUser(email string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteUser, email)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in RemoveUser: %w",
-			myerrors.ErrInternalServerError)
+		return myerrors.ErrInternalServerError
 	}
 
 	return nil
@@ -100,7 +97,7 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 	var passwordFromDB string
 	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(&passwordFromDB)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in HasUser: %w", myerrors.ErrInternalServerError)
+		return myerrors.ErrInternalServerError
 	}
 
 	if passwordFromDB != password {
@@ -114,7 +111,7 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) error {
 	_, err := storage.pool.Exec(context.Background(), putNewUserPassword, newPassword, email)
 	if err != nil {
-		return fmt.Errorf("error at updating data in ChangeUserPassword: %w", err)
+		return myerrors.ErrInternalServerError
 	}
 
 	return nil
@@ -123,21 +120,20 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) error
 func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.User, error) {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return domain.User{}, fmt.Errorf("error at begin transaction in ChangeUserName: %w",
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w",
 			myerrors.ErrInternalServerError)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
 		if err != nil {
-			fmt.Printf("error at rollback transaction in ChangeUserName: %v",
+			fmt.Printf("failed to rollback transaction to change username: %v",
 				myerrors.ErrInternalServerError)
 		}
 	}()
 
 	err = tx.QueryRow(context.Background(), putNewUsername, newUsername, email).Scan()
 	if err != nil {
-		return domain.User{}, fmt.Errorf("error at updating data in ChangeUserName: %w",
-			myerrors.ErrInternalServerError)
+		return domain.User{}, myerrors.ErrInternalServerError
 	}
 
 	var user domain.User
@@ -150,13 +146,12 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{},
-			fmt.Errorf("error at recieving data in ChangeUserName: %w", myerrors.ErrInternalServerError)
+		return domain.User{}, myerrors.ErrInternalServerError
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("error at commit transaction in ChangeUserName: %w",
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w",
 			myerrors.ErrInternalServerError)
 	}
 
@@ -175,8 +170,7 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{},
-			fmt.Errorf("error at recieving data in GetUserDataByUuid: %w", err)
+		return domain.User{}, myerrors.ErrInternalServerError
 	}
 
 	return user, nil
@@ -188,8 +182,7 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 	userPreview.Avatar = uuid
 	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Name)
 	if err != nil {
-		return domain.UserPreview{},
-			fmt.Errorf("error at recieving data in GetUserPreview: %w", myerrors.ErrInternalServerError)
+		return domain.UserPreview{}, myerrors.ErrInternalServerError
 	}
 
 	return userPreview, nil

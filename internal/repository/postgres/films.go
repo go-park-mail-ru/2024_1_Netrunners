@@ -112,8 +112,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		// &film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
-		return domain.FilmData{},
-			fmt.Errorf("error at recieving data in getFilmDataByUuid in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
+		return domain.FilmData{}, myerrors.ErrInternalServerError
 	}
 
 	return film, nil
@@ -122,13 +121,13 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return fmt.Errorf("error at begin transaction in AddFilm: %w",
+		return fmt.Errorf("failed to begin transaction to add film: %w",
 			myerrors.ErrInternalServerError)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
 		if err != nil {
-			fmt.Printf("error at rollback transaction in AddFilm: %v",
+			fmt.Printf("failed to rollback transaction to add film: %v",
 				myerrors.ErrInternalServerError)
 		}
 	}()
@@ -136,13 +135,13 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	var directorFlag int
 	err = storage.pool.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in getAmountOfDirectorsByName in AddFilm: %w",
+		return fmt.Errorf("failed to get amount of directors: %w",
 			myerrors.ErrInternalServerError)
 	}
 	if directorFlag == 0 {
 		_, err = storage.pool.Exec(context.Background(), insertDirector, film.Director)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in insertDirector in AddFilm: %w",
+			return fmt.Errorf("failed to insert director: %w",
 				myerrors.ErrInternalServerError)
 		}
 	}
@@ -150,21 +149,21 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	var directorID int
 	err = storage.pool.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
 	if err != nil {
-		return fmt.Errorf("error at recieving data from getDirectorsIdByName in AddFilm: %w",
+		return fmt.Errorf("failed to get directors id: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	_, err = storage.pool.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
 		film.AgeLimit, film.Duration, film.PublishedAt)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in insertFilm in AddFilm: %w",
+		return fmt.Errorf("failed to insert film: %w",
 			myerrors.ErrInternalServerError)
 	}
 
 	var filmID int
 	err = storage.pool.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in getFilmIdByTitle in AddFilm: %w",
+		return fmt.Errorf("failed to get film id: %w",
 			myerrors.ErrInternalServerError)
 	}
 
@@ -173,13 +172,13 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 		var actorFlag int
 		err = storage.pool.QueryRow(context.Background(), getAmountOfActorsByName, actor.Name).Scan(&actorFlag)
 		if err != nil {
-			return fmt.Errorf("error at recieving data in getAmountOfActorsByName in AddFilm: %w",
+			return fmt.Errorf("failed to get amount of actors: %w",
 				myerrors.ErrInternalServerError)
 		}
 		if actorFlag == 0 {
 			_, err = storage.pool.Exec(context.Background(), insertActor, actor.Name)
 			if err != nil {
-				return fmt.Errorf("error at inserting into data in insertActor AddFilm: %w",
+				return fmt.Errorf("failed to insert actor: %w",
 					myerrors.ErrInternalServerError)
 			}
 		}
@@ -187,13 +186,13 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 		var actorID int
 		err = storage.pool.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
 		if err != nil {
-			return fmt.Errorf("error at recieving data in getActorId in AddFilm: %w",
+			return fmt.Errorf("failed to get actor id: %w",
 				myerrors.ErrInternalServerError)
 		}
 
 		_, err = storage.pool.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)
 		if err != nil {
-			return fmt.Errorf("error at inserting into data in insertIntoFilmActors in AddFilm: %w",
+			return fmt.Errorf("failed to insert film actors: %w",
 				myerrors.ErrInternalServerError)
 		}
 	}
@@ -204,7 +203,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteFilm, uuid)
 	if err != nil {
-		return fmt.Errorf("error at inserting into data in RemoveFilm: %w", myerrors.ErrInternalServerError)
+		return myerrors.ErrInternalServerError
 	}
 
 	return nil
@@ -221,8 +220,7 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 		&film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
-		return domain.FilmPreview{},
-			fmt.Errorf("error at recieving data in GetFilmPreview: %w", err)
+		return domain.FilmPreview{}, myerrors.ErrInternalServerError
 	}
 
 	return film, nil
@@ -231,8 +229,7 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
-			myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	films := make([]domain.FilmPreview, 0)
@@ -262,8 +259,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 			return nil
 		})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
-			err)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	return films, nil
@@ -272,8 +268,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
 	if err != nil {
-		return nil,
-			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -294,8 +289,7 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllFilmActors: %w",
-			myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	return actors, nil
@@ -304,8 +298,7 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
 	if err != nil {
-		return nil,
-			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	comments := make([]domain.Comment, 0)
@@ -333,8 +326,7 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 			return nil
 		})
 	if err != nil {
-		return nil, fmt.Errorf("error at recieving data in GetAllFilmComments: %w",
-			err)
+		return nil, myerrors.ErrInternalServerError
 	}
 
 	return comments, nil
