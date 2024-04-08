@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
 type usersStorage interface {
@@ -21,7 +21,7 @@ type usersStorage interface {
 	RemoveUser(email string) error
 	HasUser(email, password string) error
 	GetUser(email string) (domain.User, error)
-	ChangeUserPassword(email, newPassword string) error
+	ChangeUserPassword(email, newPassword string) (domain.User, error)
 	ChangeUserName(email, newName string) (domain.User, error)
 	GetUserDataByUuid(uuid string) (domain.User, error)
 	GetUserPreview(uuid string) (domain.UserPreview, error)
@@ -79,14 +79,14 @@ func (service *AuthService) GetUser(ctx context.Context, login string) (domain.U
 	return user, nil
 }
 
-func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) error {
-	err := service.storage.ChangeUserPassword(login, newPassword)
+func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) (domain.User, error) {
+	user, err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
 			ctx.Value(requestId.ReqIDKey), err)
-		return err
+		return domain.User{}, err
 	}
-	return nil
+	return user, nil
 }
 
 func (service *AuthService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {

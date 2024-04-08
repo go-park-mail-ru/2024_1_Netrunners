@@ -107,13 +107,47 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 	return nil
 }
 
-func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) error {
-	_, err := storage.pool.Exec(context.Background(), putNewUserPassword, newPassword, email)
+func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return myerrors.ErrInternalServerError
+		return domain.User{}, fmt.Errorf("error at begin transaction in ChangeUserPassword: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("error at rollback transaction in ChangeUserPassword: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	err = tx.QueryRow(context.Background(), putNewUserPassword, newPassword, email).Scan()
+	if err != nil {
+		return domain.User{}, fmt.Errorf("error at updating data in ChangeUserPassword: %w",
+			myerrors.ErrInternalServerError)
 	}
 
-	return nil
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{},
+			fmt.Errorf("error at recieving data in ChangeUserPassword: %w", myerrors.ErrInternalServerError)
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("error at commit transaction in ChangeUserPassword: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	return user, nil
 }
 
 func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.User, error) {
