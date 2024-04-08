@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -36,7 +37,7 @@ func TestActorsService_GetActorByUuid(t *testing.T) {
 	mockStorage.EXPECT().GetActorByUuid("1").Return(expectedActor, nil)
 
 	actorsService := NewActorsService(mockStorage, mockLogger)
-	actor, err := actorsService.GetActorByUuid("1")
+	actor, err := actorsService.GetActorByUuid(context.Background(), "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedActor, actor)
@@ -53,7 +54,7 @@ func TestActorsService_GetActorsByFilm(t *testing.T) {
 	mockStorage.EXPECT().GetActorsByFilm("1").Return(expectedActors, nil)
 
 	actorsService := NewActorsService(mockStorage, mockLogger)
-	actors, err := actorsService.GetActorsByFilm("1")
+	actors, err := actorsService.GetActorsByFilm(context.Background(), "1")
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedActors, actors)
@@ -70,7 +71,7 @@ func TestActorsService_GetActorByUuid_Error(t *testing.T) {
 	mockStorage.EXPECT().GetActorByUuid("1").Return(domain.ActorData{}, expectedError)
 
 	actorsService := NewActorsService(mockStorage, mockLogger)
-	actor, err := actorsService.GetActorByUuid("1")
+	actor, err := actorsService.GetActorByUuid(context.Background(), "1")
 
 	assert.Error(t, err)
 	assert.Equal(t, domain.ActorData{}, actor)
@@ -87,7 +88,7 @@ func TestActorsService_GetActorsByFilm_Error(t *testing.T) {
 	mockStorage.EXPECT().GetActorsByFilm("1").Return([]domain.ActorPreview{}, expectedError)
 
 	actorsService := NewActorsService(mockStorage, mockLogger)
-	actors, err := actorsService.GetActorsByFilm("1")
+	actors, err := actorsService.GetActorsByFilm(context.Background(), "1")
 
 	assert.Error(t, err)
 	assert.Empty(t, actors)

@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -59,4 +61,27 @@ func WriteError(w http.ResponseWriter, err error) error {
 	}
 
 	return nil
+}
+
+type contextKey string
+
+const (
+	symbols             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	reqIDKey contextKey = "req_id"
+)
+
+func generateRequestID() string {
+	b := make([]byte, 10)
+	for i := range b {
+		b[i] = symbols[rand.Int63()%int64(len(symbols))]
+	}
+
+	return string(b)
+}
+
+func reqIdCTX(reqId string) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, reqIDKey, reqId)
+
+	return ctx
 }

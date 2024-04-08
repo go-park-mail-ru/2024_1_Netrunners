@@ -59,7 +59,8 @@ const getUserPreviewByUuid = `
 func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)
 	if err != nil {
-		return fmt.Errorf("error at inserting info into users in CreateUser: %w", err)
+		return fmt.Errorf("error at inserting info into users in CreateUser: %w",
+			myerrors.ErrInternalServerError)
 	}
 	return nil
 }
@@ -79,7 +80,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{},
-			fmt.Errorf("error at recieving data in GetUser: %w", err)
+			fmt.Errorf("error at recieving data in GetUser: %w", myerrors.ErrInternalServerError)
 	}
 
 	return user, nil
@@ -88,7 +89,8 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 func (storage *UsersStorage) RemoveUser(email string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteUser, email)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in RemoveUser: %w", err)
+		return fmt.Errorf("error at recieving data in RemoveUser: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	return nil
@@ -96,10 +98,9 @@ func (storage *UsersStorage) RemoveUser(email string) error {
 
 func (storage *UsersStorage) HasUser(email, password string) error {
 	var passwordFromDB string
-	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(
-		&passwordFromDB)
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(&passwordFromDB)
 	if err != nil {
-		return fmt.Errorf("error at recieving data in HasUser: %w", err)
+		return fmt.Errorf("error at recieving data in HasUser: %w", myerrors.ErrInternalServerError)
 	}
 
 	if passwordFromDB != password {
@@ -185,8 +186,7 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 	var userPreview domain.UserPreview
 
 	userPreview.Avatar = uuid
-	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(
-		&userPreview.Name)
+	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Name)
 	if err != nil {
 		return domain.UserPreview{},
 			fmt.Errorf("error at recieving data in GetUserPreview: %w", myerrors.ErrInternalServerError)

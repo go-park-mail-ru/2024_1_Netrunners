@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -23,21 +24,21 @@ func NewActorsService(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsS
 	}
 }
 
-func (service *ActorsService) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
+func (service *ActorsService) GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error) {
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetActorByUuid: %v", err)
+		service.logger.Errorf("[reqid=%s] service error at GetActorByUuid: %v", ctx.Value(reqIDKey), err)
 		return domain.ActorData{}, err
 	}
 
 	return actor, nil
 }
 
-func (service *ActorsService) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
+func (service *ActorsService) GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetActorsByFilm(filmUuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetActorByUuid: %v", err)
-		return []domain.ActorPreview{}, err
+		service.logger.Errorf("[reqid=%s] service error at GetActorsByFilm: %v", ctx.Value(reqIDKey), err)
+		return nil, err
 	}
 
 	return actors, nil

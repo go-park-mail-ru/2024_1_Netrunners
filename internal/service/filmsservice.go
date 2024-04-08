@@ -1,9 +1,10 @@
 package service
 
 import (
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"context"
 	"go.uber.org/zap"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 type FilmsStorage interface {
@@ -30,64 +31,64 @@ func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStora
 	}
 }
 
-func (service *FilmsService) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
+func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.FilmData, error) {
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetFilmByUuid: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at GetFilmByUuid: %v", ctx.Value(reqIDKey), err)
 		return domain.FilmData{}, err
 	}
 	return film, nil
 }
 
-func (service *FilmsService) AddFilm(film domain.FilmDataToAdd) error {
+func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAdd) error {
 	err := service.storage.AddFilm(film)
 	if err != nil {
-		service.logger.Errorf("service error at AddFilm: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at AddFilm: %v", ctx.Value(reqIDKey), err)
 		return err
 	}
 	return nil
 }
 
-func (service *FilmsService) RemoveFilm(uuid string) error {
+func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error {
 	err := service.storage.RemoveFilm(uuid)
 	if err != nil {
-		service.logger.Errorf("service error at RemoveFilm: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at RemoveFilm: %v", ctx.Value(reqIDKey), err)
 		return err
 	}
 	return nil
 }
 
-func (service *FilmsService) GetFilmPreview(uuid string) (domain.FilmPreview, error) {
+func (service *FilmsService) GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error) {
 	filmPreview, err := service.storage.GetFilmPreview(uuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetFilmPreview: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at GetFilmPreview: %v", ctx.Value(reqIDKey), err)
 		return domain.FilmPreview{}, err
 	}
 	return filmPreview, nil
 }
 
-func (service *FilmsService) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
+func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error) {
 	filmPreviews, err := service.storage.GetAllFilmsPreviews()
 	if err != nil {
-		service.logger.Errorf("service error at GetAllFilmsPreviews: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at GetAllFilmsPreviews: %v", ctx.Value(reqIDKey), err)
 		return nil, err
 	}
 	return filmPreviews, nil
 }
 
-func (service *FilmsService) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
+func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error) {
 	comments, err := service.storage.GetAllFilmComments(uuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetAllFilmComments: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at GetAllFilmComments: %v", ctx.Value(reqIDKey), err)
 		return nil, err
 	}
 	return comments, nil
 }
 
-func (service *FilmsService) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
+func (service *FilmsService) GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetAllFilmActors(uuid)
 	if err != nil {
-		service.logger.Errorf("service error at GetAllFilmActors: %v", myerrors.ErrInternalServerError)
+		service.logger.Errorf("[reqid=%s] service error at GetAllFilmActors: %v", ctx.Value(reqIDKey), err)
 		return nil, err
 	}
 	return actors, nil
@@ -176,7 +177,7 @@ func (service *FilmsService) AddSomeData() error {
 	for _, film := range data {
 		err := service.storage.AddFilm(film)
 		if err != nil {
-			service.logger.Errorf("service error at AddFilm: %v", myerrors.ErrInternalServerError)
+			service.logger.Errorf("[reqid=%s] service error at AddFilm: %v", err)
 			return err
 		}
 	}
