@@ -141,3 +141,6 @@ fabric.properties
 main
 
 /cmd/test/
+
+cover
+cover.out

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"net/http"
 	"os"
 	"regexp"
@@ -40,12 +41,11 @@ func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthServic
 	}
 }
 
-const reqIDKey = "reqID"
-
 func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSignUp) error {
 	err := service.storage.CreateUser(user)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at CreateUser: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to create user: %v", ctx.Value(requestId.ReqIDKey),
+			err)
 		return err
 	}
 	return nil
@@ -54,7 +54,8 @@ func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSign
 func (service *AuthService) RemoveUser(ctx context.Context, login string) error {
 	err := service.storage.RemoveUser(login)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at RemoveUser: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to remove user: %v", ctx.Value(requestId.ReqIDKey),
+			err)
 		return err
 	}
 	return nil
@@ -63,7 +64,7 @@ func (service *AuthService) RemoveUser(ctx context.Context, login string) error 
 func (service *AuthService) HasUser(ctx context.Context, login, password string) error {
 	err := service.storage.HasUser(login, password)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at HasUser: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to has user: %v", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -72,7 +73,7 @@ func (service *AuthService) HasUser(ctx context.Context, login, password string)
 func (service *AuthService) GetUser(ctx context.Context, login string) (domain.User, error) {
 	user, err := service.storage.GetUser(login)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at GetUser: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to get user: %v", ctx.Value(requestId.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -81,7 +82,8 @@ func (service *AuthService) GetUser(ctx context.Context, login string) (domain.U
 func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) error {
 	err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at ChangeUserPassword: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to change password: %v",
+			ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -90,7 +92,8 @@ func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPa
 func (service *AuthService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
 	user, err := service.storage.ChangeUserName(login, newName)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at ChangeUserName: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+			err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -187,7 +190,8 @@ func (service *AuthService) GenerateTokens(login string, isAdmin bool, version u
 func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error) {
 	user, err := service.storage.GetUserDataByUuid(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at GetUserDataByUuid: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to get user data: %v",
+			ctx.Value(requestId.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -196,7 +200,8 @@ func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) 
 func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
 	userPreview, err := service.storage.GetUserPreview(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] service error at GetUserPreview: %v", ctx.Value(reqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(requestId.ReqIDKey),
+			err)
 		return domain.UserPreview{}, err
 	}
 	return userPreview, nil

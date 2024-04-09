@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -33,14 +34,14 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -51,7 +52,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -60,7 +61,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -69,7 +70,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -78,7 +79,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -87,7 +88,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -96,7 +97,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 
 		return
@@ -114,21 +115,21 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	http.SetCookie(w, tokenCookie)
 	err = WriteSuccess(w)
 	if err != nil {
-		authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 
 	authPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] success login", requestID))
 }
 
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
-	userToken, err := r.Cookie("access")
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
+	userToken, err := r.Cookie("access")
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -137,7 +138,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -146,7 +147,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -169,20 +170,20 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	err = WriteSuccess(w)
 	if err != nil {
-		authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 }
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -195,8 +196,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID,
-				err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -205,7 +205,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -214,7 +214,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -231,7 +231,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -240,7 +240,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -249,7 +249,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -267,19 +267,19 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err = WriteSuccess(w)
 	if err != nil {
-		authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 }
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -288,7 +288,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -297,7 +297,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, myerrors.ErrNoActiveSession)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -309,7 +309,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -319,7 +319,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -335,6 +335,6 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	http.SetCookie(w, tokenCookie)
 	err = WriteSuccess(w)
 	if err != nil {
-		authPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -30,14 +31,14 @@ type filmsPreviewsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseWriter, r *http.Request) {
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(ctx)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 	}
 
@@ -48,13 +49,13 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] error at marshaling response: %v\n", requestID, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 }
 
@@ -65,14 +66,14 @@ type filmDataResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -86,7 +87,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -96,7 +97,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -109,14 +110,14 @@ type filmCommentsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -130,7 +131,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -140,7 +141,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -154,14 +155,14 @@ type filmActorsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 
 		return
@@ -176,7 +177,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -186,22 +187,22 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *http.Request) {
-	requestID := generateRequestID()
-	ctx := reqIdCTX(requestID)
+	requestID := requestId.GenerateRequestID()
+	ctx := requestId.GenerateReqIdCTX(requestID)
 
 	var filmData domain.FilmDataToAdd
 	err := json.NewDecoder(r.Body).Decode(&filmData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -210,14 +211,14 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
 
 	err = WriteSuccess(w)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 
 	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] film added successfully", requestID))
