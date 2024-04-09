@@ -52,6 +52,8 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 		})
 	}
 
+	escapeActorData(&actor)
+
 	response := actorResponse{
 		Status: http.StatusOK,
 		Actor: domain.ActorData{

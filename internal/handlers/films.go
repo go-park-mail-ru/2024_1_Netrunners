@@ -42,6 +42,10 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		}
 	}
 
+	for _, film := range films {
+		escapeFilmPreview(&film)
+	}
+
 	response := filmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  films,
@@ -77,6 +81,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		}
 		return
 	}
+
+	escapeFilmData(&filmData)
 
 	response := filmDataResponse{
 		Status:   http.StatusOK,
@@ -120,6 +126,10 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
+	}
+
+	for _, comment := range comments {
+		escapeComment(&comment)
 	}
 
 	response := filmCommentsResponse{
@@ -166,6 +176,10 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 		}
 
 		return
+	}
+
+	for _, actor := range actors {
+		escapeActorPreview(&actor)
 	}
 
 	response := filmActorsResponse{

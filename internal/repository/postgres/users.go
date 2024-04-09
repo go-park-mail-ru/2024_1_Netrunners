@@ -80,7 +80,6 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}
-
 	return user, nil
 }
 
@@ -154,7 +153,6 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w",
 			myerrors.ErrInternalServerError)
 	}
-
 	return user, nil
 }
 
@@ -172,7 +170,6 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}
-
 	return user, nil
 }
 
@@ -184,6 +181,5 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 	if err != nil {
 		return domain.UserPreview{}, myerrors.ErrInternalServerError
 	}
-
 	return userPreview, nil
 }
