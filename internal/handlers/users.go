@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
+	"io"
+	"net/http"
+	"os"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -152,8 +153,8 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	}
 
 	uuid := mux.Vars(r)["uuid"]
-	var newUserData domain.UserSignUp
-	err = json.NewDecoder(r.Body).Decode(&newUserData)
+
+	currUser, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -162,50 +163,19 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	currUserData, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
-	if err != nil {
-		err = WriteError(w, err)
+	action := r.FormValue("action")
+	if action == "chPassword" {
+		newPassword := r.FormValue("newData")
+		err = service.ValidatePassword(newPassword)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+			err = WriteError(w, err)
+			if err != nil {
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+			}
+			return
 		}
-		return
-	}
 
-	login := newUserData.Email
-	username := newUserData.Name
-	password := newUserData.Password
-
-	err = service.ValidateLogin(login)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
-		}
-		return
-	}
-
-	err = service.ValidateUsername(username)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
-		}
-		return
-	}
-
-	err = service.ValidatePassword(password)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
-		}
-		return
-	}
-
-	newUser := currUserData
-
-	if newUserData.Name != currUserData.Name {
-		newUser, err = UserPageHandlers.authService.ChangeUserName(ctx, newUserData.Email, newUserData.Name)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newPassword)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -215,8 +185,18 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 	}
 
-	if newUserData.Password != currUserData.Password {
-		newUser, err = UserPageHandlers.authService.ChangeUserPassword(ctx, newUserData.Email, newUserData.Password)
+	if action == "chUsername" {
+		newUsername := r.FormValue("newData")
+		err = service.ValidateUsername(newUsername)
+		if err != nil {
+			err = WriteError(w, err)
+			if err != nil {
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+			}
+			return
+		}
+
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newUsername)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -226,9 +206,52 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 	}
 
-	version := newUser.Version + 1
+	if action == "chAvatar" {
+		files := r.MultipartForm.File["avatar"]
+		if err != nil {
+			err = WriteError(w, err)
+			if err != nil {
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+			}
+			return
+		}
 
-	tokenSigned, err := UserPageHandlers.authService.GenerateTokens(login, false, version)
+		for _, file := range files {
+			src, err := file.Open()
+			if err != nil {
+				err = WriteError(w, err)
+				if err != nil {
+					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+				}
+				return
+			}
+			defer src.Close()
+
+			dst, err := os.Create("./avatars/" + file.Filename)
+			if err != nil {
+				err = WriteError(w, err)
+				if err != nil {
+					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+				}
+				return
+			}
+			defer dst.Close()
+
+			if _, err := io.Copy(dst, src); err != nil {
+				err = WriteError(w, err)
+				if err != nil {
+					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+				}
+				return
+			}
+
+			UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestID)
+		}
+	}
+
+	version := currUser.Version + 1
+
+	tokenSigned, err := UserPageHandlers.authService.GenerateTokens(currUser.Email, false, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -237,7 +260,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	err = UserPageHandlers.sessionService.Add(ctx, login, tokenSigned, version)
+	err = UserPageHandlers.sessionService.Add(ctx, currUser.Email, tokenSigned, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

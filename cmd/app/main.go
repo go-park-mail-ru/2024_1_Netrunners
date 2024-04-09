@@ -72,7 +72,7 @@ func main() {
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(authService, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
 	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
 	err = filmsService.AddSomeData()

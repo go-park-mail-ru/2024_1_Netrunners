@@ -25,6 +25,8 @@ type usersStorage interface {
 	ChangeUserName(email, newName string) (domain.User, error)
 	GetUserDataByUuid(uuid string) (domain.User, error)
 	GetUserPreview(uuid string) (domain.UserPreview, error)
+	ChangeUserPasswordByUuid(uuid, newPassword string) (domain.User, error)
+	ChangeUserNameByUuid(uuid, newName string) (domain.User, error)
 }
 
 type AuthService struct {
@@ -205,4 +207,24 @@ func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (do
 		return domain.UserPreview{}, err
 	}
 	return userPreview, nil
+}
+
+func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error) {
+	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change password: %v",
+			ctx.Value(requestId.ReqIDKey), err)
+		return domain.User{}, err
+	}
+	return user, nil
+}
+
+func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
+	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+	return user, nil
 }
