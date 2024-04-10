@@ -112,7 +112,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
-		return domain.FilmData{}, myerrors.ErrInternalServerError
+		return domain.FilmData{}, err
 	}
 	return film, nil
 }

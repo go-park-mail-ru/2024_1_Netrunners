@@ -1,6 +1,10 @@
 package database
 
 import (
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/jackc/pgx/v5"
+	"github.com/stretchr/testify/assert"
+	"regexp"
 	"testing"
 
 	"github.com/pashagolub/pgxmock/v3"
@@ -36,8 +40,10 @@ func TestUsersStorage_GetUser(t *testing.T) {
 
 	newUser := NewMockUser()
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
-		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt, newUser.Birthday, newUser.IsAdmin)
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
+		"is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
+			newUser.Birthday, newUser.IsAdmin)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs("cakethefake@gmail.com").
@@ -101,6 +107,7 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
+	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewUsersStorage(mock)
 
 	email := "cakethefake@gmail.com"
@@ -109,6 +116,17 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 	mock.ExpectExec("UPDATE").
 		WithArgs(password, email).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	newUser := NewMockUser()
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday",
+		"is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt,
+			newUser.Birthday, newUser.IsAdmin)
+	mock.ExpectQuery("SELECT").
+		WithArgs(email).
+		WillReturnRows(mockRows)
+
+	mock.ExpectCommit()
 
 	_, err = storage.ChangeUserPassword(email, password)
 	require.Equal(t, nil, err)
@@ -137,6 +155,131 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 	user, err := storage.GetUserDataByUuid(uuid)
 	require.NoError(t, err)
 	require.Equal(t, newUser, user)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+func TestUsersStorage_ChangeUserPasswordByUuid(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	storage, err := NewUsersStorage(mock)
+
+	uuid := "1"
+	password := "123456789"
+
+	mock.ExpectExec("UPDATE").
+		WithArgs(password, uuid).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	newUser := NewMockUser()
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
+		"is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
+			newUser.Birthday, newUser.IsAdmin)
+	mock.ExpectQuery("SELECT").
+		WithArgs(uuid).
+		WillReturnRows(mockRows)
+
+	mock.ExpectCommit()
+
+	_, err = storage.ChangeUserPasswordByUuid(uuid, password)
+	require.Equal(t, nil, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+func TestUsersStorage_ChangeUserName(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	storage, err := NewUsersStorage(mock)
+
+	email := "cakethefake@gmial.com"
+	newUsername := "123456789"
+
+	mock.ExpectExec("UPDATE").
+		WithArgs(newUsername, email).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	newUser := NewMockUser()
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday",
+		"is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt,
+			newUser.Birthday, newUser.IsAdmin)
+	mock.ExpectQuery("SELECT").
+		WithArgs(email).
+		WillReturnRows(mockRows)
+
+	mock.ExpectCommit()
+
+	_, err = storage.ChangeUserName(email, newUsername)
+	require.Equal(t, nil, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+func TestUsersStorage_ChangeUserNameByUuid(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	storage, err := NewUsersStorage(mock)
+
+	uuid := "1"
+	password := "123456789"
+
+	mock.ExpectExec("UPDATE").
+		WithArgs(password, uuid).
+		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+	newUser := NewMockUser()
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
+		"is_admin"}).
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
+			newUser.Birthday, newUser.IsAdmin)
+	mock.ExpectQuery("SELECT").
+		WithArgs(uuid).
+		WillReturnRows(mockRows)
+
+	mock.ExpectCommit()
+
+	_, err = storage.ChangeUserNameByUuid(uuid, password)
+	require.Equal(t, nil, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+func TestUsersStorage_GetUserPreview(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	storage, err := NewUsersStorage(mock)
+	require.NoError(t, err)
+
+	uuid := "test_uuid"
+	expectedUserPreview := domain.UserPreview{Name: "Test User", Avatar: uuid}
+
+	mock.ExpectQuery(regexp.QuoteMeta(getUserPreviewByUuid)).
+		WithArgs(uuid).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"name"}).
+				AddRow(expectedUserPreview.Name),
+		)
+
+	userPreview, err := storage.GetUserPreview(uuid)
+	require.NoError(t, err)
+	assert.Equal(t, expectedUserPreview, userPreview)
 
 	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)

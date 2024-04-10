@@ -136,7 +136,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		}
 	}()
 
-	err = tx.QueryRow(context.Background(), putNewUserPassword, newPassword, email).Scan()
+	_, err = tx.Exec(context.Background(), putNewUserPassword, newPassword, email)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to update data to change password: %w",
 			myerrors.ErrInternalServerError)
@@ -152,7 +152,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())
@@ -178,7 +178,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		}
 	}()
 
-	err = tx.QueryRow(context.Background(), putNewUsername, newUsername, email).Scan()
+	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}
