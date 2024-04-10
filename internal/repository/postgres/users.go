@@ -46,6 +46,21 @@ const putNewUsername = `
 		SET name = $1
 		WHERE email = $2;`
 
+const putNewUserPasswordByUuid = `
+		UPDATE users
+		SET password = $1
+		WHERE uuid = $2;`
+
+const putNewUserAvatarByUuid = `
+		UPDATE users
+		SET avatar = $1
+		WHERE uuid = $2;`
+
+const putNewUsernameByUuid = `
+		UPDATE users
+		SET name = $1
+		WHERE uuid = $2;`
+
 const getUserDataByUuid = `
 		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
 		FROM users
@@ -107,13 +122,46 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 	return nil
 }
 
-func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) error {
-	_, err := storage.pool.Exec(context.Background(), putNewUserPassword, newPassword, email)
+func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return myerrors.ErrInternalServerError
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change password: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("failed to rollback transaction to change password: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	_, err = tx.Exec(context.Background(), putNewUserPassword, newPassword, email)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to update data to change password: %w",
+			myerrors.ErrInternalServerError)
 	}
 
-	return nil
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	return user, nil
 }
 
 func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.User, error) {
@@ -130,7 +178,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		}
 	}()
 
-	err = tx.QueryRow(context.Background(), putNewUsername, newUsername, email).Scan()
+	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}
@@ -182,4 +230,129 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 		return domain.UserPreview{}, myerrors.ErrInternalServerError
 	}
 	return userPreview, nil
+}
+
+func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change password: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("failed to rollback transaction to change password: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	_, err = tx.Exec(context.Background(), putNewUserPasswordByUuid, newPassword, uuid)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed update data to change password: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserDataByUuid, uuid).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Avatar,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	return user, nil
+}
+
+func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("failed to rollback transaction to change username: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	_, err = tx.Exec(context.Background(), putNewUsernameByUuid, newUsername, uuid)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserDataByUuid, uuid).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Avatar,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	return user, nil
+}
+
+func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("failed to rollback transaction to change username: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserDataByUuid, uuid).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Avatar,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	return user, nil
 }

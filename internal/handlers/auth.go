@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -34,8 +34,8 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -103,6 +103,16 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	uuidCookie := &http.Cookie{
+		Name:     "user_uuid",
+		Value:    user.Uuid,
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   false,
+		MaxAge:   0,
+	}
+	http.SetCookie(w, uuidCookie)
+
 	tokenCookie := &http.Cookie{
 		Name:     "access",
 		Value:    tokenSigned,
@@ -122,8 +132,8 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 }
 
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
@@ -176,8 +186,8 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -254,6 +264,25 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
+	userForUuid, err := authPageHandlers.authService.GetUser(ctx, login)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	uuidCookie := &http.Cookie{
+		Name:     "user_uuid",
+		Value:    userForUuid.Uuid,
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   false,
+		MaxAge:   0,
+	}
+	http.SetCookie(w, uuidCookie)
+
 	tokenCookie := &http.Cookie{
 		Name:     "access",
 		Value:    tokenSigned,
@@ -272,8 +301,8 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {

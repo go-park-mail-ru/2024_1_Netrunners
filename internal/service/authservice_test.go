@@ -43,10 +43,10 @@ func TestAuthService_ChangeUserPassword(t *testing.T) {
 	login := "cakethefake@gmail.com"
 	newPassword := "newPassword123"
 
-	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(nil)
+	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(domain.User{}, nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	err := authService.ChangeUserPassword(context.Background(), login, newPassword)
+	_, err := authService.ChangeUserPassword(context.Background(), login, newPassword)
 
 	assert.NoError(t, err)
 }

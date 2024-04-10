@@ -72,7 +72,7 @@ func main() {
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(authService, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
 	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
 	err = filmsService.AddSomeData()
@@ -94,6 +94,7 @@ func main() {
 	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/films",
@@ -102,6 +103,7 @@ func main() {
 
 	router.Use(middleware.CorsMiddleware)
 	router.Use(middleware.PanicMiddleware)
+	router.Use(middleware.AccessLogMiddleware)
 
 	server := &http.Server{
 		Handler: router,

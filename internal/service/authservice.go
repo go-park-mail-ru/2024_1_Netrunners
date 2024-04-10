@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
 type usersStorage interface {
@@ -21,10 +21,13 @@ type usersStorage interface {
 	RemoveUser(email string) error
 	HasUser(email, password string) error
 	GetUser(email string) (domain.User, error)
-	ChangeUserPassword(email, newPassword string) error
+	ChangeUserPassword(email, newPassword string) (domain.User, error)
 	ChangeUserName(email, newName string) (domain.User, error)
 	GetUserDataByUuid(uuid string) (domain.User, error)
 	GetUserPreview(uuid string) (domain.UserPreview, error)
+	ChangeUserPasswordByUuid(uuid, newPassword string) (domain.User, error)
+	ChangeUserNameByUuid(uuid, newName string) (domain.User, error)
+	ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error)
 }
 
 type AuthService struct {
@@ -79,14 +82,14 @@ func (service *AuthService) GetUser(ctx context.Context, login string) (domain.U
 	return user, nil
 }
 
-func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) error {
-	err := service.storage.ChangeUserPassword(login, newPassword)
+func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) (domain.User, error) {
+	user, err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
 			ctx.Value(requestId.ReqIDKey), err)
-		return err
+		return domain.User{}, err
 	}
-	return nil
+	return user, nil
 }
 
 func (service *AuthService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
@@ -205,4 +208,35 @@ func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (do
 		return domain.UserPreview{}, err
 	}
 	return userPreview, nil
+}
+
+func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
+	error) {
+	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change password: %v",
+			ctx.Value(requestId.ReqIDKey), err)
+		return domain.User{}, err
+	}
+	return user, nil
+}
+
+func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
+	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+	return user, nil
+}
+
+func (service *AuthService) ChangeUserAvatarByUuid(ctx context.Context, uuid, filename string) (domain.User, error) {
+	user, err := service.storage.ChangeUserAvatarByUuid(uuid, filename)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+	return user, nil
 }

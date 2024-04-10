@@ -35,7 +35,7 @@ const getActorDataByUuid = `
 `
 
 const getActorsFilms = `
-		SELECT f.uuid, f.title, f.banner
+		SELECT f.uuid, f.title
 		FROM film f LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
 		WHERE faa.uuid = $1;
 `

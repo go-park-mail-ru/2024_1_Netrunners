@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -31,8 +31,8 @@ func NewActorsHandlers(actorsService *service.ActorsService, logger *zap.Sugared
 
 func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
 	actorUuid := mux.Vars(r)["uuid"]
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	actor, err := actorsHandlers.actorsService.GetActorByUuid(ctx, actorUuid)
 	if err != nil {
@@ -89,8 +89,8 @@ type actorsByFilmResponse struct {
 
 func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
 	filmUuid := mux.Vars(r)["uuid"]
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	actors, err := actorsHandlers.actorsService.GetActorsByFilm(ctx, filmUuid)
 	if err != nil {
