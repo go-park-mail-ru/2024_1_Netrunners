@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -62,7 +64,40 @@ func (middlewareHandlers *Middleware) PanicMiddleware(next http.Handler) http.Ha
 	})
 }
 
-func (middleware *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+func (middlewareHandlers *Middleware) CsrfMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("X-CSRF-TOKEN")
+		if token == "" {
+			middlewareHandlers.logger.Errorf("empty csrf token from %v", r.URL)
+			err := handlers.WriteError(w, myerrors.ErrInternalServerError)
+			if err != nil {
+				middlewareHandlers.logger.Errorf("error at writing response: %v\n", err)
+			}
+			return
+		}
+
+		parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+
+			return []byte("sad"), nil
+		})
+		if err != nil {
+			middlewareHandlers.logger.Errorf("invalid csrf token from: %v\n", err)
+			return
+		}
+
+		if !parsedToken.Valid {
+			middlewareHandlers.logger.Errorf("invalid csrf token from: %v\n", err)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
+}
+
+func (middlewareHandlers *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// here will be our new check function
 

@@ -87,6 +87,8 @@ func main() {
 	router.HandleFunc("/auth/signup", authPageHandlers.Signup).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
 
+	router.HandleFunc("/auth/csrf", middleware.CsrfMiddleware(authPageHandlers.Check)).Methods("POST", "OPTIONS")
+
 	router.HandleFunc("/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")

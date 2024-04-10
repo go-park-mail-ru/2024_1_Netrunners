@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
@@ -16,6 +18,11 @@ import (
 var (
 	tokenCookieExpirationTime = 48 * 3600
 )
+
+type authResponse struct {
+	Status int    `json:"status"`
+	Csrf   string `json:"csrf"`
+}
 
 type AuthPageHandlers struct {
 	authService    *service.AuthService
@@ -123,6 +130,13 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
+
+	csrfToken, err := generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set("X-CSRF-TOKEN", csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -294,6 +308,12 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, tokenCookie)
 
+	csrfToken, err := generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set("X-CSRF-TOKEN", csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -362,8 +382,31 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
+
+	csrfToken, err := generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set("X-CSRF-TOKEN", csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
+}
+
+func generateCsrfToken() (string, error) {
+	claims := &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+		Issuer:    "NETrunnerFLIX",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenSigned, err := token.SignedString([]byte("sad"))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }
