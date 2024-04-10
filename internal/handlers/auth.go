@@ -25,6 +25,7 @@ type AuthPageHandlers struct {
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
 	csrfKey        string
+	csrfHeader     string
 }
 
 func NewAuthPageHandlers(authService *service.AuthService, sessionService *service.SessionService,
@@ -34,6 +35,7 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 		sessionService: sessionService,
 		logger:         logger,
 		csrfKey:        os.Getenv("CSRFKEY"),
+		csrfHeader:     "X-CSRF-TOKEN",
 	}
 }
 
@@ -134,7 +136,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
 	}
-	w.Header().Set("X-CSRF-TOKEN", csrfToken)
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -311,7 +313,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
 	}
-	w.Header().Set("X-CSRF-TOKEN", csrfToken)
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -386,7 +388,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
 	}
-	w.Header().Set("X-CSRF-TOKEN", csrfToken)
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)

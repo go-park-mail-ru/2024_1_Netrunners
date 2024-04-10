@@ -22,6 +22,7 @@ type Middleware struct {
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
 	csrfKey        string
+	csrfHeader     string
 }
 
 func NewMiddleware(authService *service.AuthService,
@@ -31,6 +32,7 @@ func NewMiddleware(authService *service.AuthService,
 		sessionService: sessionService,
 		logger:         logger,
 		csrfKey:        os.Getenv("CSRFKEY"),
+		csrfHeader:     "X-CSRF-TOKEN",
 	}
 }
 
@@ -69,7 +71,7 @@ func (middlewareHandlers *Middleware) PanicMiddleware(next http.Handler) http.Ha
 
 func (middlewareHandlers *Middleware) CsrfMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("X-CSRF-TOKEN")
+		token := r.Header.Get(middlewareHandlers.csrfHeader)
 		if token == "" {
 			middlewareHandlers.logger.Errorf("empty csrf token from %v", r.URL)
 			err := handlers.WriteError(w, myerrors.ErrInternalServerError)
