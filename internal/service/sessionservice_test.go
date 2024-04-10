@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"go.uber.org/zap"
 
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAddSession(t *testing.T) {
@@ -30,6 +32,12 @@ func TestAddSession(t *testing.T) {
 	if err != nil {
 		t.Errorf("AddSession returned an unexpected error: %v", err)
 	}
+
+	mockStorage.EXPECT().Add(login, token, version).Return(errors.New(""))
+
+	err = service.Add(context.Background(), login, token, version)
+
+	assert.Error(t, err)
 }
 
 func TestDeleteSession(t *testing.T) {
@@ -51,6 +59,12 @@ func TestDeleteSession(t *testing.T) {
 	if err != nil {
 		t.Errorf("DeleteSession returned an unexpected error: %v", err)
 	}
+
+	mockStorage.EXPECT().DeleteSession(login, token).Return(errors.New(""))
+
+	err = service.DeleteSession(context.Background(), login, token)
+
+	assert.Error(t, err)
 }
 
 func TestUpdateSession(t *testing.T) {
@@ -72,6 +86,12 @@ func TestUpdateSession(t *testing.T) {
 	if err != nil {
 		t.Errorf("UpdateSession returned an unexpected error: %v", err)
 	}
+
+	mockStorage.EXPECT().Update(login, token).Return(errors.New(""))
+
+	err = service.Update(context.Background(), login, token)
+
+	assert.Error(t, err)
 }
 
 func TestCheckVersion(t *testing.T) {
@@ -98,6 +118,12 @@ func TestCheckVersion(t *testing.T) {
 	if !hasSession {
 		t.Error("CheckVersion returned unexpected result: expected true, got false")
 	}
+
+	mockStorage.EXPECT().CheckVersion(login, token, usersVersion).Return(false, errors.New(""))
+
+	hasSession, err = service.CheckVersion(context.Background(), login, token, usersVersion)
+
+	assert.Error(t, err)
 }
 
 func TestGetVersion(t *testing.T) {
@@ -124,6 +150,12 @@ func TestGetVersion(t *testing.T) {
 	if version != expectedVersion {
 		t.Errorf("GetVersion returned unexpected version: expected %d, got %d", expectedVersion, version)
 	}
+
+	mockStorage.EXPECT().GetVersion(login, token).Return(expectedVersion, errors.New(""))
+
+	version, err = service.GetVersion(context.Background(), login, token)
+
+	assert.Error(t, err)
 }
 
 func TestHasSession(t *testing.T) {
@@ -145,6 +177,12 @@ func TestHasSession(t *testing.T) {
 	if err != nil {
 		t.Errorf("HasSession returned an unexpected error: %v", err)
 	}
+
+	mockStorage.EXPECT().HasSession(login, token).Return(errors.New(""))
+
+	err = service.HasSession(context.Background(), login, token)
+
+	assert.Error(t, err)
 }
 
 func TestCheckAllUserSessionTokens(t *testing.T) {
@@ -165,4 +203,10 @@ func TestCheckAllUserSessionTokens(t *testing.T) {
 	if err != nil {
 		t.Errorf("CheckAllUserSessionTokens returned an unexpected error: %v", err)
 	}
+
+	mockStorage.EXPECT().CheckAllUserSessionTokens(login).Return(errors.New(""))
+
+	err = service.CheckAllUserSessionTokens(context.Background(), login)
+
+	assert.Error(t, err)
 }

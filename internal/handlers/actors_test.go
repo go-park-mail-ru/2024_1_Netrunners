@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,6 +49,33 @@ func TestActorsHandlers_GetActorByUuid(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.Status)
 	assert.Equal(t, actorData.Uuid, response.Actor.Uuid)
 	assert.Equal(t, actorData.Name, response.Actor.Name)
+
+	actorData2 := domain.ActorData{
+		Uuid: "",
+		Name: "",
+	}
+
+	mockActorsService.EXPECT().GetActorByUuid(gomock.Any(), "1").Return(actorData, errors.New(""))
+
+	actorsHandlers = NewActorsHandlers(mockActorsService, mockLogger)
+
+	req = httptest.NewRequest("GET", "/actors/1", nil)
+	req = mux.SetURLVars(req, map[string]string{"uuid": "1"})
+	w = httptest.NewRecorder()
+
+	actorsHandlers.GetActorByUuid(w, req)
+
+	resp = w.Result()
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var response2 actorResponse
+	err = json.NewDecoder(resp.Body).Decode(&response2)
+
+	assert.Equal(t, 500, response2.Status)
+	assert.Equal(t, actorData2.Uuid, response2.Actor.Uuid)
+	assert.Equal(t, actorData2.Name, response2.Actor.Name)
 }
 
 func TestActorsHandlers_GetActorsByFilm(t *testing.T) {

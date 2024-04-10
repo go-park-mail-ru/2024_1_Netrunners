@@ -5,8 +5,10 @@
 package mock
 
 import (
+	"net/http"
 	reflect "reflect"
 
+	"github.com/dgrijalva/jwt-go"
 	domain "github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -204,4 +206,20 @@ func (mr *MockusersStorageMockRecorder) RemoveUser(email interface{}) *gomock.Ca
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUser",
 		reflect.TypeOf((*MockusersStorage)(nil).RemoveUser), email)
+}
+
+// IsTokenValid mocks base method.
+func (m *MockusersStorage) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsTokenValid", token)
+	ret0, _ := ret[0].(jwt.MapClaims)
+	ret1, _ := ret[0].(error)
+	return ret0, ret1
+}
+
+// IsTokenValid indicates an expected call of RemoveUser.
+func (mr *MockusersStorageMockRecorder) IsTokenValid(token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsTokenValid",
+		reflect.TypeOf((*MockusersStorage)(nil).IsTokenValid), token)
 }

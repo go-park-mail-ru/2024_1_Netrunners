@@ -31,6 +31,13 @@ func TestAuthService_HasUser(t *testing.T) {
 	err := authService.HasUser(context.Background(), login, password)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().HasUser(login, password).Return(errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	err = authService.HasUser(context.Background(), login, password)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_ChangeUserPassword(t *testing.T) {
@@ -49,6 +56,13 @@ func TestAuthService_ChangeUserPassword(t *testing.T) {
 	_, err := authService.ChangeUserPassword(context.Background(), login, newPassword)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(domain.User{}, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	_, err = authService.ChangeUserPassword(context.Background(), login, newPassword)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_ChangeUserName(t *testing.T) {
@@ -67,6 +81,13 @@ func TestAuthService_ChangeUserName(t *testing.T) {
 	_, err := authService.ChangeUserName(context.Background(), login, newName)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().ChangeUserName(login, newName).Return(domain.User{}, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	_, err = authService.ChangeUserName(context.Background(), login, newName)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_ValidateLogin_Valid(t *testing.T) {
@@ -153,6 +174,13 @@ func TestAuthService_GetUserDataByUuid(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, user, retrievedUser)
+
+	mockStorage.EXPECT().GetUserDataByUuid(uuid).Return(user, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	_, err = authService.GetUserDataByUuid(context.Background(), uuid)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_GetUserPreview(t *testing.T) {
@@ -176,6 +204,13 @@ func TestAuthService_GetUserPreview(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, userPreview, retrievedUserPreview)
+
+	mockStorage.EXPECT().GetUserPreview(uuid).Return(userPreview, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	retrievedUserPreview, err = authService.GetUserPreview(context.Background(), uuid)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_ChangeUserPasswordByUuid(t *testing.T) {
@@ -194,6 +229,13 @@ func TestAuthService_ChangeUserPasswordByUuid(t *testing.T) {
 	_, err := authService.ChangeUserPasswordByUuid(context.Background(), uuid, newPassword)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().ChangeUserPasswordByUuid(uuid, newPassword).Return(domain.User{}, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	_, err = authService.ChangeUserPasswordByUuid(context.Background(), uuid, newPassword)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_ChangeUserNameByUuid(t *testing.T) {
@@ -212,6 +254,13 @@ func TestAuthService_ChangeUserNameByUuid(t *testing.T) {
 	_, err := authService.ChangeUserNameByUuid(context.Background(), uuid, newName)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().ChangeUserNameByUuid(uuid, newName).Return(domain.User{}, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	_, err = authService.ChangeUserNameByUuid(context.Background(), uuid, newName)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_GetUser(t *testing.T) {
@@ -231,6 +280,13 @@ func TestAuthService_GetUser(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedUser, user)
+
+	mockStorage.EXPECT().GetUser(gomock.Eq(login)).Return(expectedUser, errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	user, err = authService.GetUser(context.Background(), login)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_CreateUser(t *testing.T) {
@@ -252,6 +308,13 @@ func TestAuthService_CreateUser(t *testing.T) {
 	err := authService.CreateUser(context.Background(), user)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().CreateUser(user).Return(errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	err = authService.CreateUser(context.Background(), user)
+
+	assert.Error(t, err)
 }
 
 func TestAuthService_RemoveUser(t *testing.T) {
@@ -269,4 +332,36 @@ func TestAuthService_RemoveUser(t *testing.T) {
 	err := authService.RemoveUser(context.Background(), login)
 
 	assert.NoError(t, err)
+
+	mockStorage.EXPECT().RemoveUser(login).Return(errors.New(""))
+
+	authService = NewAuthService(mockStorage, mockLogger)
+	err = authService.RemoveUser(context.Background(), login)
+
+	assert.Error(t, err)
 }
+
+// func TestAuthService_IsTokenValid(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
+
+// 	mockStorage := mockService.NewMockusersStorage(ctrl)
+// 	mockLogger := zaptest.NewLogger(t).Sugar()
+
+// 	cookie := &http.Cookie{
+// 		Name:     "access",
+// 		Value:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTI5MzU5NzMsImlzcyI6Ik5FVHJ1bm5lckZMSVgiLCJMb2dpbiI6ImJlYnJhQGJlYi5yYSIsIklzQWRtaW4iOmZhbHNlLCJWZXJzaW9uIjowfQ.Uzq55YX4G_vaRFuItjF_tswUX3B74OJuOwMCgmJUDSc",
+// 		Path:     "/",
+// 		HttpOnly: true,
+// 		Secure:   false,
+// 		MaxAge:   6000,
+// 	}
+// 	claims := jwt.MapClaims{}
+
+// 	mockStorage.EXPECT().IsTokenValid(cookie).Return(claims, nil)
+
+// 	authService := NewAuthService(mockStorage, mockLogger)
+// 	_, err := authService.IsTokenValid(cookie)
+
+// 	assert.NoError(t, err)
+// }

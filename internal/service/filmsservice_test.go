@@ -3,12 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
-	"testing"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
@@ -335,4 +336,9 @@ func TestFilmsService_AddSomeData(t *testing.T) {
 
 	err := service.AddSomeData()
 	require.NoError(t, err)
+
+	mockStorage.EXPECT().AddFilm(gomock.Any()).Return(errors.New(""))
+
+	err = service.AddSomeData()
+	require.Error(t, err)
 }
