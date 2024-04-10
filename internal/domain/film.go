@@ -3,16 +3,16 @@ package domain
 import "time"
 
 type FilmData struct {
-	Uuid         string
-	Preview      string
-	Title        string
-	Director     string
-	AverageScore float32
-	ScoresCount  int
-	Duration     int
-	Date         time.Time
-	Data         string
-	AgeLimit     uint8
+	Uuid         string    `json:"uuid"`
+	Preview      string    `json:"preview"`
+	Title        string    `json:"title"`
+	Director     string    `json:"director"`
+	AverageScore float32   `json:"averageScore"`
+	ScoresCount  int       `json:"scoresCount"`
+	Duration     int       `json:"duration"`
+	Date         time.Time `json:"date"`
+	Data         string    `json:"data"`
+	AgeLimit     uint8     `json:"ageLimit"`
 }
 
 type FilmDataToAdd struct {

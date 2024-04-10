@@ -3,15 +3,15 @@ package domain
 import "time"
 
 type User struct {
-	Uuid         string
+	Uuid         string `json:"uuid"`
 	Email        string `json:"login"`
 	Name         string `json:"username"`
 	Password     string `json:"password"`
 	Version      uint8
-	IsAdmin      bool
-	Avatar       string
-	RegisteredAt time.Time
-	Birthday     time.Time
+	IsAdmin      bool      `json:"isAdmin"`
+	Avatar       string    `json:"avatar"`
+	RegisteredAt time.Time `json:"registeredAt"`
+	Birthday     time.Time `json:"birthday"`
 }
 
 type UserSignUp struct {
