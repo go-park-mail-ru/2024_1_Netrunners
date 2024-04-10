@@ -51,6 +51,11 @@ const putNewUserPasswordByUuid = `
 		SET password = $1
 		WHERE uuid = $2;`
 
+const putNewUserAvatarByUuid = `
+		UPDATE users
+		SET avatar = $1
+		WHERE uuid = $2;`
+
 const putNewUsernameByUuid = `
 		UPDATE users
 		SET name = $1
@@ -285,6 +290,47 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	}()
 
 	err = tx.QueryRow(context.Background(), putNewUsernameByUuid, newUsername, uuid).Scan()
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	var user domain.User
+	err = storage.pool.QueryRow(context.Background(), getUserDataByUuid, uuid).Scan(
+		&user.Uuid,
+		&user.Email,
+		&user.Avatar,
+		&user.Name,
+		&user.Password,
+		&user.RegisteredAt,
+		&user.Birthday,
+		&user.IsAdmin)
+	if err != nil {
+		return domain.User{}, myerrors.ErrInternalServerError
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	return user, nil
+}
+
+func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error) {
+	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w",
+			myerrors.ErrInternalServerError)
+	}
+	defer func() {
+		err = tx.Rollback(context.Background())
+		if err != nil {
+			fmt.Printf("failed to rollback transaction to change username: %v",
+				myerrors.ErrInternalServerError)
+		}
+	}()
+
+	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}

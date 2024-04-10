@@ -102,6 +102,7 @@ func main() {
 
 	router.Use(middleware.CorsMiddleware)
 	router.Use(middleware.PanicMiddleware)
+	router.Use(middleware.AccessLogMiddleware)
 
 	server := &http.Server{
 		Handler: router,

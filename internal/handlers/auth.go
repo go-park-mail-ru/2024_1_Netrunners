@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -34,8 +34,8 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -122,8 +122,8 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 }
 
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
@@ -176,8 +176,8 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -272,8 +272,8 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 }
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
-	requestID := requestId.GenerateRequestID()
-	ctx := requestId.GenerateReqIdCTX(requestID)
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
