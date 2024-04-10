@@ -210,7 +210,8 @@ func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (do
 	return userPreview, nil
 }
 
-func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error) {
+func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
+	error) {
 	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
