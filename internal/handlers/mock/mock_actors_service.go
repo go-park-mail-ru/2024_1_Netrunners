@@ -47,7 +47,8 @@ func (m *MockActorsService) GetActorByUuid(ctx context.Context, actorUuid string
 // GetActorByUuid indicates an expected call of GetActorByUuid.
 func (mr *MockActorsServiceMockRecorder) GetActorByUuid(ctx, actorUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid", reflect.TypeOf((*MockActorsService)(nil).GetActorByUuid), ctx, actorUuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid",
+		reflect.TypeOf((*MockActorsService)(nil).GetActorByUuid), ctx, actorUuid)
 }
 
 // GetActorsByFilm mocks base method.
@@ -62,5 +63,6 @@ func (m *MockActorsService) GetActorsByFilm(ctx context.Context, filmUuid string
 // GetActorsByFilm indicates an expected call of GetActorsByFilm.
 func (mr *MockActorsServiceMockRecorder) GetActorsByFilm(ctx, filmUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm", reflect.TypeOf((*MockActorsService)(nil).GetActorsByFilm), ctx, filmUuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm",
+		reflect.TypeOf((*MockActorsService)(nil).GetActorsByFilm), ctx, filmUuid)
 }

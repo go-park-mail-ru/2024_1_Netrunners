@@ -45,7 +45,8 @@ func (m *MockFilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 // AddFilm indicates an expected call of AddFilm.
 func (mr *MockFilmsStorageMockRecorder) AddFilm(film interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm", reflect.TypeOf((*MockFilmsStorage)(nil).AddFilm), film)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm",
+		reflect.TypeOf((*MockFilmsStorage)(nil).AddFilm), film)
 }
 
 // GetAllFilmActors mocks base method.
@@ -60,7 +61,8 @@ func (m *MockFilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview,
 // GetAllFilmActors indicates an expected call of GetAllFilmActors.
 func (mr *MockFilmsStorageMockRecorder) GetAllFilmActors(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmActors", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmActors), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmActors",
+		reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmActors), uuid)
 }
 
 // GetAllFilmComments mocks base method.
@@ -75,7 +77,8 @@ func (m *MockFilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, er
 // GetAllFilmComments indicates an expected call of GetAllFilmComments.
 func (mr *MockFilmsStorageMockRecorder) GetAllFilmComments(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmComments), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments",
+		reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmComments), uuid)
 }
 
 // GetAllFilmsPreviews mocks base method.
@@ -90,7 +93,8 @@ func (m *MockFilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 // GetAllFilmsPreviews indicates an expected call of GetAllFilmsPreviews.
 func (mr *MockFilmsStorageMockRecorder) GetAllFilmsPreviews() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmsPreviews))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews",
+		reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmsPreviews))
 }
 
 // GetFilmDataByUuid mocks base method.
@@ -105,7 +109,8 @@ func (m *MockFilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, erro
 // GetFilmDataByUuid indicates an expected call of GetFilmDataByUuid.
 func (mr *MockFilmsStorageMockRecorder) GetFilmDataByUuid(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmDataByUuid", reflect.TypeOf((*MockFilmsStorage)(nil).GetFilmDataByUuid), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmDataByUuid",
+		reflect.TypeOf((*MockFilmsStorage)(nil).GetFilmDataByUuid), uuid)
 }
 
 // GetFilmPreview mocks base method.
@@ -120,7 +125,8 @@ func (m *MockFilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, erro
 // GetFilmPreview indicates an expected call of GetFilmPreview.
 func (mr *MockFilmsStorageMockRecorder) GetFilmPreview(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmPreview", reflect.TypeOf((*MockFilmsStorage)(nil).GetFilmPreview), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmPreview",
+		reflect.TypeOf((*MockFilmsStorage)(nil).GetFilmPreview), uuid)
 }
 
 // RemoveFilm mocks base method.
@@ -134,5 +140,6 @@ func (m *MockFilmsStorage) RemoveFilm(uuid string) error {
 // RemoveFilm indicates an expected call of RemoveFilm.
 func (mr *MockFilmsStorageMockRecorder) RemoveFilm(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFilm", reflect.TypeOf((*MockFilmsStorage)(nil).RemoveFilm), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFilm",
+		reflect.TypeOf((*MockFilmsStorage)(nil).RemoveFilm), uuid)
 }

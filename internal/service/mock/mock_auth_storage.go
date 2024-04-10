@@ -61,7 +61,8 @@ func (m *MockusersStorage) ChangeUserName(email, newName string) (domain.User, e
 // ChangeUserName indicates an expected call of ChangeUserName.
 func (mr *MockusersStorageMockRecorder) ChangeUserName(email, newName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserName", reflect.TypeOf((*MockusersStorage)(nil).ChangeUserName), email, newName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserName",
+		reflect.TypeOf((*MockusersStorage)(nil).ChangeUserName), email, newName)
 }
 
 // ChangeUserNameByUuid mocks base method.
@@ -76,7 +77,8 @@ func (m *MockusersStorage) ChangeUserNameByUuid(uuid, newName string) (domain.Us
 // ChangeUserNameByUuid indicates an expected call of ChangeUserNameByUuid.
 func (mr *MockusersStorageMockRecorder) ChangeUserNameByUuid(uuid, newName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserNameByUuid", reflect.TypeOf((*MockusersStorage)(nil).ChangeUserNameByUuid), uuid, newName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserNameByUuid",
+		reflect.TypeOf((*MockusersStorage)(nil).ChangeUserNameByUuid), uuid, newName)
 }
 
 // ChangeUserPassword mocks base method.
@@ -91,7 +93,8 @@ func (m *MockusersStorage) ChangeUserPassword(email, newPassword string) (domain
 // ChangeUserPassword indicates an expected call of ChangeUserPassword.
 func (mr *MockusersStorageMockRecorder) ChangeUserPassword(email, newPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPassword", reflect.TypeOf((*MockusersStorage)(nil).ChangeUserPassword), email, newPassword)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPassword",
+		reflect.TypeOf((*MockusersStorage)(nil).ChangeUserPassword), email, newPassword)
 }
 
 // ChangeUserPasswordByUuid mocks base method.
@@ -106,7 +109,8 @@ func (m *MockusersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) (d
 // ChangeUserPasswordByUuid indicates an expected call of ChangeUserPasswordByUuid.
 func (mr *MockusersStorageMockRecorder) ChangeUserPasswordByUuid(uuid, newPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPasswordByUuid", reflect.TypeOf((*MockusersStorage)(nil).ChangeUserPasswordByUuid), uuid, newPassword)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPasswordByUuid",
+		reflect.TypeOf((*MockusersStorage)(nil).ChangeUserPasswordByUuid), uuid, newPassword)
 }
 
 // CreateUser mocks base method.
@@ -120,7 +124,8 @@ func (m *MockusersStorage) CreateUser(user domain.UserSignUp) error {
 // CreateUser indicates an expected call of CreateUser.
 func (mr *MockusersStorageMockRecorder) CreateUser(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockusersStorage)(nil).CreateUser), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser",
+		reflect.TypeOf((*MockusersStorage)(nil).CreateUser), user)
 }
 
 // GetUser mocks base method.
@@ -135,7 +140,8 @@ func (m *MockusersStorage) GetUser(email string) (domain.User, error) {
 // GetUser indicates an expected call of GetUser.
 func (mr *MockusersStorageMockRecorder) GetUser(email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockusersStorage)(nil).GetUser), email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser",
+		reflect.TypeOf((*MockusersStorage)(nil).GetUser), email)
 }
 
 // GetUserDataByUuid mocks base method.
@@ -150,7 +156,8 @@ func (m *MockusersStorage) GetUserDataByUuid(uuid string) (domain.User, error) {
 // GetUserDataByUuid indicates an expected call of GetUserDataByUuid.
 func (mr *MockusersStorageMockRecorder) GetUserDataByUuid(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDataByUuid", reflect.TypeOf((*MockusersStorage)(nil).GetUserDataByUuid), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDataByUuid",
+		reflect.TypeOf((*MockusersStorage)(nil).GetUserDataByUuid), uuid)
 }
 
 // GetUserPreview mocks base method.
@@ -165,7 +172,8 @@ func (m *MockusersStorage) GetUserPreview(uuid string) (domain.UserPreview, erro
 // GetUserPreview indicates an expected call of GetUserPreview.
 func (mr *MockusersStorageMockRecorder) GetUserPreview(uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPreview", reflect.TypeOf((*MockusersStorage)(nil).GetUserPreview), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPreview",
+		reflect.TypeOf((*MockusersStorage)(nil).GetUserPreview), uuid)
 }
 
 // HasUser mocks base method.
@@ -179,7 +187,8 @@ func (m *MockusersStorage) HasUser(email, password string) error {
 // HasUser indicates an expected call of HasUser.
 func (mr *MockusersStorageMockRecorder) HasUser(email, password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasUser", reflect.TypeOf((*MockusersStorage)(nil).HasUser), email, password)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasUser",
+		reflect.TypeOf((*MockusersStorage)(nil).HasUser), email, password)
 }
 
 // RemoveUser mocks base method.
@@ -193,5 +202,6 @@ func (m *MockusersStorage) RemoveUser(email string) error {
 // RemoveUser indicates an expected call of RemoveUser.
 func (mr *MockusersStorageMockRecorder) RemoveUser(email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUser", reflect.TypeOf((*MockusersStorage)(nil).RemoveUser), email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUser",
+		reflect.TypeOf((*MockusersStorage)(nil).RemoveUser), email)
 }
