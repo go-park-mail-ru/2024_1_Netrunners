@@ -130,6 +130,11 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	}
 }
 
+type newData struct {
+	Action string `json:"action"`
+	Data   string `json:"newData"`
+}
+
 func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -163,9 +168,18 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	action := r.FormValue("action")
+	var data newData
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
 	switch {
-	case action == "chPassword":
+	case data.Action == "chPassword":
 		newPassword := r.FormValue("newData")
 		err = service.ValidatePassword(newPassword)
 		if err != nil {
@@ -185,7 +199,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-	case action == "chUsername":
+	case data.Action == "chUsername":
 		newUsername := r.FormValue("newData")
 		err = service.ValidateUsername(newUsername)
 		if err != nil {
@@ -204,7 +218,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			}
 			return
 		}
-	case action == "chAvatar":
+	case data.Action == "chAvatar":
 		files := r.MultipartForm.File["avatar"]
 		if err != nil {
 			err = WriteError(w, err)

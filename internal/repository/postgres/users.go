@@ -246,7 +246,7 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 		}
 	}()
 
-	err = tx.QueryRow(context.Background(), putNewUserPasswordByUuid, newPassword, uuid).Scan()
+	_, err = tx.Exec(context.Background(), putNewUserPasswordByUuid, newPassword, uuid)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed update data to change password: %w",
 			myerrors.ErrInternalServerError)
@@ -289,7 +289,7 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 		}
 	}()
 
-	err = tx.QueryRow(context.Background(), putNewUsernameByUuid, newUsername, uuid).Scan()
+	_, err = tx.Exec(context.Background(), putNewUsernameByUuid, newUsername, uuid)
 	if err != nil {
 		return domain.User{}, myerrors.ErrInternalServerError
 	}

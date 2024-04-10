@@ -103,6 +103,16 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	uuidCookie := &http.Cookie{
+		Name:     "user_uuid",
+		Value:    user.Uuid,
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   false,
+		MaxAge:   0,
+	}
+	http.SetCookie(w, uuidCookie)
+
 	tokenCookie := &http.Cookie{
 		Name:     "access",
 		Value:    tokenSigned,
@@ -253,6 +263,25 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		}
 		return
 	}
+
+	userForUuid, err := authPageHandlers.authService.GetUser(ctx, login)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	uuidCookie := &http.Cookie{
+		Name:     "user_uuid",
+		Value:    userForUuid.Uuid,
+		Path:     "/",
+		HttpOnly: false,
+		Secure:   false,
+		MaxAge:   0,
+	}
+	http.SetCookie(w, uuidCookie)
 
 	tokenCookie := &http.Cookie{
 		Name:     "access",
