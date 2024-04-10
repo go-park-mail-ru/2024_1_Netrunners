@@ -19,11 +19,6 @@ var (
 	tokenCookieExpirationTime = 48 * 3600
 )
 
-type authResponse struct {
-	Status int    `json:"status"`
-	Csrf   string `json:"csrf"`
-}
-
 type AuthPageHandlers struct {
 	authService    *service.AuthService
 	sessionService *service.SessionService
