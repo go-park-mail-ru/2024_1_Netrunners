@@ -110,7 +110,7 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 		WithArgs(password, email).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
-	err = storage.ChangeUserPassword(email, password)
+	_, err = storage.ChangeUserPassword(email, password)
 	require.Equal(t, nil, err)
 
 	err = mock.ExpectationsWereMet()
