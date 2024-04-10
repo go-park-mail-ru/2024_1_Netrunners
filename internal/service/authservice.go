@@ -32,8 +32,8 @@ type usersStorage interface {
 
 type AuthService struct {
 	storage   usersStorage
-	secretKey string
 	logger    *zap.SugaredLogger
+	secretKey string
 }
 
 func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthService {

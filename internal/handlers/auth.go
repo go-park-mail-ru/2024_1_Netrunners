@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"go.uber.org/zap"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
@@ -21,6 +24,8 @@ type AuthPageHandlers struct {
 	authService    *service.AuthService
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
+	csrfKey        string
+	csrfHeader     string
 }
 
 func NewAuthPageHandlers(authService *service.AuthService, sessionService *service.SessionService,
@@ -29,6 +34,8 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 		authService:    authService,
 		sessionService: sessionService,
 		logger:         logger,
+		csrfKey:        os.Getenv("CSRFKEY"),
+		csrfHeader:     "X-CSRF-TOKEN",
 	}
 }
 
@@ -123,6 +130,13 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
+
+	csrfToken, err := authPageHandlers.generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -294,6 +308,12 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, tokenCookie)
 
+	csrfToken, err := authPageHandlers.generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -362,8 +382,31 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
+
+	csrfToken, err := authPageHandlers.generateCsrfToken()
+	if err != nil {
+		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
+		return
+	}
+	w.Header().Set(authPageHandlers.csrfHeader, csrfToken)
 	err = WriteSuccess(w)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
+}
+
+func (authPageHandlers *AuthPageHandlers) generateCsrfToken() (string, error) {
+	claims := &jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+		Issuer:    "NETrunnerFLIX",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenSigned, err := token.SignedString([]byte(authPageHandlers.csrfKey))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }
