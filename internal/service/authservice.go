@@ -8,6 +8,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+
 	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
@@ -32,8 +34,8 @@ type usersStorage interface {
 
 type AuthService struct {
 	storage   usersStorage
-	secretKey string
 	logger    *zap.SugaredLogger
+	secretKey string
 }
 
 func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthService {

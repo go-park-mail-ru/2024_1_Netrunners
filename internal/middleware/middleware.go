@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -20,6 +21,7 @@ type Middleware struct {
 	authService    *service.AuthService
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
+	csrfKey        string
 }
 
 func NewMiddleware(authService *service.AuthService,
@@ -28,6 +30,7 @@ func NewMiddleware(authService *service.AuthService,
 		authService:    authService,
 		sessionService: sessionService,
 		logger:         logger,
+		csrfKey:        os.Getenv("CSRFKEY"),
 	}
 }
 
@@ -81,7 +84,7 @@ func (middlewareHandlers *Middleware) CsrfMiddleware(next http.HandlerFunc) http
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte("sad"), nil
+			return []byte(middlewareHandlers.csrfKey), nil
 		})
 		if err != nil {
 			middlewareHandlers.logger.Errorf("invalid csrf token from: %v\n", err)

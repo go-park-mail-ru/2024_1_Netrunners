@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -23,6 +24,7 @@ type AuthPageHandlers struct {
 	authService    *service.AuthService
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
+	csrfKey        string
 }
 
 func NewAuthPageHandlers(authService *service.AuthService, sessionService *service.SessionService,
@@ -31,6 +33,7 @@ func NewAuthPageHandlers(authService *service.AuthService, sessionService *servi
 		authService:    authService,
 		sessionService: sessionService,
 		logger:         logger,
+		csrfKey:        os.Getenv("CSRFKEY"),
 	}
 }
 
@@ -126,7 +129,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 	http.SetCookie(w, tokenCookie)
 
-	csrfToken, err := generateCsrfToken()
+	csrfToken, err := authPageHandlers.generateCsrfToken()
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
@@ -303,7 +306,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, tokenCookie)
 
-	csrfToken, err := generateCsrfToken()
+	csrfToken, err := authPageHandlers.generateCsrfToken()
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
@@ -378,7 +381,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 
 	http.SetCookie(w, tokenCookie)
 
-	csrfToken, err := generateCsrfToken()
+	csrfToken, err := authPageHandlers.generateCsrfToken()
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to generate csrf: %v\n", requestID, err)
 		return
@@ -390,7 +393,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 }
 
-func generateCsrfToken() (string, error) {
+func (authPageHandlers *AuthPageHandlers) generateCsrfToken() (string, error) {
 	claims := &jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 		Issuer:    "NETrunnerFLIX",
@@ -398,7 +401,7 @@ func generateCsrfToken() (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenSigned, err := token.SignedString([]byte("sad"))
+	tokenSigned, err := token.SignedString([]byte(authPageHandlers.csrfKey))
 	if err != nil {
 		return "", fmt.Errorf("%v", err)
 	}
