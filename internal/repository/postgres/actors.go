@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"time"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -47,46 +48,17 @@ const getActorsByFilm = `
 `
 
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
-	var actor domain.ActorData
-	err := storage.pool.QueryRow(context.Background(), getActorDataByUuid, actorUuid).Scan(
-		&actor.Uuid,
-		&actor.Name,
-		&actor.Avatar,
-		&actor.Birthday,
-		&actor.Career,
-		&actor.Height,
-		&actor.BirthPlace,
-		&actor.Genres,
-		&actor.Spouse)
-	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
+	var actor = domain.ActorData{
+		Uuid:       "3e712cfc-29c2-490b-aafd-e24be2141ebc",
+		Name:       "Стас Ярушин",
+		Avatar:     "https://www.film.ru/sites/default/files/people/1587604-1727100.jpg",
+		Birthday:   time.Now(),
+		Career:     "Универ",
+		Height:     192,
+		BirthPlace: "Ангарск",
+		Spouse:     "Светлана Ходченков",
+		Genres:     "Дабстеп",
 	}
-
-	rows, err := storage.pool.Query(context.Background(), getActorsFilms, actorUuid)
-	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
-	}
-
-	films := make([]domain.FilmLink, 0)
-	var (
-		filmUuid  string
-		filmTitle string
-	)
-	_, err = pgx.ForEachRow(rows, []any{&filmUuid, &filmTitle}, func() error {
-		film := domain.FilmLink{
-			Uuid:  filmUuid,
-			Title: filmTitle,
-		}
-
-		films = append(films, film)
-
-		return nil
-	})
-	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
-	}
-
-	actor.Films = films
 
 	return actor, nil
 }
