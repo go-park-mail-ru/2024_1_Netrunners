@@ -8,8 +8,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-
 	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
