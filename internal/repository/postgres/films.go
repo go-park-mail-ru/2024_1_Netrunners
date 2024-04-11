@@ -21,14 +21,6 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 	}, nil
 }
 
-const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
-		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
-		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration, f.data;`
-
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
 		FROM director
@@ -79,26 +71,12 @@ const getFilmPreview = `
 		WHERE f.uuid = $1
 		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
 
-const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, COUNT(c.id)
-		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
-		JOIN director d ON f.director = d.id
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
-
 const getAllFilmComments = `
 		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
 		WHERE film.uuid = $1;`
-
-const getAllFilmActors = `
-		SELECT a.uuid, a.name, a.avatar
-		FROM actor a
-		JOIN film_actor fa ON a.id = fa.actor
-		JOIN film f ON fa.film = f.id
-		WHERE f.uuid = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
