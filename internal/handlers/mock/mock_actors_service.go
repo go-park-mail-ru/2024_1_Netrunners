@@ -48,11 +48,16 @@ func (m *MockActorsService) GetActorByUuid(ctx context.Context, actorUuid string
 func (mr *MockActorsServiceMockRecorder) GetActorByUuid(ctx, actorUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid",
 		reflect.TypeOf((*MockActorsService)(nil).GetActorByUuid), ctx, actorUuid)
 =======
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid", reflect.TypeOf((*MockActorsService)(nil).GetActorByUuid), ctx, actorUuid)
 >>>>>>> cc029ef (handlers-tests)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid",
+		reflect.TypeOf((*MockActorsService)(nil).GetActorByUuid), ctx, actorUuid)
+>>>>>>> 577448e (fixes)
 }
 
 // GetActorsByFilm mocks base method.
@@ -68,9 +73,14 @@ func (m *MockActorsService) GetActorsByFilm(ctx context.Context, filmUuid string
 func (mr *MockActorsServiceMockRecorder) GetActorsByFilm(ctx, filmUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 <<<<<<< HEAD
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm",
 		reflect.TypeOf((*MockActorsService)(nil).GetActorsByFilm), ctx, filmUuid)
 =======
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm", reflect.TypeOf((*MockActorsService)(nil).GetActorsByFilm), ctx, filmUuid)
 >>>>>>> cc029ef (handlers-tests)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm",
+		reflect.TypeOf((*MockActorsService)(nil).GetActorsByFilm), ctx, filmUuid)
+>>>>>>> 577448e (fixes)
 }

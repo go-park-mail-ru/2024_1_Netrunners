@@ -46,7 +46,8 @@ func (m *MockActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, 
 // GetActorByUuid indicates an expected call of GetActorByUuid.
 func (mr *MockActorsStorageMockRecorder) GetActorByUuid(actorUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid", reflect.TypeOf((*MockActorsStorage)(nil).GetActorByUuid), actorUuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorByUuid",
+		reflect.TypeOf((*MockActorsStorage)(nil).GetActorByUuid), actorUuid)
 }
 
 // GetActorsByFilm mocks base method.
@@ -61,5 +62,6 @@ func (m *MockActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPrev
 // GetActorsByFilm indicates an expected call of GetActorsByFilm.
 func (mr *MockActorsStorageMockRecorder) GetActorsByFilm(filmUuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm", reflect.TypeOf((*MockActorsStorage)(nil).GetActorsByFilm), filmUuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActorsByFilm",
+		reflect.TypeOf((*MockActorsStorage)(nil).GetActorsByFilm), filmUuid)
 }
