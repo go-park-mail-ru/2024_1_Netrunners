@@ -194,7 +194,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())
