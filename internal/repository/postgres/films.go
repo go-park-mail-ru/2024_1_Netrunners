@@ -101,17 +101,26 @@ const getAllFilmActors = `
 		WHERE f.uuid = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
-	var film = domain.FilmData{
-		Uuid:         "8a3e5139-e58e-4e91-92a9-0e0cacc2b0ae",
-		Title:        "Fast n Furious",
-		Link:         "https://daimnefilm.hb.ru-msk.vkcs.cloud/Rick%20Roll.ia.mp4",
-		Director:     "Федор Бондарчук",
-		AverageScore: 4,
-		ScoresCount:  1,
-		Duration:     140,
-		Data:         "Первый фильм великой серии",
-		Date:         time.Now(),
-		AgeLimit:     18,
+	var film domain.FilmData
+	err := storage.pool.QueryRow(context.Background(),
+		`SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			JOIN director d ON f.director = d.id
+			WHERE f.uuid = $1
+			GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
+		&film.Uuid,
+		&film.Title,
+		&film.Preview,
+		&film.Director,
+		&film.Data,
+		&film.Duration,
+		&film.Date,
+		&film.AverageScore,
+		&film.ScoresCount)
+	if err != nil {
+		return domain.FilmData{},
+			fmt.Errorf("error at begin transaction in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
 	}
 
 	return film, nil
@@ -225,51 +234,48 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 }
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
-	var films = []domain.FilmPreview{
-		{
-			Uuid: "8a3e5139-e58e-4e91-92a9-0e0cacc2b0ae",
-			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
-				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-			Title:        "Fast and Furious 1",
-			Duration:     3600,
-			Director:     "Федор Бондарчук",
-			AverageScore: 4,
-			ScoresCount:  1,
-		},
-		{
-			Uuid:         "17b449a1-499d-49a5-ac2c-b2ea1295449a",
-			Preview:      "https://m.media-amazon.com/images/I/71Wo+cFznbL.jpg",
-			Title:        "Fast and Furious 2",
-			Duration:     7200,
-			Director:     "Федор Бондарчук",
-			AverageScore: 4,
-			ScoresCount:  1,
-		},
+	rows, err := storage.pool.Query(context.Background(),
+		`SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`)
+	if err != nil {
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	films := make([]domain.FilmPreview, 0)
+	var (
+		FilmUuid     string
+		FilmPreview  string
+		FilmTitle    string
+		FilmDirector string
+		FilmDuration int
+		// FilmScore    float32
+		FilmRating int
+	)
+	_, err = pgx.ForEachRow(rows,
+		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmRating}, func() error {
+			film := domain.FilmPreview{
+				Uuid:     FilmUuid,
+				Title:    FilmTitle,
+				Preview:  FilmPreview,
+				Director: FilmDirector,
+				Duration: FilmDuration,
+				// AverageScore: FilmScore,
+				ScoresCount: FilmRating,
+			}
+
+			films = append(films, film)
+
+			return nil
+		})
+	if err != nil {
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	return films, nil
-}
-
-func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
-	var actors = []domain.ActorPreview{
-		{
-			Uuid:   "3e712cfc-29c2-490b-aafd-e24be2141ebc",
-			Name:   "Дмитрий Нагиев",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
-		{
-			Uuid:   "89190a5a-4e12-4ee8-ac10-5f84a0b717dc",
-			Name:   "Светлана Ходченкова",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
-		{
-			Uuid:   "2795d859-c712-4cc2-acd4-19d5a26e2a00",
-			Name:   "Стас Ярушин",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
-	}
-
-	return actors, nil
 }
 
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
@@ -307,4 +313,40 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 	}
 
 	return comments, nil
+}
+
+func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
+	rows, err := storage.pool.Query(context.Background(),
+		`SELECT a.uuid, a.name
+			FROM actor a
+			JOIN film_actor fa ON a.id = fa.actor
+			JOIN film f ON fa.film = f.id
+			WHERE f.uuid = $1;`, uuid)
+	if err != nil {
+		return nil,
+			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
+	}
+
+	actors := make([]domain.ActorPreview, 0)
+	var (
+		ActorUuid string
+		ActorName string
+	)
+	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
+		actor := domain.ActorPreview{
+			Uuid:   ActorUuid,
+			Name:   ActorName,
+			Avatar: ActorUuid,
+		}
+
+		actors = append(actors, actor)
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error at inserting into data in GetAllFilmActors: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	return actors, nil
 }
