@@ -144,7 +144,6 @@ func ValidateLogin(e string) error {
 	if emailRegex.MatchString(e) {
 		return nil
 	}
-	fmt.Println(e)
 	return myerrors.ErrLoginIsNotValid
 }
 

@@ -75,7 +75,7 @@ func main() {
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
 	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
-	err = filmsService.AddSomeData()
+	// err = filmsService.AddSomeData()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 
 	"go.uber.org/zap"
 
@@ -37,7 +38,7 @@ func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string)
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
-			err)
+			myerrors.ErrNoSuchFilm)
 		return domain.FilmData{}, err
 	}
 	return film, nil

@@ -80,7 +80,7 @@ const getFilmPreview = `
 		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
@@ -116,7 +116,6 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	if err != nil {
 		return domain.FilmData{}, err
 	}
-
 	return film, nil
 }
 
@@ -228,48 +227,68 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 }
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
-	var films = []domain.FilmPreview{
-		{
-			Uuid: "8a3e5139-e58e-4e91-92a9-0e0cacc2b0ae",
-			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
-				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-			Title:        "Fast and Furious 1",
-			Duration:     3600,
-			Director:     "Федор Бондарчук",
-			AverageScore: 4,
-			ScoresCount:  1,
-		},
-		{
-			Uuid:         "17b449a1-499d-49a5-ac2c-b2ea1295449a",
-			Preview:      "https://m.media-amazon.com/images/I/71Wo+cFznbL.jpg",
-			Title:        "Fast and Furious 2",
-			Duration:     7200,
-			Director:     "Федор Бондарчук",
-			AverageScore: 4,
-			ScoresCount:  1,
-		},
+	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
+	if err != nil {
+		return nil, err
+	}
+
+	films := make([]domain.FilmPreview, 0)
+	var (
+		FilmUuid     string
+		FilmPreview  string
+		FilmTitle    string
+		FilmDirector string
+		FilmDuration int
+		FilmScore    float32
+		FilmRating   int
+	)
+	for rows.Next() {
+		var film domain.FilmPreview
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating)
+		if err != nil {
+			return nil, err
+		}
+
+		film.Uuid = FilmUuid
+		film.Title = FilmTitle
+		film.Preview = FilmPreview
+		film.Director = FilmDirector
+		film.Duration = FilmDuration
+		film.ScoresCount = FilmRating
+		film.AverageScore = FilmScore
+
+		films = append(films, film)
+
 	}
 
 	return films, nil
 }
 
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
-	var actors = []domain.ActorPreview{
-		{
-			Uuid:   "3e712cfc-29c2-490b-aafd-e24be2141ebc",
-			Name:   "Дмитрий Нагиев",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
-		{
-			Uuid:   "89190a5a-4e12-4ee8-ac10-5f84a0b717dc",
-			Name:   "Светлана Ходченкова",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
-		{
-			Uuid:   "2795d859-c712-4cc2-acd4-19d5a26e2a00",
-			Name:   "Стас Ярушин",
-			Avatar: "https://shorturl.at/ewzP8",
-		},
+	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	actors := make([]domain.ActorPreview, 0)
+	var (
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
+	)
+
+	for rows.Next() {
+		var actor domain.ActorPreview
+		err = rows.Scan(&ActorUuid, &ActorName, &ActorAvatar)
+		if err != nil {
+			return nil, err
+		}
+
+		actor.Uuid = ActorUuid
+		actor.Name = ActorName
+		actor.Avatar = ActorAvatar
+
+		actors = append(actors, actor)
 	}
 
 	return actors, nil
@@ -278,7 +297,7 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, err
 	}
 
 	comments := make([]domain.Comment, 0)
@@ -290,23 +309,21 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 		CommentScore    int
 		CommentAddedAt  time.Time
 	)
-	_, err = pgx.ForEachRow(rows,
-		[]any{&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt}, func() error {
-			comment := domain.Comment{
-				Uuid:     CommentUuid,
-				FilmUuid: CommentFilmUuid,
-				Author:   CommentAuthor,
-				Text:     CommentText,
-				Score:    CommentScore,
-				AddedAt:  CommentAddedAt,
-			}
+	for rows.Next() {
+		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt)
+		if err != nil {
+			return nil, err
+		}
+		var comment domain.Comment
 
-			comments = append(comments, comment)
+		comment.Uuid = CommentUuid
+		comment.Author = CommentAuthor
+		comment.FilmUuid = CommentFilmUuid
+		comment.Text = CommentText
+		comment.Score = CommentScore
+		comment.AddedAt = CommentAddedAt
 
-			return nil
-		})
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		comments = append(comments, comment)
 	}
 
 	return comments, nil

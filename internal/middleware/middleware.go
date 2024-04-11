@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"log/slog"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -31,7 +31,7 @@ func NewMiddleware(authService *service.AuthService,
 
 func (middlewareHandlers *Middleware) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://94.139.247.246:8080")
+		w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:8080")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, "+
@@ -75,11 +75,10 @@ func (middleware *Middleware) AccessLogMiddleware(next http.Handler) http.Handle
 		reqId := reqid.GenerateRequestID()
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, reqid.ReqIDKey, reqId)
-		logger := slog.With("requestID", ctx.Value(reqid.ReqIDKey))
-		logger.Info("request accessLog", "path", r.URL.Path)
+		middleware.logger.Info("request accessLog", "path", r.URL.Path)
 		start := time.Now()
 		next.ServeHTTP(w, r.WithContext(ctx))
-		logger.Info("requestProcessed", "method", r.Method, "URLPath",
-			r.URL.Path, "time", time.Since(start))
+		middleware.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], time = [%s];",
+			reqId, r.Method, r.URL.Path, time.Since(start)))
 	})
 }

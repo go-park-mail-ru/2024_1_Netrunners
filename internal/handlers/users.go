@@ -84,17 +84,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
 
-	var inputUserData domain.User
-	err := json.NewDecoder(r.Body).Decode(&inputUserData)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-		return
-	}
-
-	uuid := inputUserData.Uuid
+	uuid := mux.Vars(r)["uuid"]
 	userPreview, err := UserPageHandlers.authService.GetUserPreview(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
@@ -179,8 +169,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	switch {
 	case data.Action == "chPassword":
-		newPassword := r.FormValue("newData")
-		err = service.ValidatePassword(newPassword)
+		err = service.ValidatePassword(data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -189,7 +178,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newPassword)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -199,8 +188,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 
 	case data.Action == "chUsername":
-		newUsername := r.FormValue("newData")
-		err = service.ValidateUsername(newUsername)
+		err = service.ValidateUsername(data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -209,7 +197,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newUsername)
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -267,41 +255,41 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 			UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestId)
 		}
+	}
 
-		version := currUser.Version + 1
+	version := currUser.Version + 1
 
-		tokenSigned, err := UserPageHandlers.authService.GenerateTokens(currUser.Email, false, version)
-		if err != nil {
-			err = WriteError(w, err)
-			if err != nil {
-				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-			}
-			return
-		}
-
-		err = UserPageHandlers.sessionService.Add(ctx, currUser.Email, tokenSigned, version)
-		if err != nil {
-			err = WriteError(w, err)
-			if err != nil {
-				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-			}
-			return
-		}
-
-		tokenCookie := &http.Cookie{
-			Name:     "access",
-			Value:    tokenSigned,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   false,
-			MaxAge:   tokenCookieExpirationTime,
-		}
-
-		http.SetCookie(w, tokenCookie)
-
-		err = WriteSuccess(w)
+	tokenSigned, err := UserPageHandlers.authService.GenerateTokens(currUser.Email, false, version)
+	if err != nil {
+		err = WriteError(w, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
+		return
+	}
+
+	err = UserPageHandlers.sessionService.Add(ctx, currUser.Email, tokenSigned, version)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	tokenCookie := &http.Cookie{
+		Name:     "access",
+		Value:    tokenSigned,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		MaxAge:   tokenCookieExpirationTime,
+	}
+
+	http.SetCookie(w, tokenCookie)
+
+	err = WriteSuccess(w)
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}
 }

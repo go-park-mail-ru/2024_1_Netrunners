@@ -46,10 +46,12 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(ctx)
 	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestID, err)
 		err = WriteError(w, err)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
+		return
 	}
 
 	for _, film := range films {
@@ -63,13 +65,21 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 }
 

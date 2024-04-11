@@ -119,15 +119,16 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := NewMockUser()
-	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday",
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "avatar", "password", "registered_at", "birthday",
 		"is_admin"}).
-		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt,
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
 			newUser.Birthday, newUser.IsAdmin)
 	mock.ExpectQuery("SELECT").
 		WithArgs(email).
 		WillReturnRows(mockRows)
 
 	mock.ExpectCommit()
+	mock.ExpectRollback()
 
 	_, err = storage.ChangeUserPassword(email, password)
 	require.Equal(t, nil, err)
@@ -210,9 +211,9 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := NewMockUser()
-	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday",
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
-		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt,
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
 			newUser.Birthday, newUser.IsAdmin)
 	mock.ExpectQuery("SELECT").
 		WithArgs(email).
@@ -269,13 +270,13 @@ func TestUsersStorage_GetUserPreview(t *testing.T) {
 	require.NoError(t, err)
 
 	uuid := "test_uuid"
-	expectedUserPreview := domain.UserPreview{Name: "Test User", Avatar: uuid}
+	expectedUserPreview := domain.UserPreview{Uuid: uuid, Name: "Test User", Avatar: "avatar.com"}
 
 	mock.ExpectQuery(regexp.QuoteMeta(getUserPreviewByUuid)).
 		WithArgs(uuid).
 		WillReturnRows(
-			pgxmock.NewRows([]string{"name"}).
-				AddRow(expectedUserPreview.Name),
+			pgxmock.NewRows([]string{"uuid", "name", "avatar"}).
+				AddRow(expectedUserPreview.Uuid, expectedUserPreview.Name, expectedUserPreview.Avatar),
 		)
 
 	userPreview, err := storage.GetUserPreview(uuid)

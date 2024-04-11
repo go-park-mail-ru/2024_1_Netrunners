@@ -67,7 +67,7 @@ const getUserDataByUuid = `
 		WHERE uuid = $1;`
 
 const getUserPreviewByUuid = `
-		SELECT name
+		SELECT uuid, name, avatar 
 		FROM users
 		WHERE uuid = $1;`
 
@@ -132,7 +132,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		err = tx.Rollback(context.Background())
 		if err != nil {
 			fmt.Printf("failed to rollback transaction to change password: %v",
-				myerrors.ErrInternalServerError)
+				err)
 		}
 	}()
 
@@ -225,8 +225,8 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, error) {
 	var userPreview domain.UserPreview
 
-	userPreview.Avatar = uuid
-	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Name)
+	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Uuid,
+		&userPreview.Name, &userPreview.Avatar)
 	if err != nil {
 		return domain.UserPreview{}, myerrors.ErrInternalServerError
 	}

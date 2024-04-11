@@ -2,7 +2,6 @@ package errors
 
 import (
 	"errors"
-	"fmt"
 )
 
 func ParseError(err error) (int, error) {
@@ -30,7 +29,6 @@ func ParseError(err error) (int, error) {
 		status = 500
 	default:
 		status = 500
-		fmt.Printf("unexpected error type: %v\n", err)
 	}
 
 	currentErr := err

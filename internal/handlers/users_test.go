@@ -61,19 +61,19 @@ func TestUserPageHandlers_GetProfilePreview(t *testing.T) {
 	userHandlers := NewUserPageHandlers(mockAuthService, mockSessionService, zaptest.NewLogger(t).Sugar())
 
 	userData := domain.User{
-		Uuid: "1",
-		Name: "Test User",
+		Uuid:   "1",
+		Name:   "Test User",
+		Avatar: "avatar.com",
 	}
 
 	mockAuthService.EXPECT().GetUserPreview(gomock.Any(), "1").Return(domain.UserPreview{
-		Uuid: userData.Uuid,
-		Name: userData.Name,
+		Uuid:   userData.Uuid,
+		Name:   userData.Name,
+		Avatar: userData.Avatar,
 	}, nil)
 
-	reqBody, err := json.Marshal(userData)
-	assert.Nil(t, err)
-
-	req := httptest.NewRequest("POST", "/profile-preview", strings.NewReader(string(reqBody)))
+	req := httptest.NewRequest("GET", "/profile/1/preview", nil)
+	req = mux.SetURLVars(req, map[string]string{"uuid": "1"})
 	w := httptest.NewRecorder()
 
 	userHandlers.GetProfilePreview(w, req)
@@ -84,7 +84,7 @@ func TestUserPageHandlers_GetProfilePreview(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var response profilePreviewResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
+	err := json.NewDecoder(resp.Body).Decode(&response)
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Status)
 	assert.Equal(t, userData.Uuid, response.UserPreview.Uuid)
@@ -108,7 +108,7 @@ func TestUserPageHandlers_ProfileEditByUuid(t *testing.T) {
 	mockAuthService.EXPECT().GenerateTokens(gomock.Any(), false, gomock.Any()).Return("newToken", nil)
 	mockSessionService.EXPECT().Add(gomock.Any(), "", "newToken", uint8(1)).Return(nil)
 
-	reqBody := `{"action":"chPassword", "data":"newPassword"}`
+	reqBody := `{"action":"chPassword", "newData":"newPassword"}`
 	req := httptest.NewRequest("PUT", "/users/1", strings.NewReader(reqBody))
 	req.AddCookie(mockUserToken)
 	req = mux.SetURLVars(req, map[string]string{"uuid": "1"})
