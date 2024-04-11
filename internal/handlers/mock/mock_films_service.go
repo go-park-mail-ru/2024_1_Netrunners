@@ -46,8 +46,12 @@ func (m *MockFilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAd
 // AddFilm indicates an expected call of AddFilm.
 func (mr *MockFilmsServiceMockRecorder) AddFilm(ctx, film interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm",
 		reflect.TypeOf((*MockFilmsService)(nil).AddFilm), ctx, film)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm", reflect.TypeOf((*MockFilmsService)(nil).AddFilm), ctx, film)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetAllFilmActors mocks base method.
@@ -62,8 +66,12 @@ func (m *MockFilmsService) GetAllFilmActors(ctx context.Context, uuid string) ([
 // GetAllFilmActors indicates an expected call of GetAllFilmActors.
 func (mr *MockFilmsServiceMockRecorder) GetAllFilmActors(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmActors",
 		reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmActors), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmActors", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmActors), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetAllFilmComments mocks base method.
@@ -78,8 +86,12 @@ func (m *MockFilmsService) GetAllFilmComments(ctx context.Context, uuid string) 
 // GetAllFilmComments indicates an expected call of GetAllFilmComments.
 func (mr *MockFilmsServiceMockRecorder) GetAllFilmComments(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments",
 		reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmComments), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmComments), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetAllFilmsPreviews mocks base method.
@@ -94,8 +106,12 @@ func (m *MockFilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.Fi
 // GetAllFilmsPreviews indicates an expected call of GetAllFilmsPreviews.
 func (mr *MockFilmsServiceMockRecorder) GetAllFilmsPreviews(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews",
 		reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmsPreviews), ctx)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmsPreviews), ctx)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetFilmDataByUuid mocks base method.
@@ -110,8 +126,12 @@ func (m *MockFilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (
 // GetFilmDataByUuid indicates an expected call of GetFilmDataByUuid.
 func (mr *MockFilmsServiceMockRecorder) GetFilmDataByUuid(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmDataByUuid",
 		reflect.TypeOf((*MockFilmsService)(nil).GetFilmDataByUuid), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmDataByUuid", reflect.TypeOf((*MockFilmsService)(nil).GetFilmDataByUuid), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetFilmPreview mocks base method.
@@ -126,8 +146,12 @@ func (m *MockFilmsService) GetFilmPreview(ctx context.Context, uuid string) (dom
 // GetFilmPreview indicates an expected call of GetFilmPreview.
 func (mr *MockFilmsServiceMockRecorder) GetFilmPreview(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmPreview",
 		reflect.TypeOf((*MockFilmsService)(nil).GetFilmPreview), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmPreview", reflect.TypeOf((*MockFilmsService)(nil).GetFilmPreview), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // RemoveFilm mocks base method.
@@ -141,6 +165,10 @@ func (m *MockFilmsService) RemoveFilm(ctx context.Context, uuid string) error {
 // RemoveFilm indicates an expected call of RemoveFilm.
 func (mr *MockFilmsServiceMockRecorder) RemoveFilm(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFilm",
 		reflect.TypeOf((*MockFilmsService)(nil).RemoveFilm), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFilm", reflect.TypeOf((*MockFilmsService)(nil).RemoveFilm), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }

@@ -49,8 +49,12 @@ func (m *MockAuthService) ChangeUserName(ctx context.Context, email, newName str
 // ChangeUserName indicates an expected call of ChangeUserName.
 func (mr *MockAuthServiceMockRecorder) ChangeUserName(ctx, email, newName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserName",
 		reflect.TypeOf((*MockAuthService)(nil).ChangeUserName), ctx, email, newName)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserName", reflect.TypeOf((*MockAuthService)(nil).ChangeUserName), ctx, email, newName)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // ChangeUserNameByUuid mocks base method.
@@ -65,8 +69,12 @@ func (m *MockAuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newNam
 // ChangeUserNameByUuid indicates an expected call of ChangeUserNameByUuid.
 func (mr *MockAuthServiceMockRecorder) ChangeUserNameByUuid(ctx, uuid, newName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserNameByUuid",
 		reflect.TypeOf((*MockAuthService)(nil).ChangeUserNameByUuid), ctx, uuid, newName)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserNameByUuid", reflect.TypeOf((*MockAuthService)(nil).ChangeUserNameByUuid), ctx, uuid, newName)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // ChangeUserPassword mocks base method.
@@ -81,8 +89,12 @@ func (m *MockAuthService) ChangeUserPassword(ctx context.Context, email, newPass
 // ChangeUserPassword indicates an expected call of ChangeUserPassword.
 func (mr *MockAuthServiceMockRecorder) ChangeUserPassword(ctx, email, newPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPassword",
 		reflect.TypeOf((*MockAuthService)(nil).ChangeUserPassword), ctx, email, newPassword)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPassword", reflect.TypeOf((*MockAuthService)(nil).ChangeUserPassword), ctx, email, newPassword)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // ChangeUserPasswordByUuid mocks base method.
@@ -97,8 +109,12 @@ func (m *MockAuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, ne
 // ChangeUserPasswordByUuid indicates an expected call of ChangeUserPasswordByUuid.
 func (mr *MockAuthServiceMockRecorder) ChangeUserPasswordByUuid(ctx, uuid, newPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPasswordByUuid",
 		reflect.TypeOf((*MockAuthService)(nil).ChangeUserPasswordByUuid), ctx, uuid, newPassword)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeUserPasswordByUuid", reflect.TypeOf((*MockAuthService)(nil).ChangeUserPasswordByUuid), ctx, uuid, newPassword)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // CreateUser mocks base method.
@@ -112,8 +128,12 @@ func (m *MockAuthService) CreateUser(ctx context.Context, user domain.UserSignUp
 // CreateUser indicates an expected call of CreateUser.
 func (mr *MockAuthServiceMockRecorder) CreateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser",
 		reflect.TypeOf((*MockAuthService)(nil).CreateUser), ctx, user)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockAuthService)(nil).CreateUser), ctx, user)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GenerateTokens mocks base method.
@@ -128,8 +148,12 @@ func (m *MockAuthService) GenerateTokens(login string, isAdmin bool, version uin
 // GenerateTokens indicates an expected call of GenerateTokens.
 func (mr *MockAuthServiceMockRecorder) GenerateTokens(login, isAdmin, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateTokens",
 		reflect.TypeOf((*MockAuthService)(nil).GenerateTokens), login, isAdmin, version)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateTokens", reflect.TypeOf((*MockAuthService)(nil).GenerateTokens), login, isAdmin, version)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetUser mocks base method.
@@ -144,8 +168,12 @@ func (m *MockAuthService) GetUser(ctx context.Context, email string) (domain.Use
 // GetUser indicates an expected call of GetUser.
 func (mr *MockAuthServiceMockRecorder) GetUser(ctx, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser",
 		reflect.TypeOf((*MockAuthService)(nil).GetUser), ctx, email)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockAuthService)(nil).GetUser), ctx, email)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetUserDataByUuid mocks base method.
@@ -160,8 +188,12 @@ func (m *MockAuthService) GetUserDataByUuid(ctx context.Context, uuid string) (d
 // GetUserDataByUuid indicates an expected call of GetUserDataByUuid.
 func (mr *MockAuthServiceMockRecorder) GetUserDataByUuid(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDataByUuid",
 		reflect.TypeOf((*MockAuthService)(nil).GetUserDataByUuid), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDataByUuid", reflect.TypeOf((*MockAuthService)(nil).GetUserDataByUuid), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetUserPreview mocks base method.
@@ -176,8 +208,12 @@ func (m *MockAuthService) GetUserPreview(ctx context.Context, uuid string) (doma
 // GetUserPreview indicates an expected call of GetUserPreview.
 func (mr *MockAuthServiceMockRecorder) GetUserPreview(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPreview",
 		reflect.TypeOf((*MockAuthService)(nil).GetUserPreview), ctx, uuid)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserPreview", reflect.TypeOf((*MockAuthService)(nil).GetUserPreview), ctx, uuid)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // HasUser mocks base method.
@@ -191,8 +227,12 @@ func (m *MockAuthService) HasUser(ctx context.Context, email, password string) e
 // HasUser indicates an expected call of HasUser.
 func (mr *MockAuthServiceMockRecorder) HasUser(ctx, email, password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasUser",
 		reflect.TypeOf((*MockAuthService)(nil).HasUser), ctx, email, password)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasUser", reflect.TypeOf((*MockAuthService)(nil).HasUser), ctx, email, password)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // IsTokenValid mocks base method.
@@ -207,8 +247,12 @@ func (m *MockAuthService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error
 // IsTokenValid indicates an expected call of IsTokenValid.
 func (mr *MockAuthServiceMockRecorder) IsTokenValid(token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsTokenValid",
 		reflect.TypeOf((*MockAuthService)(nil).IsTokenValid), token)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsTokenValid", reflect.TypeOf((*MockAuthService)(nil).IsTokenValid), token)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // RemoveUser mocks base method.
@@ -222,8 +266,12 @@ func (m *MockAuthService) RemoveUser(ctx context.Context, email string) error {
 // RemoveUser indicates an expected call of RemoveUser.
 func (mr *MockAuthServiceMockRecorder) RemoveUser(ctx, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUser",
 		reflect.TypeOf((*MockAuthService)(nil).RemoveUser), ctx, email)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUser", reflect.TypeOf((*MockAuthService)(nil).RemoveUser), ctx, email)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // MockSessionService is a mock of SessionService interface.
@@ -260,8 +308,12 @@ func (m *MockSessionService) Add(ctx context.Context, login, token string, versi
 // Add indicates an expected call of Add.
 func (mr *MockSessionServiceMockRecorder) Add(ctx, login, token, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add",
 		reflect.TypeOf((*MockSessionService)(nil).Add), ctx, login, token, version)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockSessionService)(nil).Add), ctx, login, token, version)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // CheckAllUserSessionTokens mocks base method.
@@ -275,8 +327,12 @@ func (m *MockSessionService) CheckAllUserSessionTokens(ctx context.Context, logi
 // CheckAllUserSessionTokens indicates an expected call of CheckAllUserSessionTokens.
 func (mr *MockSessionServiceMockRecorder) CheckAllUserSessionTokens(ctx, login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAllUserSessionTokens",
 		reflect.TypeOf((*MockSessionService)(nil).CheckAllUserSessionTokens), ctx, login)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAllUserSessionTokens", reflect.TypeOf((*MockSessionService)(nil).CheckAllUserSessionTokens), ctx, login)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // CheckVersion mocks base method.
@@ -291,8 +347,12 @@ func (m *MockSessionService) CheckVersion(ctx context.Context, login, token stri
 // CheckVersion indicates an expected call of CheckVersion.
 func (mr *MockSessionServiceMockRecorder) CheckVersion(ctx, login, token, usersVersion interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckVersion",
 		reflect.TypeOf((*MockSessionService)(nil).CheckVersion), ctx, login, token, usersVersion)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckVersion", reflect.TypeOf((*MockSessionService)(nil).CheckVersion), ctx, login, token, usersVersion)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // DeleteSession mocks base method.
@@ -306,8 +366,12 @@ func (m *MockSessionService) DeleteSession(ctx context.Context, login, token str
 // DeleteSession indicates an expected call of DeleteSession.
 func (mr *MockSessionServiceMockRecorder) DeleteSession(ctx, login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession",
 		reflect.TypeOf((*MockSessionService)(nil).DeleteSession), ctx, login, token)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockSessionService)(nil).DeleteSession), ctx, login, token)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // GetVersion mocks base method.
@@ -322,8 +386,12 @@ func (m *MockSessionService) GetVersion(ctx context.Context, login, token string
 // GetVersion indicates an expected call of GetVersion.
 func (mr *MockSessionServiceMockRecorder) GetVersion(ctx, login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVersion",
 		reflect.TypeOf((*MockSessionService)(nil).GetVersion), ctx, login, token)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVersion", reflect.TypeOf((*MockSessionService)(nil).GetVersion), ctx, login, token)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // HasSession mocks base method.
@@ -337,8 +405,12 @@ func (m *MockSessionService) HasSession(ctx context.Context, login, token string
 // HasSession indicates an expected call of HasSession.
 func (mr *MockSessionServiceMockRecorder) HasSession(ctx, login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSession",
 		reflect.TypeOf((*MockSessionService)(nil).HasSession), ctx, login, token)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSession", reflect.TypeOf((*MockSessionService)(nil).HasSession), ctx, login, token)
+>>>>>>> cc029ef (handlers-tests)
 }
 
 // Update mocks base method.
@@ -352,6 +424,10 @@ func (m *MockSessionService) Update(ctx context.Context, login, token string) er
 // Update indicates an expected call of Update.
 func (mr *MockSessionServiceMockRecorder) Update(ctx, login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+<<<<<<< HEAD
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update",
 		reflect.TypeOf((*MockSessionService)(nil).Update), ctx, login, token)
+=======
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockSessionService)(nil).Update), ctx, login, token)
+>>>>>>> cc029ef (handlers-tests)
 }

@@ -44,8 +44,7 @@ func (m *MocksessionStorage) Add(login, token string, version uint8) error {
 // Add indicates an expected call of Add.
 func (mr *MocksessionStorageMockRecorder) Add(login, token, version interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add",
-		reflect.TypeOf((*MocksessionStorage)(nil).Add), login, token, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MocksessionStorage)(nil).Add), login, token, version)
 }
 
 // CheckAllUserSessionTokens mocks base method.
@@ -59,8 +58,7 @@ func (m *MocksessionStorage) CheckAllUserSessionTokens(login string) error {
 // CheckAllUserSessionTokens indicates an expected call of CheckAllUserSessionTokens.
 func (mr *MocksessionStorageMockRecorder) CheckAllUserSessionTokens(login interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAllUserSessionTokens",
-		reflect.TypeOf((*MocksessionStorage)(nil).CheckAllUserSessionTokens), login)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAllUserSessionTokens", reflect.TypeOf((*MocksessionStorage)(nil).CheckAllUserSessionTokens), login)
 }
 
 // CheckVersion mocks base method.
@@ -75,8 +73,7 @@ func (m *MocksessionStorage) CheckVersion(login, token string, usersVersion uint
 // CheckVersion indicates an expected call of CheckVersion.
 func (mr *MocksessionStorageMockRecorder) CheckVersion(login, token, usersVersion interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckVersion",
-		reflect.TypeOf((*MocksessionStorage)(nil).CheckVersion), login, token, usersVersion)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckVersion", reflect.TypeOf((*MocksessionStorage)(nil).CheckVersion), login, token, usersVersion)
 }
 
 // DeleteSession mocks base method.
@@ -90,8 +87,7 @@ func (m *MocksessionStorage) DeleteSession(login, token string) error {
 // DeleteSession indicates an expected call of DeleteSession.
 func (mr *MocksessionStorageMockRecorder) DeleteSession(login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession",
-		reflect.TypeOf((*MocksessionStorage)(nil).DeleteSession), login, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MocksessionStorage)(nil).DeleteSession), login, token)
 }
 
 // GetVersion mocks base method.
@@ -106,8 +102,7 @@ func (m *MocksessionStorage) GetVersion(login, token string) (uint8, error) {
 // GetVersion indicates an expected call of GetVersion.
 func (mr *MocksessionStorageMockRecorder) GetVersion(login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVersion",
-		reflect.TypeOf((*MocksessionStorage)(nil).GetVersion), login, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVersion", reflect.TypeOf((*MocksessionStorage)(nil).GetVersion), login, token)
 }
 
 // HasSession mocks base method.
@@ -121,8 +116,7 @@ func (m *MocksessionStorage) HasSession(login, token string) error {
 // HasSession indicates an expected call of HasSession.
 func (mr *MocksessionStorageMockRecorder) HasSession(login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSession",
-		reflect.TypeOf((*MocksessionStorage)(nil).HasSession), login, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasSession", reflect.TypeOf((*MocksessionStorage)(nil).HasSession), login, token)
 }
 
 // Update mocks base method.
@@ -136,6 +130,5 @@ func (m *MocksessionStorage) Update(login, token string) error {
 // Update indicates an expected call of Update.
 func (mr *MocksessionStorageMockRecorder) Update(login, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update",
-		reflect.TypeOf((*MocksessionStorage)(nil).Update), login, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MocksessionStorage)(nil).Update), login, token)
 }
