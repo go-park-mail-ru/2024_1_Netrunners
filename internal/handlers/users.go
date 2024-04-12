@@ -189,7 +189,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newPassword)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -209,7 +209,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newUsername)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {

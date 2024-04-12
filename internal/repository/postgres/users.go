@@ -158,7 +158,8 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w", err)
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	return user, nil
