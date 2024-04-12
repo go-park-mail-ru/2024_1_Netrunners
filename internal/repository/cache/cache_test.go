@@ -473,3 +473,19 @@ func TestUpdateVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestSessionStorage_CheckAllUserSessionTokens(t *testing.T) {
+	storage := NewSessionStorage()
+
+	// Set up some mock data in the cache
+	mockCacheData := map[string]uint8{
+		"token1": 1,
+		"token2": 2,
+	}
+	mockLogin := "testUser"
+	storage.cacheStorage.Set(mockLogin, mockCacheData, 0)
+
+	err := storage.CheckAllUserSessionTokens(mockLogin)
+
+	assert.NoError(t, err)
+}

@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"errors"
-	"testing"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
+	"testing"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
@@ -318,4 +319,20 @@ func TestGetAllFilmActors_Error(t *testing.T) {
 	_, err := service.GetAllFilmActors(context.Background(), uuid)
 
 	assert.Error(t, err)
+}
+
+func TestFilmsService_AddSomeData(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+
+	service := FilmsService{
+		storage: mockStorage,
+		logger:  zap.NewNop().Sugar(),
+	}
+
+	mockStorage.EXPECT().AddFilm(gomock.Any()).Return(nil).Times(3)
+
+	err := service.AddSomeData()
+	require.NoError(t, err)
 }

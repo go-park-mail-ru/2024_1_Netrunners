@@ -1,9 +1,8 @@
 package database
 
 import (
-	"testing"
-
 	"github.com/jackc/pgx/v5"
+	"testing"
 
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"

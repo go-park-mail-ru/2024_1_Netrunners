@@ -180,7 +180,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 
 	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	var user domain.User

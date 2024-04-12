@@ -210,9 +210,9 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := NewMockUser()
-	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "password", "registered_at", "birthday",
+	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
-		AddRow(newUser.Uuid, newUser.Email, newUser.Name, newUser.Password, newUser.RegisteredAt,
+		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
 			newUser.Birthday, newUser.IsAdmin)
 	mock.ExpectQuery("SELECT").
 		WithArgs(email).

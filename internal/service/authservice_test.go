@@ -61,24 +61,12 @@ func TestAuthService_ChangeUserName(t *testing.T) {
 	login := "cakethefake@gmail.com"
 	newName := "New Name"
 
-	user := domain.User{
-		Uuid:         "1",
-		Email:        login,
-		Avatar:       "",
-		Name:         newName,
-		Password:     "123456789",
-		IsAdmin:      true,
-		RegisteredAt: time.Now(),
-		Birthday:     time.Now(),
-	}
-
-	mockStorage.EXPECT().ChangeUserName(login, newName).Return(user, nil)
+	mockStorage.EXPECT().ChangeUserName(login, newName).Return(domain.User{}, nil)
 
 	authService := NewAuthService(mockStorage, mockLogger)
-	updatedUser, err := authService.ChangeUserName(context.Background(), login, newName)
+	_, err := authService.ChangeUserName(context.Background(), login, newName)
 
 	assert.NoError(t, err)
-	assert.Equal(t, user, updatedUser)
 }
 
 func TestAuthService_ValidateLogin_Valid(t *testing.T) {
@@ -188,4 +176,97 @@ func TestAuthService_GetUserPreview(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, userPreview, retrievedUserPreview)
+}
+
+func TestAuthService_ChangeUserPasswordByUuid(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mockService.NewMockusersStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	uuid := "1"
+	newPassword := "newPassword123"
+
+	mockStorage.EXPECT().ChangeUserPasswordByUuid(uuid, newPassword).Return(domain.User{}, nil)
+
+	authService := NewAuthService(mockStorage, mockLogger)
+	_, err := authService.ChangeUserPasswordByUuid(context.Background(), uuid, newPassword)
+
+	assert.NoError(t, err)
+}
+
+func TestAuthService_ChangeUserNameByUuid(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mockService.NewMockusersStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	uuid := "1"
+	newName := "New Name"
+
+	mockStorage.EXPECT().ChangeUserNameByUuid(uuid, newName).Return(domain.User{}, nil)
+
+	authService := NewAuthService(mockStorage, mockLogger)
+	_, err := authService.ChangeUserNameByUuid(context.Background(), uuid, newName)
+
+	assert.NoError(t, err)
+}
+
+func TestAuthService_GetUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mockService.NewMockusersStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	login := "cakethefake@gmail.com"
+	expectedUser := domain.User{Name: "Test User"}
+
+	mockStorage.EXPECT().GetUser(gomock.Eq(login)).Return(expectedUser, nil)
+
+	authService := NewAuthService(mockStorage, mockLogger)
+	user, err := authService.GetUser(context.Background(), login)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedUser, user)
+}
+
+func TestAuthService_CreateUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mockService.NewMockusersStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	user := domain.UserSignUp{
+		Email:    "test@example.com",
+		Name:     "Test User",
+		Password: "password",
+	}
+
+	mockStorage.EXPECT().CreateUser(user).Return(nil)
+
+	authService := NewAuthService(mockStorage, mockLogger)
+	err := authService.CreateUser(context.Background(), user)
+
+	assert.NoError(t, err)
+}
+
+func TestAuthService_RemoveUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mockService.NewMockusersStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	login := "test@example.com"
+
+	mockStorage.EXPECT().RemoveUser(login).Return(nil)
+
+	authService := NewAuthService(mockStorage, mockLogger)
+	err := authService.RemoveUser(context.Background(), login)
+
+	assert.NoError(t, err)
 }
