@@ -230,13 +230,3 @@ func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newN
 	}
 	return user, nil
 }
-
-func (service *AuthService) ChangeUserAvatarByUuid(ctx context.Context, uuid, filename string) (domain.User, error) {
-	user, err := service.storage.ChangeUserAvatarByUuid(uuid, filename)
-	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
-			err)
-		return domain.User{}, err
-	}
-	return user, nil
-}
