@@ -21,6 +21,7 @@ type UserSignUp struct {
 }
 
 type UserPreview struct {
+	Uuid   string
 	Name   string
 	Avatar string
 }

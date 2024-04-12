@@ -22,12 +22,12 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 }
 
 const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, f.s3_link, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration, f.data;`
+		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.duration;`
 
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
@@ -101,16 +101,20 @@ const getAllFilmActors = `
 		WHERE f.uuid = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
-	var film = domain.FilmData{
-		Uuid:         "8a3e5139-e58e-4e91-92a9-0e0cacc2b0ae",
-		Title:        "Fast n Furious",
-		Director:     "Федор Бондарчук",
-		AverageScore: 4,
-		ScoresCount:  1,
-		Duration:     140,
-		Data:         "Первый фильм великой серии",
-		Date:         time.Now(),
-		AgeLimit:     18,
+	var film domain.FilmData
+	err := storage.pool.QueryRow(context.Background(), getFilmDataByUuid, uuid).Scan(
+		&film.Uuid,
+		&film.Title,
+		&film.Preview,
+		&film.Link,
+		&film.Director,
+		&film.Data,
+		&film.Duration,
+		&film.Date,
+		&film.AverageScore,
+		&film.ScoresCount)
+	if err != nil {
+		return domain.FilmData{}, myerrors.ErrInternalServerError
 	}
 
 	return film, nil

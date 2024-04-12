@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
@@ -15,12 +16,12 @@ import (
 )
 
 type UserPageHandlers struct {
-	authService    *service.AuthService
-	sessionService *service.SessionService
+	authService    AuthService
+	sessionService SessionService
 	logger         *zap.SugaredLogger
 }
 
-func NewUserPageHandlers(authService *service.AuthService, sessionService *service.SessionService,
+func NewUserPageHandlers(authService AuthService, sessionService SessionService,
 	logger *zap.SugaredLogger) *UserPageHandlers {
 	return &UserPageHandlers{
 		authService:    authService,
@@ -188,7 +189,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newPassword)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -208,7 +209,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newUsername)
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, data.Data)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -216,6 +217,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			}
 			return
 		}
+
 	case data.Action == "chAvatar":
 		files := r.MultipartForm.File["avatar"]
 		if err != nil {

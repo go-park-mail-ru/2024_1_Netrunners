@@ -46,16 +46,17 @@ CREATE SEQUENCE IF NOT EXISTS film_id_seq START 1;
 
 CREATE TABLE IF NOT EXISTS film
 (
-	id           INTEGER PRIMARY KEY UNIQUE                          DEFAULT NEXTVAL('film_id_seq')      NOT NULL,
-	uuid         UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
-	title        TEXT                                                                                    NOT NULL,
-	data         TEXT                                                DEFAULT ''                          NOT NULL,
-	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
-	s3_link      TEXT                                                DEFAULT 'https://shorturl.at/jHIMO' NOT NULL,
+	id           INTEGER PRIMARY KEY UNIQUE                          DEFAULT NEXTVAL('film_id_seq')          NOT NULL,
+	uuid         UUID UNIQUE                                         DEFAULT gen_random_uuid()               NOT NULL,
+	title        TEXT                                                                                        NOT NULL,
+	data         TEXT                                                DEFAULT ''                              NOT NULL,
+	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2'     NOT NULL,
+	s3_link      TEXT                                                DEFAULT 'https://daimnefilm.hb.ru-msk.' ||
+																			 'vkcs.cloud/Rick%20Roll.ia.mp4' NOT NULL,
 	director     INTEGER,
-	age_limit    SMALLINT CHECK (age_limit >= 0 AND age_limit <= 18) DEFAULT 18                          NOT NULL,
-	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                         NOT NULL,
-	published_at TIMESTAMP                                           DEFAULT NOW()                       NOT NULL,
+	age_limit    SMALLINT CHECK (age_limit >= 0 AND age_limit <= 18) DEFAULT 18                              NOT NULL,
+	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                             NOT NULL,
+	published_at TIMESTAMP                                           DEFAULT NOW()                           NOT NULL,
 	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL
 );
 
