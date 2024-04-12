@@ -158,7 +158,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	}
 
 	uuid := mux.Vars(r)["uuid"]
-
 	currUser, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
@@ -305,5 +304,4 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
 	}
-
 }

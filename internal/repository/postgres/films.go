@@ -104,7 +104,6 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	var film = domain.FilmData{
 		Uuid:         "8a3e5139-e58e-4e91-92a9-0e0cacc2b0ae",
 		Title:        "Fast n Furious",
-		Link:         "https://daimnefilm.hb.ru-msk.vkcs.cloud/Rick%20Roll.ia.mp4",
 		Director:     "Федор Бондарчук",
 		AverageScore: 4,
 		ScoresCount:  1,
