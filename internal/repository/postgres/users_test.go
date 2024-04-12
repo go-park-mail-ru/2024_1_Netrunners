@@ -1,14 +1,15 @@
 package database
 
 import (
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/jackc/pgx/v5"
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/pashagolub/pgxmock/v3"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 )
 
 func TestUsersStorage_CreateUser(t *testing.T) {

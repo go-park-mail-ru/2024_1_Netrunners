@@ -146,6 +146,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
 		&user.Uuid,
 		&user.Email,
+		&user.Avatar,
 		&user.Name,
 		&user.Password,
 		&user.RegisteredAt,
@@ -157,8 +158,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w",
-			myerrors.ErrInternalServerError)
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w", err)
 	}
 
 	return user, nil
@@ -187,6 +187,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
 		&user.Uuid,
 		&user.Email,
+		&user.Avatar,
 		&user.Name,
 		&user.Password,
 		&user.RegisteredAt,

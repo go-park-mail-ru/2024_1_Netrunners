@@ -22,12 +22,12 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 }
 
 const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, f.s3_link, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.uuid, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.duration;`
+		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration;`
 
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
