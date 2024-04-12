@@ -174,7 +174,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
-		return
 	}
 
 	switch {
