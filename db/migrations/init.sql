@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS users
 	avatar        TEXT                       DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
 	name          TEXT                       DEFAULT 'user'                      NOT NULL,
 	password      TEXT CHECK (LENGTH(email) <= 64)                               NOT NULL,
-	registered_at TIMESTAMP                  DEFAULT NOW()                       NOT NULL,
-	birthday      TIMESTAMP                  DEFAULT NOW()                       NOT NULL,
+	registered_at TIMESTAMPTZ                  DEFAULT NOW()                       NOT NULL,
+	birthday      TIMESTAMPTZ                  DEFAULT NOW()                       NOT NULL,
 	is_admin      BOOLEAN                    DEFAULT FALSE                       NOT NULL
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS actor
 	uuid        UUID UNIQUE                  DEFAULT gen_random_uuid()           NOT NULL,
 	name        TEXT UNIQUE                                                      NOT NULL,
 	avatar      TEXT                         DEFAULT 'https://shorturl.at/ewzP8' NOT NULL,
-	birthday    TIMESTAMP                    DEFAULT NOW()                       NOT NULL,
+	birthday    TIMESTAMPTZ                    DEFAULT NOW()                       NOT NULL,
 	career      TEXT                         DEFAULT ''                          NOT NULL,
 	height      INTEGER CHECK (height < 300) DEFAULT 192                         NOT NULL,
 	birth_place TEXT                         DEFAULT 'Russia, Angarsk'           NOT NULL,
