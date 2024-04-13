@@ -23,11 +23,7 @@ func NewUsersStorage(pool PgxIface) (*UsersStorage, error) {
 const insertUser = `INSERT INTO users (email, name, password) VALUES ($1, $2, $3);`
 
 const getUserData = `
-<<<<<<< HEAD
 		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
-=======
-		SELECT uuid, email, name, password, registered_at, birthday, is_admin
->>>>>>> 0968d01 (sql reauests remade)
 		FROM users
 		WHERE email = $1;`
 
