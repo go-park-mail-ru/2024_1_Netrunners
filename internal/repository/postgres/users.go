@@ -23,7 +23,7 @@ func NewUsersStorage(pool PgxIface) (*UsersStorage, error) {
 const insertUser = `INSERT INTO users (email, name, password) VALUES ($1, $2, $3);`
 
 const getUserData = `
-		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
+		SELECT external_id, email, avatar, name, password, registered_at, birthday, is_admin
 		FROM users
 		WHERE email = $1;`
 
@@ -49,27 +49,27 @@ const putNewUsername = `
 const putNewUserPasswordByUuid = `
 		UPDATE users
 		SET password = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const putNewUserAvatarByUuid = `
 		UPDATE users
 		SET avatar = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const putNewUsernameByUuid = `
 		UPDATE users
 		SET name = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const getUserDataByUuid = `
-		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
+		SELECT external_id, email, avatar, name, password, registered_at, birthday, is_admin
 		FROM users
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getUserPreviewByUuid = `
 		SELECT name
 		FROM users
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)

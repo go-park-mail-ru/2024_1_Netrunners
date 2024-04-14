@@ -61,32 +61,33 @@ const insertIntoFilmActors = `
 
 const deleteFilm = `
 		DELETE FROM film
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getFilmPreview = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmComments = `
-		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
+		       comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
-		WHERE film.uuid = $1;`
+		WHERE film.external_id = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(),
-		`SELECT f.uuid, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+		`SELECT f.external_id, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
 			FROM film f
 			LEFT JOIN comment c ON f.id = c.film
 			JOIN director d ON f.director = d.id
-			WHERE f.uuid = $1
-			GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
+			WHERE f.external_id = $1
+			GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
 		&film.Uuid,
 		&film.Title,
 		&film.Preview,
