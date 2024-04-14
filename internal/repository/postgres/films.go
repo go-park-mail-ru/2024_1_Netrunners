@@ -21,14 +21,6 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 	}, nil
 }
 
-const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
-		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
-		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration, f.data;`
-
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
 		FROM director
@@ -69,39 +61,33 @@ const insertIntoFilmActors = `
 
 const deleteFilm = `
 		DELETE FROM film
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getFilmPreview = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
-
-const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, f.director, f.duration, AVG(c.score), COUNT(c.id)
-		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
-		GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmComments = `
-		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
+		       comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
-		WHERE film.uuid = $1;`
-
-const getAllFilmActors = `
-		SELECT a.uuid, a.name, a.avatar
-		FROM actor a
-		JOIN film_actor fa ON a.id = fa.actor
-		JOIN film f ON fa.film = f.id
-		WHERE f.uuid = $1;`
+		WHERE film.external_id = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
-	err := storage.pool.QueryRow(context.Background(), getFilmDataByUuid, uuid).Scan(
+	err := storage.pool.QueryRow(context.Background(),
+		`SELECT f.external_id, f.title, f.banner, d.name, f.published_at, f.duration, AVG(c.score), COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			JOIN director d ON f.director = d.id
+			WHERE f.external_id = $1
+			GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.duration;`, uuid).Scan(
 		&film.Uuid,
 		&film.Title,
 		&film.Preview,
@@ -112,8 +98,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.AverageScore,
 		&film.ScoresCount)
 	if err != nil {
-		return domain.FilmData{}, err
+		return domain.FilmData{},
+			fmt.Errorf("error at begin transaction in GetFilmByUuid: %w", myerrors.ErrInternalServerError)
 	}
+
 	return film, nil
 }
 
@@ -225,9 +213,14 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 }
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
+	rows, err := storage.pool.Query(context.Background(),
+		`SELECT f.uuid, f.title, f.banner, f.director, f.duration, COUNT(c.id)
+			FROM film f
+			LEFT JOIN comment c ON f.id = c.film
+			GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	films := make([]domain.FilmPreview, 0)
@@ -237,19 +230,19 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		FilmTitle    string
 		FilmDirector string
 		FilmDuration int
-		FilmScore    float32
-		FilmRating   int
+		// FilmScore    float32
+		FilmRating int
 	)
 	_, err = pgx.ForEachRow(rows,
-		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating}, func() error {
+		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmRating}, func() error {
 			film := domain.FilmPreview{
-				Uuid:         FilmUuid,
-				Title:        FilmTitle,
-				Preview:      FilmPreview,
-				Director:     FilmDirector,
-				Duration:     FilmDuration,
-				AverageScore: FilmScore,
-				ScoresCount:  FilmRating,
+				Uuid:     FilmUuid,
+				Title:    FilmTitle,
+				Preview:  FilmPreview,
+				Director: FilmDirector,
+				Duration: FilmDuration,
+				// AverageScore: FilmScore,
+				ScoresCount: FilmRating,
 			}
 
 			films = append(films, film)
@@ -257,40 +250,11 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 			return nil
 		})
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, fmt.Errorf("error at recieving data in GetAllFilmsPreviews: %w",
+			myerrors.ErrInternalServerError)
 	}
 
 	return films, nil
-}
-
-func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
-	}
-
-	actors := make([]domain.ActorPreview, 0)
-	var (
-		ActorUuid   string
-		ActorName   string
-		ActorAvatar string
-	)
-	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName, &ActorAvatar}, func() error {
-		actor := domain.ActorPreview{
-			Uuid:   ActorUuid,
-			Name:   ActorName,
-			Avatar: ActorAvatar,
-		}
-
-		actors = append(actors, actor)
-
-		return nil
-	})
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
-	}
-
-	return actors, nil
 }
 
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
@@ -328,4 +292,40 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 	}
 
 	return comments, nil
+}
+
+func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
+	rows, err := storage.pool.Query(context.Background(),
+		`SELECT a.uuid, a.name
+			FROM actor a
+			JOIN film_actor fa ON a.id = fa.actor
+			JOIN film f ON fa.film = f.id
+			WHERE f.uuid = $1;`, uuid)
+	if err != nil {
+		return nil,
+			fmt.Errorf("error at recieving data in GetAllFilmComments: %w", myerrors.ErrInternalServerError)
+	}
+
+	actors := make([]domain.ActorPreview, 0)
+	var (
+		ActorUuid string
+		ActorName string
+	)
+	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName}, func() error {
+		actor := domain.ActorPreview{
+			Uuid:   ActorUuid,
+			Name:   ActorName,
+			Avatar: ActorUuid,
+		}
+
+		actors = append(actors, actor)
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error at inserting into data in GetAllFilmActors: %w",
+			myerrors.ErrInternalServerError)
+	}
+
+	return actors, nil
 }

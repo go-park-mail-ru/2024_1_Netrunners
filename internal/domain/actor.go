@@ -25,3 +25,10 @@ type ActorPreview struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
+
+func NewMockActor() *ActorData {
+	return &ActorData{
+		Uuid: "1",
+		Name: "Danya",
+	}
+}
