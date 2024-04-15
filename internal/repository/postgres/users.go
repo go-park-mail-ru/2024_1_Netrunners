@@ -135,8 +135,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	defer func() {
 		err = tx.Rollback(context.Background())
 		if err != nil {
-			fmt.Printf("failed to rollback transaction to change password: %w: %w", err,
-				myerrors.ErrInternalServerError)
+			fmt.Printf("failed to rollback transaction to change password: %v", err)
 		}
 	}()
 
@@ -179,8 +178,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	defer func() {
 		err = tx.Rollback(context.Background())
 		if err != nil {
-			fmt.Printf("failed to rollback transaction to change username: %w: %w", err,
-				myerrors.ErrInternalServerError)
+			fmt.Printf("failed to rollback transaction to change username: %v", err)
 		}
 	}()
 

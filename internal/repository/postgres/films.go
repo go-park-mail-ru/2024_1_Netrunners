@@ -131,8 +131,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	defer func() {
 		err = tx.Rollback(context.Background())
 		if err != nil {
-			fmt.Printf("failed to rollback transaction to add film: %w: %w", err,
-				myerrors.ErrInternalServerError)
+			fmt.Printf("failed to rollback transaction to add film: %v", err)
 		}
 	}()
 
