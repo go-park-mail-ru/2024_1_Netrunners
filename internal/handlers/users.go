@@ -94,6 +94,17 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	userPreview.Avatar = "./uploads/" + user.Email + "avatar.png"
+
 	escapeUserPreviewData(&userPreview)
 
 	response := profilePreviewResponse{
@@ -215,47 +226,56 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		for _, file := range files {
-			src, err := file.Open()
+		avatarFile := files[0]
+
+		storagePath := "./uploads/" + currUser.Email
+		_, err = os.Stat(storagePath)
+		if err != nil {
+			err = os.Mkdir(storagePath, 0755)
 			if err != nil {
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to create directory for user's avatar: %v\n", requestId, err)
 				err = WriteError(w, err)
 				if err != nil {
 					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 				}
 				return
 			}
-			defer src.Close()
-
-			dst, err := os.Create("./uploads/user/" + file.Filename)
-			if err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-			defer dst.Close()
-
-			currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, file.Filename)
-			if err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-
-			if _, err := io.Copy(dst, src); err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-
-			UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestId)
 		}
 	}
+
+	dst, err := os.Create(storagePath + "/avatar.png")
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to create empty avatar file: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	defer dst.Close()
+
+	src, err := avatarFile.Open()
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+	defer src.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestId)
+
+	// ============
 
 	version := currUser.Version + 1
 
