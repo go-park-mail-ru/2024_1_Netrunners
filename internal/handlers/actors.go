@@ -99,6 +99,7 @@ func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *
 
 	actors, err := actorsHandlers.actorsService.GetActorsByFilm(ctx, filmUuid)
 	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to get actors by film: %v\n", requestID, err)
 		err = WriteError(w, err)
 		if err != nil {
 			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -114,11 +115,21 @@ func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		actorsHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
 		actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 }
