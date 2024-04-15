@@ -22,12 +22,12 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 }
 
 const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration;`
 
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
@@ -69,36 +69,37 @@ const insertIntoFilmActors = `
 
 const deleteFilm = `
 		DELETE FROM film
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getFilmPreview = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmComments = `
-		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
+		       comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
-		WHERE film.uuid = $1;`
+		WHERE film.external_id = $1;`
 
 const getAllFilmActors = `
-		SELECT a.uuid, a.name, a.avatar
+		SELECT a.external_id, a.name, a.avatar
 		FROM actor a
 		JOIN film_actor fa ON a.id = fa.actor
 		JOIN film f ON fa.film = f.id
-		WHERE f.uuid = $1;`
+		WHERE f.external_id = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
