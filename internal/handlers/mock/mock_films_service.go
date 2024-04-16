@@ -49,6 +49,21 @@ func (mr *MockFilmsServiceMockRecorder) AddFilm(ctx, film interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm", reflect.TypeOf((*MockFilmsService)(nil).AddFilm), ctx, film)
 }
 
+// GetAllFavoriteFilms mocks base method.
+func (m *MockFilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllFavoriteFilms", ctx, userUuid)
+	ret0, _ := ret[0].([]domain.FilmPreview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllFavoriteFilms indicates an expected call of GetAllFavoriteFilms.
+func (mr *MockFilmsServiceMockRecorder) GetAllFavoriteFilms(ctx, userUuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFavoriteFilms", reflect.TypeOf((*MockFilmsService)(nil).GetAllFavoriteFilms), ctx, userUuid)
+}
+
 // GetAllFilmActors mocks base method.
 func (m *MockFilmsService) GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
 	m.ctrl.T.Helper()
@@ -122,6 +137,34 @@ func (m *MockFilmsService) GetFilmPreview(ctx context.Context, uuid string) (dom
 func (mr *MockFilmsServiceMockRecorder) GetFilmPreview(ctx, uuid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilmPreview", reflect.TypeOf((*MockFilmsService)(nil).GetFilmPreview), ctx, uuid)
+}
+
+// PutFavoriteFilm mocks base method.
+func (m *MockFilmsService) PutFavoriteFilm(ctx context.Context, filmUuid, userUuid string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutFavoriteFilm", ctx, filmUuid, userUuid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PutFavoriteFilm indicates an expected call of PutFavoriteFilm.
+func (mr *MockFilmsServiceMockRecorder) PutFavoriteFilm(ctx, filmUuid, userUuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutFavoriteFilm", reflect.TypeOf((*MockFilmsService)(nil).PutFavoriteFilm), ctx, filmUuid, userUuid)
+}
+
+// RemoveFavoriteFilm mocks base method.
+func (m *MockFilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid, userUuid string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveFavoriteFilm", ctx, filmUuid, userUuid)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveFavoriteFilm indicates an expected call of RemoveFavoriteFilm.
+func (mr *MockFilmsServiceMockRecorder) RemoveFavoriteFilm(ctx, filmUuid, userUuid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveFavoriteFilm", reflect.TypeOf((*MockFilmsService)(nil).RemoveFavoriteFilm), ctx, filmUuid, userUuid)
 }
 
 // RemoveFilm mocks base method.
