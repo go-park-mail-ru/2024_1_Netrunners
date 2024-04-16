@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
@@ -146,7 +147,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserPassword, newPassword, email)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -163,7 +164,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -193,7 +194,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -210,7 +211,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -236,7 +237,7 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -249,7 +250,7 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 	var userPreview domain.UserPreview
 	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Uuid,
 		&userPreview.Name, &userPreview.Avatar)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.UserPreview{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -273,7 +274,7 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserPasswordByUuid, newPassword, uuid)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -290,7 +291,7 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -321,7 +322,7 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUsernameByUuid, newUsername, uuid)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -338,7 +339,7 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -368,7 +369,7 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -385,7 +386,7 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
