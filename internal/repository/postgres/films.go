@@ -118,6 +118,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	if err != nil {
 		return domain.FilmData{}, err
 	}
+
 	return film, nil
 }
 
@@ -260,7 +261,6 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		film.AverageScore = FilmScore
 
 		films = append(films, film)
-
 	}
 
 	return films, nil
