@@ -134,6 +134,12 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	if err != nil {
 		return domain.FilmData{}, err
 	}
+	if err == pgx.ErrNoRows {
+		return domain.FilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
+	if err != nil {
+		return domain.FilmData{}, err
+	}
 
 	return film, nil
 }
@@ -239,8 +245,11 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 		&filmPreview.Duration,
 		&filmPreview.AverageScore,
 		&filmPreview.ScoresCount)
+	if err == pgx.ErrNoRows {
+		return domain.FilmPreview{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.FilmPreview{}, myerrors.ErrInternalServerError
+		return domain.FilmPreview{}, err
 	}
 	return filmPreview, nil
 }
@@ -284,6 +293,9 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -314,6 +326,9 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -363,8 +378,11 @@ func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string
 	return nil
 }
 
-func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, userUuid)
+func (storage *FilmsStorage) GetAllFavoriteFilms(uuid string) ([]domain.FilmPreview, error) {
+	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, uuid)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	}
 	if err != nil {
 		return nil, err
 	}

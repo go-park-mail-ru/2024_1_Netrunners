@@ -27,6 +27,8 @@ func ParseError(err error) (int, error) {
 	case errors.Is(err, ErrInternalServerError),
 		errors.Is(err, ErrTooHighVersion):
 		status = 500
+	case errors.Is(err, ErrNotFound):
+		status = 404
 	default:
 		status = 500
 	}

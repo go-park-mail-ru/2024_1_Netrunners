@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -61,8 +62,11 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		&actor.BirthPlace,
 		&actor.Genres,
 		&actor.Spouse)
+	if err == pgx.ErrNoRows {
+		return domain.ActorData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
+		return domain.ActorData{}, err
 	}
 
 	rows, err := storage.pool.Query(context.Background(), getFilmsByActor, actorUuid)
@@ -96,8 +100,11 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, err
 	}
 
 	actors := make([]domain.ActorPreview, 0)

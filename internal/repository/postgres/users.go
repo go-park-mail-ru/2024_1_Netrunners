@@ -92,16 +92,22 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 	return user, nil
 }
 
 func (storage *UsersStorage) RemoveUser(email string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteUser, email)
+	if err == pgx.ErrNoRows {
+		return fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return myerrors.ErrInternalServerError
+		return err
 	}
 
 	return nil
@@ -110,8 +116,11 @@ func (storage *UsersStorage) RemoveUser(email string) error {
 func (storage *UsersStorage) HasUser(email, password string) error {
 	var passwordFromDB string
 	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(&passwordFromDB)
+	if err == pgx.ErrNoRows {
+		return fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return myerrors.ErrInternalServerError
+		return err
 	}
 
 	if passwordFromDB != password {
@@ -137,9 +146,11 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserPassword, newPassword, email)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to update data to change password: %w",
-			myerrors.ErrInternalServerError)
+		return domain.User{}, err
 	}
 
 	var user domain.User
@@ -152,6 +163,9 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -179,6 +193,9 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -193,6 +210,9 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -216,19 +236,24 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 	return user, nil
 }
 
 func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, error) {
 	var userPreview domain.UserPreview
-
 	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Uuid,
 		&userPreview.Name, &userPreview.Avatar)
+	if err == pgx.ErrNoRows {
+		return domain.UserPreview{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.UserPreview{}, myerrors.ErrInternalServerError
+		return domain.UserPreview{}, err
 	}
 	return userPreview, nil
 }
@@ -248,9 +273,11 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserPasswordByUuid, newPassword, uuid)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed update data to change password: %w",
-			myerrors.ErrInternalServerError)
+		return domain.User{}, err
 	}
 
 	var user domain.User
@@ -263,8 +290,11 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())
@@ -291,8 +321,11 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUsernameByUuid, newUsername, uuid)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	var user domain.User
@@ -305,8 +338,11 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())
@@ -332,8 +368,11 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 	}()
 
 	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	var user domain.User
@@ -346,8 +385,11 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
+	if err == pgx.ErrNoRows {
+		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+	}
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())

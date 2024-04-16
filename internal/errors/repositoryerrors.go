@@ -23,4 +23,6 @@ var (
 
 	ErrNoSuchActor     = errors.New("no such actor with given uuid")
 	ErrNoActorsForFilm = errors.New("no actors for this film")
+
+	ErrNotFound = errors.New("no rows for given uuid")
 )
