@@ -89,6 +89,9 @@ func main() {
 	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/remove_favorite", filmsPageHandlers.RemoveFavoriteFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/all_favorite", filmsPageHandlers.GetAllFavoriteFilms).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
