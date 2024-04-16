@@ -21,6 +21,9 @@ type FilmsService interface {
 	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
 	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
 	GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
+	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
+	RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
+	GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error)
 }
 
 type FilmsPageHandlers struct {
@@ -256,4 +259,116 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 	}
 
 	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] film added successfully", requestID))
+}
+
+type dataToFavorite struct {
+	FilmUuid string `json:"filmUuid"`
+	UserUuid string `json:"userUuid"`
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) PutFavoriteFilm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var data dataToFavorite
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+	}
+
+	err = filmsPageHandlers.filmsService.PutFavoriteFilm(ctx, data.FilmUuid, data.UserUuid)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to put favorite film: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+	}
+
+	err = WriteSuccess(w)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+
+	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film added successfully", requestId))
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) RemoveFavoriteFilm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var data dataToFavorite
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+	}
+
+	err = filmsPageHandlers.filmsService.RemoveFavoriteFilm(ctx, data.FilmUuid, data.UserUuid)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to remove favorite film: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+	}
+
+	err = WriteSuccess(w)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+
+	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film removed successfully", requestId))
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+	uuid := mux.Vars(r)["uuid"]
+
+	films, err := filmsPageHandlers.filmsService.GetAllFavoriteFilms(ctx, uuid)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all favorite film: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+	}
+
+	for _, film := range films {
+		escapeFilmPreview(&film)
+	}
+
+	response := filmsPreviewsResponse{
+		Status: http.StatusOK,
+		Films:  films,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
 }

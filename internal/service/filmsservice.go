@@ -18,6 +18,9 @@ type FilmsStorage interface {
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	GetAllFilmComments(uuid string) ([]domain.Comment, error)
 	GetAllFilmActors(uuid string) ([]domain.ActorPreview, error)
+	PutFavoriteFilm(filmUuid string, userUuid string) error
+	RemoveFavoriteFilm(filmUuid string, userUuid string) error
+	GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error)
 }
 
 type FilmsService struct {
@@ -101,94 +104,32 @@ func (service *FilmsService) GetAllFilmActors(ctx context.Context, uuid string) 
 	}
 	return actors, nil
 }
-
-func (service *FilmsService) AddSomeData() error {
-	data := []domain.FilmDataToAdd{
-		{
-			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
-				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-			Title:    "Fast and Furious 1",
-			Duration: 3600,
-			Director: "Dozer",
-			Data:     "Dozer Dozer Dozer Dozer",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Стас Ярушин",
-					Career:     "универский типос",
-					Height:     154,
-					BirthPlace: "Ангарск",
-					Genres:     "Хип-Хоп",
-					Spouse:     "Светлана Ходченкова <3",
-				},
-				{
-					Name:       "Дмитрий Нагиев",
-					Career:     "физрукский типос",
-					Height:     215,
-					BirthPlace: "Шахты",
-					Genres:     "RnB",
-					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
-				},
-			},
-		},
-		{
-			Preview:  "https://m.media-amazon.com/images/I/71Wo+cFznbL.jpg",
-			Title:    "Fast and Furious 2",
-			Duration: 7200,
-			Director: "Dima",
-			Data:     "Dima Dima Dima Dima",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Костя Воронин",
-					Career:     "Костик",
-					Height:     181,
-					BirthPlace: "Россия",
-					Genres:     "Riddim",
-					Spouse:     "Taylor Swift",
-				},
-				{
-					Name:       "Tom Hanks",
-					Career:     "пиццерийных дел мастер",
-					Height:     178,
-					BirthPlace: "Омерика",
-					Genres:     "Riddim",
-					Spouse:     "Вроде Ваенга хз",
-				},
-			},
-		},
-		{
-			Preview:  "https://m.media-amazon.com/images/I/71ql8kIrPKL.jpg",
-			Title:    "Fast and Furious 3",
-			Duration: 4800,
-			Director: "Dima",
-			Data:     "Dima Dima Dima Dima",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Дональд Дак",
-					Career:     "пиццерийных дел мастер",
-					Height:     178,
-					BirthPlace: "Омерика",
-					Genres:     "Riddim",
-					Spouse:     "Вроде Ваенга хз",
-				},
-				{
-					Name:       "Дмитрий Нагиев",
-					Career:     "физрукский типос",
-					Height:     215,
-					BirthPlace: "Шахты",
-					Genres:     "RnB",
-					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
-				},
-			},
-		},
+func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	err := service.storage.PutFavoriteFilm(filmUuid, userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to put favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return err
 	}
-
-	for _, film := range data {
-		err := service.storage.AddFilm(film)
-		if err != nil {
-			service.logger.Errorf("[reqid=%s] failed to add film: %v", err)
-			return err
-		}
-	}
-
 	return nil
+}
+
+func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	err := service.storage.RemoveFavoriteFilm(filmUuid, userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return err
+	}
+	return nil
+}
+
+func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error) {
+	films, err := service.storage.GetAllFavoriteFilms(userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
 }

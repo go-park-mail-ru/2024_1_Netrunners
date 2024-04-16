@@ -102,6 +102,22 @@ const getAllFilmActors = `
 		JOIN film f ON fa.film = f.id
 		WHERE f.external_id = $1;`
 
+const putFavoriteFilm = `
+		INSERT INTO favorites (film_external_id, user_external_id) VALUES ($1, $2);`
+
+const removeFavoriteFilm = `
+		DELETE FROM favorites
+		WHERE film_external_id = $1 AND user_external_id = $2;`
+
+const getAllFavoriteFilms = `
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		FROM film f
+		INNER JOIN favorites fav ON f.external_id = fav.film_external_id
+		LEFT JOIN comment c ON f.id = c.film
+		JOIN director d ON f.director = d.id
+		WHERE fav.user_external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
+
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(), getFilmDataByUuid, uuid).Scan(
@@ -118,6 +134,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	if err != nil {
 		return domain.FilmData{}, err
 	}
+
 	return film, nil
 }
 
@@ -260,7 +277,6 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		film.AverageScore = FilmScore
 
 		films = append(films, film)
-
 	}
 
 	return films, nil
@@ -329,4 +345,56 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 	}
 
 	return comments, nil
+}
+
+func (storage *FilmsStorage) PutFavoriteFilm(filmUuid string, userUuid string) error {
+	_, err := storage.pool.Exec(context.Background(), putFavoriteFilm, filmUuid, userUuid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string) error {
+	_, err := storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error) {
+	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, userUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	films := make([]domain.FilmPreview, 0)
+	var (
+		FilmUuid     string
+		FilmPreview  string
+		FilmTitle    string
+		FilmDirector string
+		FilmDuration int
+		FilmScore    float32
+		FilmRating   int
+	)
+	for rows.Next() {
+		var film domain.FilmPreview
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating)
+		if err != nil {
+			return nil, err
+		}
+
+		film.Uuid = FilmUuid
+		film.Title = FilmTitle
+		film.Preview = FilmPreview
+		film.Director = FilmDirector
+		film.Duration = FilmDuration
+		film.ScoresCount = FilmRating
+		film.AverageScore = FilmScore
+
+		films = append(films, film)
+	}
+	return films, nil
 }
