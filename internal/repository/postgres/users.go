@@ -23,7 +23,7 @@ func NewUsersStorage(pool PgxIface) (*UsersStorage, error) {
 const insertUser = `INSERT INTO users (email, name, password) VALUES ($1, $2, $3);`
 
 const getUserData = `
-		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
+		SELECT external_id, email, avatar, name, password, registered_at, birthday, is_admin
 		FROM users
 		WHERE email = $1;`
 
@@ -49,27 +49,27 @@ const putNewUsername = `
 const putNewUserPasswordByUuid = `
 		UPDATE users
 		SET password = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const putNewUserAvatarByUuid = `
 		UPDATE users
 		SET avatar = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const putNewUsernameByUuid = `
 		UPDATE users
 		SET name = $1
-		WHERE uuid = $2;`
+		WHERE external_id = $2;`
 
 const getUserDataByUuid = `
-		SELECT uuid, email, avatar, name, password, registered_at, birthday, is_admin
+		SELECT external_id, email, avatar, name, password, registered_at, birthday, is_admin
 		FROM users
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getUserPreviewByUuid = `
-		SELECT name
+		SELECT external_id, name, avatar 
 		FROM users
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)
@@ -132,7 +132,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		err = tx.Rollback(context.Background())
 		if err != nil {
 			fmt.Printf("failed to rollback transaction to change password: %v",
-				myerrors.ErrInternalServerError)
+				err)
 		}
 	}()
 
@@ -146,6 +146,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
 		&user.Uuid,
 		&user.Email,
+		&user.Avatar,
 		&user.Name,
 		&user.Password,
 		&user.RegisteredAt,
@@ -157,8 +158,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w",
-			myerrors.ErrInternalServerError)
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w", err)
 	}
 
 	return user, nil
@@ -180,20 +180,21 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 
 	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	var user domain.User
 	err = storage.pool.QueryRow(context.Background(), getUserData, email).Scan(
 		&user.Uuid,
 		&user.Email,
+		&user.Avatar,
 		&user.Name,
 		&user.Password,
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
 	if err != nil {
-		return domain.User{}, myerrors.ErrInternalServerError
+		return domain.User{}, err
 	}
 
 	err = tx.Commit(context.Background())
@@ -224,8 +225,8 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, error) {
 	var userPreview domain.UserPreview
 
-	userPreview.Avatar = uuid
-	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Name)
+	err := storage.pool.QueryRow(context.Background(), getUserPreviewByUuid, uuid).Scan(&userPreview.Uuid,
+		&userPreview.Name, &userPreview.Avatar)
 	if err != nil {
 		return domain.UserPreview{}, myerrors.ErrInternalServerError
 	}

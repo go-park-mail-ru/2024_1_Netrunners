@@ -144,7 +144,6 @@ func ValidateLogin(e string) error {
 	if emailRegex.MatchString(e) {
 		return nil
 	}
-	fmt.Println(e)
 	return myerrors.ErrLoginIsNotValid
 }
 
@@ -223,16 +222,6 @@ func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, 
 
 func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
 	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
-	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
-			err)
-		return domain.User{}, err
-	}
-	return user, nil
-}
-
-func (service *AuthService) ChangeUserAvatarByUuid(ctx context.Context, uuid, filename string) (domain.User, error) {
-	user, err := service.storage.ChangeUserAvatarByUuid(uuid, filename)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
 			err)

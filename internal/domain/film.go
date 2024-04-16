@@ -6,6 +6,7 @@ type FilmData struct {
 	Uuid         string    `json:"uuid"`
 	Preview      string    `json:"preview"`
 	Title        string    `json:"title"`
+	Link         string    `json:"link"`
 	Director     string    `json:"director"`
 	AverageScore float32   `json:"averageScore"`
 	ScoresCount  int       `json:"scoresCount"`

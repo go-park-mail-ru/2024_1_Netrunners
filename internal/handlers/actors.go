@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -9,24 +10,28 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
-type actorResponse struct {
-	Status int              `json:"status"`
-	Actor  domain.ActorData `json:"actor"`
+type ActorsService interface {
+	GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error)
+	GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error)
 }
 
 type ActorsHandlers struct {
-	actorsService *service.ActorsService
+	actorsService ActorsService
 	logger        *zap.SugaredLogger
 }
 
-func NewActorsHandlers(actorsService *service.ActorsService, logger *zap.SugaredLogger) *ActorsHandlers {
+func NewActorsHandlers(actorsService ActorsService, logger *zap.SugaredLogger) *ActorsHandlers {
 	return &ActorsHandlers{
 		actorsService: actorsService,
 		logger:        logger,
 	}
+}
+
+type actorResponse struct {
+	Status int              `json:"status"`
+	Actor  domain.ActorData `json:"actor"`
 }
 
 func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
@@ -94,6 +99,7 @@ func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *
 
 	actors, err := actorsHandlers.actorsService.GetActorsByFilm(ctx, filmUuid)
 	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to get actors by film: %v\n", requestID, err)
 		err = WriteError(w, err)
 		if err != nil {
 			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
@@ -109,11 +115,21 @@ func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		actorsHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
 		actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 }

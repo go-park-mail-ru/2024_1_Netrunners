@@ -26,9 +26,11 @@ func main() {
 	var (
 		frontEndPort int
 		backEndPort  int
+		serverIP     string
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
 	flag.IntVar(&backEndPort, "b-port", 8081, "back-end server port")
+	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
 
@@ -69,16 +71,11 @@ func main() {
 	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
 	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
 
-	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger)
+	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
 	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
-
-	err = filmsService.AddSomeData()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	router := mux.NewRouter()
 

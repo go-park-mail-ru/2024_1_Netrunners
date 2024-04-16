@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,15 +11,24 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
+type FilmsService interface {
+	GetFilmDataByUuid(ctx context.Context, uuid string) (domain.FilmData, error)
+	AddFilm(ctx context.Context, film domain.FilmDataToAdd) error
+	RemoveFilm(ctx context.Context, uuid string) error
+	GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error)
+	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
+	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
+	GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
+}
+
 type FilmsPageHandlers struct {
-	filmsService *service.FilmsService
+	filmsService FilmsService
 	logger       *zap.SugaredLogger
 }
 
-func NewFilmsPageHandlers(filmsService *service.FilmsService, logger *zap.SugaredLogger) *FilmsPageHandlers {
+func NewFilmsPageHandlers(filmsService FilmsService, logger *zap.SugaredLogger) *FilmsPageHandlers {
 	return &FilmsPageHandlers{
 		filmsService: filmsService,
 		logger:       logger,
@@ -36,10 +46,12 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(ctx)
 	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestID, err)
 		err = WriteError(w, err)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
+		return
 	}
 
 	for _, film := range films {
@@ -53,13 +65,21 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
 	}
 }
 

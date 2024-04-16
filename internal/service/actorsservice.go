@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
 type ActorsStorage interface {
@@ -30,7 +31,7 @@ func (service *ActorsService) GetActorByUuid(ctx context.Context, actorUuid stri
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(requestId.ReqIDKey),
-			err)
+			myerrors.ErrNoSuchActor)
 		return domain.ActorData{}, err
 	}
 
@@ -41,7 +42,7 @@ func (service *ActorsService) GetActorsByFilm(ctx context.Context, filmUuid stri
 	actors, err := service.storage.GetActorsByFilm(filmUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get actors by film: %v", ctx.Value(requestId.ReqIDKey),
-			err)
+			myerrors.ErrNoActorsForFilm)
 		return nil, err
 	}
 

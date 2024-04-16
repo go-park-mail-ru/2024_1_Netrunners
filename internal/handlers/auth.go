@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -17,13 +19,38 @@ var (
 	tokenCookieExpirationTime = 48 * 3600
 )
 
+type AuthService interface {
+	CreateUser(ctx context.Context, user domain.UserSignUp) error
+	RemoveUser(ctx context.Context, email string) error
+	HasUser(ctx context.Context, email, password string) error
+	GetUser(ctx context.Context, email string) (domain.User, error)
+	ChangeUserPassword(ctx context.Context, email, newPassword string) (domain.User, error)
+	ChangeUserName(ctx context.Context, email, newName string) (domain.User, error)
+	GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error)
+	GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error)
+	ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error)
+	ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error)
+	IsTokenValid(token *http.Cookie) (jwt.MapClaims, error)
+	GenerateTokens(login string, isAdmin bool, version uint8) (tokenSigned string, err error)
+}
+
+type SessionService interface {
+	Add(ctx context.Context, login string, token string, version uint8) (err error)
+	DeleteSession(ctx context.Context, login string, token string) (err error)
+	Update(ctx context.Context, login string, token string) (err error)
+	CheckVersion(ctx context.Context, login string, token string, usersVersion uint8) (hasSession bool, err error)
+	GetVersion(ctx context.Context, login string, token string) (version uint8, err error)
+	HasSession(ctx context.Context, login string, token string) error
+	CheckAllUserSessionTokens(ctx context.Context, login string) error
+}
+
 type AuthPageHandlers struct {
-	authService    *service.AuthService
-	sessionService *service.SessionService
+	authService    AuthService
+	sessionService SessionService
 	logger         *zap.SugaredLogger
 }
 
-func NewAuthPageHandlers(authService *service.AuthService, sessionService *service.SessionService,
+func NewAuthPageHandlers(authService AuthService, sessionService SessionService,
 	logger *zap.SugaredLogger) *AuthPageHandlers {
 	return &AuthPageHandlers{
 		authService:    authService,

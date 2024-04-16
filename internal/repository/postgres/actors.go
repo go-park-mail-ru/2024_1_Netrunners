@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -29,22 +30,24 @@ func NewActorsStorage(pool PgxIface) (*ActorsStorage, error) {
 }
 
 const getActorDataByUuid = `
-		SELECT uuid, name, avatar, birthday, career, height, birth_place, genres, spouse
+		SELECT external_id, name, avatar, birthday, career, height, birth_place, genres, spouse
 		FROM actor
-		WHERE uuid = $1;
-`
+		WHERE external_id = $1;`
 
-const getActorsFilms = `
-		SELECT f.uuid, f.title
-		FROM film f LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
-		WHERE faa.uuid = $1;
-`
+const getFilmsByActor = `
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		FROM film f 
+		LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
+		LEFT JOIN comment c ON f.id = c.film
+		JOIN director d ON f.director = d.id
+		WHERE faa.external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getActorsByFilm = `
-		SELECT a.uuid, a.name, a.avatar
-		FROM actor a LEFT JOIN (film_actor fa LEFT JOIN film f ON fa.film = f.id) faf ON a.id = faf.actor
-		WHERE faf.uuid = $1;
-`
+		SELECT a.external_id, a.name, a.avatar
+		FROM actor a 
+		LEFT JOIN (film_actor fa LEFT JOIN film f ON fa.film = f.id) faf ON a.id = faf.actor
+		WHERE faf.external_id = $1;`
 
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
 	var actor domain.ActorData
@@ -62,7 +65,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
 
-	rows, err := storage.pool.Query(context.Background(), getActorsFilms, actorUuid)
+	rows, err := storage.pool.Query(context.Background(), getFilmsByActor, actorUuid)
 	if err != nil {
 		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}

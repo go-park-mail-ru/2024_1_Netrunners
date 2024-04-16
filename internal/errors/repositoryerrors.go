@@ -19,5 +19,8 @@ var (
 	ErrIncorrectLoginOrPassword = errors.New("incorrect login or password")
 
 	// mockDB films errors
-	ErrNoSuchFilm = errors.New("no such film with given id")
+	ErrNoSuchFilm = errors.New("no such film with given uuid")
+
+	ErrNoSuchActor     = errors.New("no such actor with given uuid")
+	ErrNoActorsForFilm = errors.New("no actors for this film")
 )

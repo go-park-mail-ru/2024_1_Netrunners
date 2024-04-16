@@ -22,12 +22,13 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 }
 
 const getFilmDataByUuid = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.data, f.duration, f.published_at, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, AVG(c.score),
+		       COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title,  f.banner, d.name, f.published_at, f.duration, f.data;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration;`
 
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
@@ -69,35 +70,37 @@ const insertIntoFilmActors = `
 
 const deleteFilm = `
 		DELETE FROM film
-		WHERE uuid = $1;`
+		WHERE external_id = $1;`
 
 const getFilmPreview = `
-		SELECT f.uuid, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE f.uuid = $1
-		GROUP BY f.uuid, f.title, f.banner, d.name, f.duration;`
+		WHERE f.external_id = $1
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmsPreviews = `
-		SELECT f.uuid, f.title, f.banner, f.director, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
-		GROUP BY f.uuid, f.title, f.banner, f.director, f.duration;`
+		JOIN director d ON f.director = d.id
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmComments = `
-		SELECT comment.uuid, film.uuid, users.name AS author_name, comment.text, comment.score, comment.added_at
+		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
+		       comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
-		WHERE film.uuid = $1;`
+		WHERE film.external_id = $1;`
 
 const getAllFilmActors = `
-		SELECT a.uuid, a.name, a.avatar
+		SELECT a.external_id, a.name, a.avatar
 		FROM actor a
 		JOIN film_actor fa ON a.id = fa.actor
 		JOIN film f ON fa.film = f.id
-		WHERE f.uuid = $1;`
+		WHERE f.external_id = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
@@ -105,6 +108,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.Uuid,
 		&film.Title,
 		&film.Preview,
+		&film.Link,
 		&film.Director,
 		&film.Data,
 		&film.Duration,
@@ -227,7 +231,7 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, err
 	}
 
 	films := make([]domain.FilmPreview, 0)
@@ -240,24 +244,23 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		FilmScore    float32
 		FilmRating   int
 	)
-	_, err = pgx.ForEachRow(rows,
-		[]any{&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating}, func() error {
-			film := domain.FilmPreview{
-				Uuid:         FilmUuid,
-				Title:        FilmTitle,
-				Preview:      FilmPreview,
-				Director:     FilmDirector,
-				Duration:     FilmDuration,
-				AverageScore: FilmScore,
-				ScoresCount:  FilmRating,
-			}
+	for rows.Next() {
+		var film domain.FilmPreview
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating)
+		if err != nil {
+			return nil, err
+		}
 
-			films = append(films, film)
+		film.Uuid = FilmUuid
+		film.Title = FilmTitle
+		film.Preview = FilmPreview
+		film.Director = FilmDirector
+		film.Duration = FilmDuration
+		film.ScoresCount = FilmRating
+		film.AverageScore = FilmScore
 
-			return nil
-		})
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		films = append(films, film)
+
 	}
 
 	return films, nil
@@ -266,7 +269,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, err
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -275,19 +278,19 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 		ActorName   string
 		ActorAvatar string
 	)
-	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName, &ActorAvatar}, func() error {
-		actor := domain.ActorPreview{
-			Uuid:   ActorUuid,
-			Name:   ActorName,
-			Avatar: ActorAvatar,
+
+	for rows.Next() {
+		var actor domain.ActorPreview
+		err = rows.Scan(&ActorUuid, &ActorName, &ActorAvatar)
+		if err != nil {
+			return nil, err
 		}
 
-		actors = append(actors, actor)
+		actor.Uuid = ActorUuid
+		actor.Name = ActorName
+		actor.Avatar = ActorAvatar
 
-		return nil
-	})
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		actors = append(actors, actor)
 	}
 
 	return actors, nil
@@ -296,7 +299,7 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, err
 	}
 
 	comments := make([]domain.Comment, 0)
@@ -308,23 +311,21 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 		CommentScore    int
 		CommentAddedAt  time.Time
 	)
-	_, err = pgx.ForEachRow(rows,
-		[]any{&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt}, func() error {
-			comment := domain.Comment{
-				Uuid:     CommentUuid,
-				FilmUuid: CommentFilmUuid,
-				Author:   CommentAuthor,
-				Text:     CommentText,
-				Score:    CommentScore,
-				AddedAt:  CommentAddedAt,
-			}
+	for rows.Next() {
+		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt)
+		if err != nil {
+			return nil, err
+		}
+		var comment domain.Comment
 
-			comments = append(comments, comment)
+		comment.Uuid = CommentUuid
+		comment.Author = CommentAuthor
+		comment.FilmUuid = CommentFilmUuid
+		comment.Text = CommentText
+		comment.Score = CommentScore
+		comment.AddedAt = CommentAddedAt
 
-			return nil
-		})
-	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		comments = append(comments, comment)
 	}
 
 	return comments, nil
