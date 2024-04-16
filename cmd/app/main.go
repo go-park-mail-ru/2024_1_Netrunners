@@ -77,10 +77,6 @@ func main() {
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
 	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	router := mux.NewRouter()
 
 	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST", "OPTIONS")
