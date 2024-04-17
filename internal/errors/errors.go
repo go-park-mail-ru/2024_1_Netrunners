@@ -16,6 +16,7 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrUsernameIsToShort),
 		errors.Is(err, ErrFailInQueryRow),
 		errors.Is(err, ErrFailInQuery),
+		errors.Is(err, ErrNoSuchActor),
 		errors.Is(err, ErrFailInExec):
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),
@@ -24,13 +25,15 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrWrongSessionVersion),
 		errors.Is(err, ErrNotAuthorised),
 		errors.Is(err, ErrTokenIsNotValid),
-		errors.Is(err, ErrNoActiveSession):
+		errors.Is(err, ErrNoActiveSession),
+		errors.Is(err, ErrNoSuchFilm):
 		status = 401
 	case errors.Is(err, ErrInternalServerError),
 		errors.Is(err, ErrTooHighVersion),
 		errors.Is(err, ErrFailInForEachRow),
 		errors.Is(err, ErrFailedToBeginTransaction),
-		errors.Is(err, ErrFailedToCommitTransaction):
+		errors.Is(err, ErrFailedToCommitTransaction),
+		errors.Is(err, ErrNoActorsForFilm):
 		status = 500
 	default:
 		status = 500
