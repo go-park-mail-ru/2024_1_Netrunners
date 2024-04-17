@@ -117,7 +117,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.ScoresCount)
 	if err != nil {
 		return domain.FilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	return film, nil
 }
@@ -126,7 +126,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction to add film: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -136,68 +136,74 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 	}()
 
 	var directorFlag int
-	err = storage.pool.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
+	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
 	if err != nil {
 		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	if directorFlag == 0 {
-		_, err = storage.pool.Exec(context.Background(), insertDirector, film.Director)
+		_, err = tx.Exec(context.Background(), insertDirector, film.Director)
 		if err != nil {
 			return fmt.Errorf("failed to insert director: %w: %w", err,
-				myerrors.ErrInternalServerError)
+				myerrors.ErrFailInExec)
 		}
 	}
 
 	var directorID int
-	err = storage.pool.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
+	err = tx.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
 	if err != nil {
 		return fmt.Errorf("failed to get directors id: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
-	_, err = storage.pool.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
+	_, err = tx.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
 		film.AgeLimit, film.Duration, film.PublishedAt)
 	if err != nil {
 		return fmt.Errorf("failed to insert film: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var filmID int
-	err = storage.pool.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
+	err = tx.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
 	if err != nil {
 		return fmt.Errorf("failed to get film id: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	ActorsCast := film.Actors
 	for _, actor := range ActorsCast {
 		var actorFlag int
-		err = storage.pool.QueryRow(context.Background(), getAmountOfActorsByName, actor.Name).Scan(&actorFlag)
+		err = tx.QueryRow(context.Background(), getAmountOfActorsByName, actor.Name).Scan(&actorFlag)
 		if err != nil {
 			return fmt.Errorf("failed to get amount of actors: %w: %w", err,
-				myerrors.ErrInternalServerError)
+				myerrors.ErrFailInQueryRow)
 		}
 		if actorFlag == 0 {
-			_, err = storage.pool.Exec(context.Background(), insertActor, actor.Name)
+			_, err = tx.Exec(context.Background(), insertActor, actor.Name)
 			if err != nil {
 				return fmt.Errorf("failed to insert actor: %w: %w", err,
-					myerrors.ErrInternalServerError)
+					myerrors.ErrFailInExec)
 			}
 		}
 
 		var actorID int
-		err = storage.pool.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
+		err = tx.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
 		if err != nil {
 			return fmt.Errorf("failed to get actor id: %w: %w", err,
-				myerrors.ErrInternalServerError)
+				myerrors.ErrFailInQueryRow)
 		}
 
-		_, err = storage.pool.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)
+		_, err = tx.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)
 		if err != nil {
 			return fmt.Errorf("failed to insert film actors: %w: %w", err,
-				myerrors.ErrInternalServerError)
+				myerrors.ErrFailInExec)
 		}
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to commit transaction: %w: %w", err,
+			myerrors.ErrFailedToCommitTransaction)
 	}
 
 	return nil
@@ -207,7 +213,7 @@ func (storage *FilmsStorage) RemoveFilm(uuid string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteFilm, uuid)
 	if err != nil {
 		return fmt.Errorf("failed to remove film: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	return nil
@@ -225,7 +231,7 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 		&filmPreview.ScoresCount)
 	if err != nil {
 		return domain.FilmPreview{}, fmt.Errorf("failed to get film's preview: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	return filmPreview, nil
 }
@@ -272,7 +278,7 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 	rows, err := storage.pool.Query(context.Background(), getAllFilmActors, uuid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all film's actors: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQuery)
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -303,7 +309,7 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQuery)
 	}
 
 	comments := make([]domain.Comment, 0)

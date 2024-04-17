@@ -64,13 +64,13 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		&actor.Spouse)
 	if err != nil {
 		return domain.ActorData{}, fmt.Errorf("failed to get actor by uuid: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	rows, err := storage.pool.Query(context.Background(), getFilmsByActor, actorUuid)
 	if err != nil {
 		return domain.ActorData{}, fmt.Errorf("failed to get actor's films: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQuery)
 	}
 
 	films := make([]domain.FilmLink, 0)
@@ -90,7 +90,7 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 	})
 	if err != nil {
 		return domain.ActorData{}, fmt.Errorf("failed to save actor's films: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInForEachRow)
 	}
 
 	actor.Films = films
@@ -102,7 +102,7 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get actors by film: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQuery)
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -124,7 +124,7 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to save actors by film: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInForEachRow)
 	}
 
 	return actors, nil

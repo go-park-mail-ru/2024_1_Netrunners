@@ -75,7 +75,7 @@ func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 	return nil
 }
@@ -95,7 +95,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get user: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	return user, nil
 }
@@ -104,7 +104,7 @@ func (storage *UsersStorage) RemoveUser(email string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteUser, email)
 	if err != nil {
 		return fmt.Errorf("failed to remove user: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	return nil
@@ -115,7 +115,7 @@ func (storage *UsersStorage) HasUser(email, password string) error {
 	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(&passwordFromDB)
 	if err != nil {
 		return fmt.Errorf("failed to get user for password check: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQuery)
 	}
 
 	if passwordFromDB != password {
@@ -130,7 +130,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -142,7 +142,7 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 	_, err = tx.Exec(context.Background(), putNewUserPassword, newPassword, email)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to update data to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var user domain.User
@@ -157,13 +157,13 @@ func (storage *UsersStorage) ChangeUserPassword(email, newPassword string) (doma
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get new user data: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToCommitTransaction)
 	}
 
 	return user, nil
@@ -173,7 +173,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -185,7 +185,7 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 	_, err = tx.Exec(context.Background(), putNewUsername, newUsername, email)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var user domain.User
@@ -200,13 +200,13 @@ func (storage *UsersStorage) ChangeUserName(email, newUsername string) (domain.U
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get new user data: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToCommitTransaction)
 	}
 	return user, nil
 }
@@ -224,7 +224,7 @@ func (storage *UsersStorage) GetUserDataByUuid(uuid string) (domain.User, error)
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get user data by uuid: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	return user, nil
 }
@@ -236,7 +236,7 @@ func (storage *UsersStorage) GetUserPreview(uuid string) (domain.UserPreview, er
 		&userPreview.Name, &userPreview.Avatar)
 	if err != nil {
 		return domain.UserPreview{}, fmt.Errorf("failed to get user preview: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 	return userPreview, nil
 }
@@ -245,7 +245,7 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -257,7 +257,7 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 	_, err = tx.Exec(context.Background(), putNewUserPasswordByUuid, newPassword, uuid)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed update data to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var user domain.User
@@ -272,13 +272,13 @@ func (storage *UsersStorage) ChangeUserPasswordByUuid(uuid, newPassword string) 
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get new user data: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change password: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToCommitTransaction)
 	}
 
 	return user, nil
@@ -288,7 +288,7 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -300,7 +300,7 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	_, err = tx.Exec(context.Background(), putNewUsernameByUuid, newUsername, uuid)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var user domain.User
@@ -315,13 +315,13 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get new user data: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToCommitTransaction)
 	}
 	return user, nil
 }
@@ -330,7 +330,7 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToBeginTransaction)
 	}
 	defer func() {
 		err = tx.Rollback(context.Background())
@@ -342,7 +342,7 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to change user's avatar: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInExec)
 	}
 
 	var user domain.User
@@ -357,13 +357,13 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 		&user.IsAdmin)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to get new user data: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailInQueryRow)
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w: %w", err,
-			myerrors.ErrInternalServerError)
+			myerrors.ErrFailedToCommitTransaction)
 	}
 	return user, nil
 }

@@ -13,14 +13,18 @@ var (
 	ErrNoSuchUserInTheCache     = errors.New("no such user in cache")
 	ErrTooHighVersion           = errors.New("too high session version")
 
-	// mockDB users errors
+	// postgres users errors
 	ErrNoSuchUser               = errors.New("no such user with given login")
 	ErrUserAlreadyExists        = errors.New("user with given login already exists")
 	ErrIncorrectLoginOrPassword = errors.New("incorrect login or password")
 
-	// mockDB films errors
-	ErrNoSuchFilm = errors.New("no such film with given uuid")
+	// // postgres films errors
+	// ErrNoSuchFilmByUuid = errors.New("no such film with given uuid")
 
-	ErrNoSuchActor     = errors.New("no such actor with given uuid")
-	ErrNoActorsForFilm = errors.New("no actors for this film")
+	ErrFailInQueryRow            = errors.New("failed to query row")
+	ErrFailInQuery               = errors.New("failed to query rows")
+	ErrFailInExec                = errors.New("failed to exec script")
+	ErrFailInForEachRow          = errors.New("unexpected error at ForEachRow")
+	ErrFailedToBeginTransaction  = errors.New("failed to begin transaction")
+	ErrFailedToCommitTransaction = errors.New("failed to commit transaction")
 )
