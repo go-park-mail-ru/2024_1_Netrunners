@@ -108,9 +108,9 @@ func NewMockFilmActors() []domain.ActorPreview {
 
 func NewMockFilmComments() []domain.Comment {
 	return []domain.Comment{
-		{Uuid: "1", FilmUuid: "1", Author: "Fast n Furious 1", Text: "comment1", Score: 1, AddedAt: time.Now()},
-		{Uuid: "2", FilmUuid: "1", Author: "Fast n Furious 2", Text: "comment1", Score: 1, AddedAt: time.Now()},
-		{Uuid: "3", FilmUuid: "1", Author: "Fast n Furious 3", Text: "comment1", Score: 1, AddedAt: time.Now()},
+		{Uuid: "1", Author: "Fast n Furious 1", Text: "comment1", Score: 1, AddedAt: time.Now()},
+		{Uuid: "2", Author: "Fast n Furious 2", Text: "comment1", Score: 1, AddedAt: time.Now()},
+		{Uuid: "3", Author: "Fast n Furious 3", Text: "comment1", Score: 1, AddedAt: time.Now()},
 	}
 }
 

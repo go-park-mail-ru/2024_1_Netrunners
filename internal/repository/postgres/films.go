@@ -89,12 +89,11 @@ const getAllFilmsPreviews = `
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 const getAllFilmComments = `
-		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
-		       comment.added_at
+		SELECT comment.external_id, users.name AS author_name, comment.text, comment.score, comment.added_at
 		FROM comment
 		JOIN users ON comment.author = users.id
 		JOIN film ON comment.film = film.id
-		WHERE film.external_id = $1;`
+		WHERE film.id = $1;`
 
 const getAllFilmActors = `
 		SELECT a.external_id, a.name, a.avatar
@@ -104,19 +103,29 @@ const getAllFilmActors = `
 		WHERE f.external_id = $1;`
 
 const putFavoriteFilm = `
-		INSERT INTO favorites (film_external_id, user_external_id) VALUES ($1, $2);`
+		INSERT INTO favorites (film_id, user_id) VALUES ($1, $2);`
 
 const removeFavoriteFilm = `
 		DELETE FROM favorites
-		WHERE film_external_id = $1 AND user_external_id = $2;`
+		WHERE film_id = $1 AND user_id = $2;`
+
+const getUserIdByUuid = `
+		SELECT id
+		FROM users
+		WHERE users.external_id = $1;`
+
+const getFilmIdByUuid = `
+		SELECT id
+		FROM film
+		WHERE film.external_id = $1;`
 
 const getAllFavoriteFilms = `
 		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
-		INNER JOIN favorites fav ON f.external_id = fav.film_external_id
+		INNER JOIN favorites fav ON f.id = fav.film_id
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE fav.user_external_id = $1
+		WHERE fav.user_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
@@ -132,9 +141,6 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.Date,
 		&film.AverageScore,
 		&film.ScoresCount)
-	if err != nil {
-		return domain.FilmData{}, err
-	}
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.FilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
@@ -326,25 +332,29 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 }
 
 func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
+	var filmId int
+	err := storage.pool.QueryRow(context.Background(), getFilmIdByUuid, uuid).Scan(&filmId)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	} else if err != nil {
+		return nil, err
 	}
+
+	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, filmId)
 	if err != nil {
 		return nil, err
 	}
 
 	comments := make([]domain.Comment, 0)
 	var (
-		CommentUuid     string
-		CommentFilmUuid string
-		CommentAuthor   string
-		CommentText     string
-		CommentScore    int
-		CommentAddedAt  time.Time
+		CommentUuid    string
+		CommentAuthor  string
+		CommentText    string
+		CommentScore   int
+		CommentAddedAt time.Time
 	)
 	for rows.Next() {
-		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt)
+		err = rows.Scan(&CommentUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -352,7 +362,6 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 
 		comment.Uuid = CommentUuid
 		comment.Author = CommentAuthor
-		comment.FilmUuid = CommentFilmUuid
 		comment.Text = CommentText
 		comment.Score = CommentScore
 		comment.AddedAt = CommentAddedAt
@@ -364,7 +373,25 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 }
 
 func (storage *FilmsStorage) PutFavoriteFilm(filmUuid string, userUuid string) error {
-	_, err := storage.pool.Exec(context.Background(), putFavoriteFilm, filmUuid, userUuid)
+	var (
+		filmId int
+		userId int
+	)
+	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, userUuid).Scan(&userId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, userUuid)
+	} else if err != nil {
+		return err
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getFilmIdByUuid, filmUuid).Scan(&filmId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, filmUuid)
+	} else if err != nil {
+		return err
+	}
+
+	_, err = storage.pool.Exec(context.Background(), putFavoriteFilm, filmId, userId)
 	if err != nil {
 		return err
 	}
@@ -372,7 +399,25 @@ func (storage *FilmsStorage) PutFavoriteFilm(filmUuid string, userUuid string) e
 }
 
 func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string) error {
-	_, err := storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
+	var (
+		filmId int
+		userId int
+	)
+	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, userUuid).Scan(&userId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, userUuid)
+	} else if err != nil {
+		return err
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getFilmIdByUuid, filmUuid).Scan(&filmId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, filmUuid)
+	} else if err != nil {
+		return err
+	}
+
+	_, err = storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
 	if err != nil {
 		return err
 	}
@@ -380,11 +425,18 @@ func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string
 }
 
 func (storage *FilmsStorage) GetAllFavoriteFilms(uuid string) ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, uuid)
+	var userId int
+	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, uuid).Scan(&userId)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	} else if err != nil {
+		return nil, err
 	}
-	if err != nil {
+
+	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, userId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+	} else if err != nil {
 		return nil, err
 	}
 

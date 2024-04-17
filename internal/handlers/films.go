@@ -278,20 +278,23 @@ func (filmsPageHandlers *FilmsPageHandlers) PutFavoriteFilm(w http.ResponseWrite
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
+		return
 	}
 
 	err = filmsPageHandlers.filmsService.PutFavoriteFilm(ctx, data.FilmUuid, data.UserUuid)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to put favorite film: %v\n", requestId, err)
-		err = WriteError(w, err)
+		err := WriteError(w, err)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
+		return
 	}
 
 	err = WriteSuccess(w)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		return
 	}
 
 	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film added successfully", requestId))
@@ -340,6 +343,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
+		return
 	}
 
 	for _, film := range films {

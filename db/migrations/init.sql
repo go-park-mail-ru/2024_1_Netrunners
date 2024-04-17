@@ -76,8 +76,23 @@ CREATE TABLE IF NOT EXISTS film_actor
 CREATE TABLE IF NOT EXISTS favorites
 (
 	id               INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	film_external_id UUID NOT NULL,
-	user_external_id UUID NOT NULL,
-	FOREIGN KEY (user_external_id) REFERENCES users (external_id) ON DELETE CASCADE,
-	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
+	film_id INTEGER NOT NULL,
+	user_id INTEGER NOT NULL,
+	FOREIGN KEY (id) REFERENCES users (id) ON DELETE CASCADE,
+	FOREIGN KEY (id) REFERENCES film (id) ON DELETE CASCADE
 );
+
+INSERT INTO users (email, avatar, name, password, is_admin) VALUES ('danila@mail.ru', '', 'danila', '12344321', TRUE);
+INSERT INTO users (email, avatar, name, password, is_admin) VALUES ('alexander@mail.ru', '', 'alexander', '12344321', TRUE);
+INSERT INTO users (email, avatar, name, password, is_admin) VALUES ('dmitriy@mail.ru', '', 'dmitriy', '12344321', TRUE);
+INSERT INTO users (email, avatar, name, password, is_admin) VALUES ('nikita@mail.ru', '', 'nikita', '12344321', TRUE);
+
+INSERT INTO actor (name, avatar, career, height, birth_place, genres, spouse) VALUES ('', '', '', '', '', '', '');
+INSERT INTO actor (name, avatar, career, height, birth_place, genres, spouse) VALUES ('', '', '', '', '', '', '');
+INSERT INTO actor (name, avatar, career, height, birth_place, genres, spouse) VALUES ('', '', '', '', '', '', '');
+INSERT INTO actor (name, avatar, career, height, birth_place, genres, spouse) VALUES ('', '', '', '', '', '', '');
+INSERT INTO actor (name, avatar, career, height, birth_place, genres, spouse) VALUES ('', '', '', '', '', '', '');
+
+INSERT INTO director (name, avatar, birthday) VALUES ('', '', '');
+
+INSERT INTO film (title, data, banner, s3_link, director, age_limit, duration) VALUES ('', '', '', '', 1, 16, );

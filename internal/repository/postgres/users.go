@@ -93,7 +93,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 		&user.RegisteredAt,
 		&user.Birthday,
 		&user.IsAdmin)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.User{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -104,7 +104,7 @@ func (storage *UsersStorage) GetUser(email string) (domain.User, error) {
 
 func (storage *UsersStorage) RemoveUser(email string) error {
 	_, err := storage.pool.Exec(context.Background(), deleteUser, email)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
@@ -117,7 +117,7 @@ func (storage *UsersStorage) RemoveUser(email string) error {
 func (storage *UsersStorage) HasUser(email, password string) error {
 	var passwordFromDB string
 	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByName, email).Scan(&passwordFromDB)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
