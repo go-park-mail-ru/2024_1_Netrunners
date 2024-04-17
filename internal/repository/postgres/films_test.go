@@ -87,6 +87,8 @@ func TestFilmsStorage_AddFilm(t *testing.T) {
 	mock.ExpectExec("INSERT").
 		WithArgs(1, 1).WillReturnResult(pgxmock.NewResult("INSERT", 1))
 
+	mock.ExpectCommit()
+
 	err = storage.AddFilm(newFilm)
 	require.Equal(t, nil, err)
 

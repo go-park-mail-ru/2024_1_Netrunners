@@ -94,16 +94,16 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-		return
-	}
+	// user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	// if err != nil {
+	// 	err = WriteError(w, err)
+	// 	if err != nil {
+	// 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	// 	}
+	// 	return
+	// }
 
-	userPreview.Avatar = "./uploads/" + user.Email + "avatar.png"
+	// userPreview.Avatar = "./uploads/" + user.Email + "avatar.png"
 
 	escapeUserPreviewData(&userPreview)
 
