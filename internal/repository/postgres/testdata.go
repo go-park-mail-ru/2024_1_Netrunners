@@ -19,8 +19,6 @@ func NewMockActor() domain.ActorData {
 		Spouse:     "Дабстеп",
 		Films: []domain.FilmPreview{
 			{Uuid: "1", Title: "Fast n Furious 1"},
-			{Uuid: "2", Title: "Fast n Furious 2"},
-			{Uuid: "3", Title: "Fast n Furious 3"},
 		},
 	}
 }

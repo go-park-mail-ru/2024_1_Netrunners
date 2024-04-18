@@ -52,15 +52,15 @@ const getActorsByFilm = `
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
 	var actor = domain.ActorData{}
 	err := storage.pool.QueryRow(context.Background(), getActorDataByUuid, actorUuid).Scan(
-		actor.Uuid,
-		actor.Name,
-		actor.Avatar,
-		actor.Birthday,
-		actor.Career,
-		actor.Height,
-		actor.BirthPlace,
-		actor.Genres,
-		actor.Spouse)
+		&actor.Uuid,
+		&actor.Name,
+		&actor.Avatar,
+		&actor.Birthday,
+		&actor.Career,
+		&actor.Height,
+		&actor.BirthPlace,
+		&actor.Genres,
+		&actor.Spouse)
 	if err != nil {
 		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
