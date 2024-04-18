@@ -33,7 +33,7 @@ func NewMiddleware(authService *service.AuthService,
 
 func (middlewareHandlers *Middleware) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", middlewareHandlers.serverIP)
+		w.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("http://%s", middlewareHandlers.serverIP))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, "+
@@ -64,7 +64,7 @@ func (middlewareHandlers *Middleware) PanicMiddleware(next http.Handler) http.Ha
 	})
 }
 
-func (middleware *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+func (middlewareHandlers *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// here will be our new check function
 
@@ -72,15 +72,16 @@ func (middleware *Middleware) AuthMiddleware(next http.HandlerFunc) http.Handler
 	}
 }
 
-func (middleware *Middleware) AccessLogMiddleware(next http.Handler) http.Handler {
+func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqId := reqid.GenerateRequestID()
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, reqid.ReqIDKey, reqId)
-		middleware.logger.Info("request accessLog", "path", r.URL.Path)
+		middlewareHandlers.logger.Info("request accessLog", "path", r.URL.Path)
 		start := time.Now()
 		next.ServeHTTP(w, r.WithContext(ctx))
-		middleware.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], time = [%s];",
+		middlewareHandlers.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], "+
+			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
 	})
 }

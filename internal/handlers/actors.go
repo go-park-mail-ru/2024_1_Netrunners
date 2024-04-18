@@ -48,31 +48,11 @@ func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *h
 		return
 	}
 
-	actorFilms := make([]domain.FilmLink, 0, len(actor.Films))
-
-	for _, film := range actor.Films {
-		actorFilms = append(actorFilms, domain.FilmLink{
-			Uuid:  film.Uuid,
-			Title: film.Title,
-		})
-	}
-
 	escapeActorData(&actor)
 
 	response := actorResponse{
 		Status: http.StatusOK,
-		Actor: domain.ActorData{
-			Uuid:       actorUuid,
-			Name:       actor.Name,
-			Avatar:     actor.Avatar,
-			Birthday:   actor.Birthday,
-			Career:     actor.Career,
-			Height:     actor.Height,
-			BirthPlace: actor.BirthPlace,
-			Genres:     actor.Genres,
-			Spouse:     actor.Spouse,
-			Films:      actorFilms,
-		},
+		Actor:  actor,
 	}
 
 	jsonResponse, err := json.Marshal(response)
