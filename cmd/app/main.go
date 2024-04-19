@@ -34,6 +34,11 @@ func main() {
 
 	flag.Parse()
 
+	err := initUploads()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatal(err)
@@ -122,11 +127,50 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+	if err := server.ListenAndServeTLS("./cert/server.crt", "./cert/server.key"); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 
 	<-stopped
 
 	fmt.Println("Server stopped")
+}
+
+func initUploads() error {
+	storagePath := "./uploads/"
+	_, err := os.Stat(storagePath)
+	if err != nil {
+		err = os.Mkdir(storagePath, 0755)
+		if err != nil {
+			return err
+		}
+		err = os.Mkdir(storagePath+"users/", 0755)
+		if err != nil {
+			return err
+		}
+		err = os.Mkdir(storagePath+"films/", 0755)
+		if err != nil {
+			return err
+		}
+	} else {
+		storagePath = "./uploads/users/"
+		_, err = os.Stat(storagePath)
+		if err != nil {
+			err = os.Mkdir(storagePath, 0755)
+			if err != nil {
+				return err
+			}
+		}
+
+		storagePath := "./uploads/films/"
+		_, err = os.Stat(storagePath)
+		if err != nil {
+			err = os.Mkdir(storagePath, 0755)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

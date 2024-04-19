@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 
@@ -94,6 +95,23 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	avatar := "./uploads/users/" + user.Email + "/avatar.png"
+	_, err = os.Stat(avatar)
+	if err != nil {
+		userPreview.Avatar = "./uploads/users/default/avatar.png"
+	} else {
+		userPreview.Avatar = avatar
+	}
+
 	escapeUserPreviewData(&userPreview)
 
 	response := profilePreviewResponse{
@@ -119,11 +137,6 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		}
 		return
 	}
-}
-
-type newData struct {
-	Action string `json:"action"`
-	Data   string `json:"newData"`
 }
 
 func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWriter, r *http.Request) {
@@ -158,18 +171,10 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	var data newData
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-	}
-
-	switch {
-	case data.Action == "chPassword":
-		err = service.ValidatePassword(data.Data)
+	newData := r.FormValue("newData")
+	switch r.FormValue("action") {
+	case "chPassword":
+		err = service.ValidatePassword(newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -178,7 +183,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -187,8 +192,8 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-	case data.Action == "chUsername":
-		err = service.ValidateUsername(data.Data)
+	case "chUsername":
+		err = service.ValidateUsername(newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -197,7 +202,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -205,7 +210,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			}
 			return
 		}
-	case data.Action == "chAvatar":
+	case "chAvatar":
 		files := r.MultipartForm.File["avatar"]
 		if err != nil {
 			err = WriteError(w, err)
@@ -215,45 +220,13 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		for _, file := range files {
-			src, err := file.Open()
+		err = UserPageHandlers.saveFile(files[0], currUser.Email, requestId.(string))
+		if err != nil {
+			err = WriteError(w, err)
 			if err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
-			defer src.Close()
-
-			dst, err := os.Create("./uploads/user/" + file.Filename)
-			if err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-			defer dst.Close()
-
-			currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, file.Filename)
-			if err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-
-			if _, err := io.Copy(dst, src); err != nil {
-				err = WriteError(w, err)
-				if err != nil {
-					UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-				}
-				return
-			}
-
-			UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestId)
+			return
 		}
 	}
 
@@ -292,4 +265,38 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	if err != nil {
 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}
+}
+
+func (UserPageHandlers *UserPageHandlers) saveFile(file *multipart.FileHeader, email string, requestId string) error {
+	storagePath := "./uploads/users/" + email
+	_, err := os.Stat(storagePath)
+	if err != nil {
+		err = os.Mkdir(storagePath, 0755)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to create directory for user's avatar: %v\n", requestId, err)
+			return myerrors.ErrInternalServerError
+		}
+	}
+
+	dst, err := os.Create(storagePath + "/avatar.png")
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to create empty avatar file: %v\n", requestId, err)
+		return myerrors.ErrInternalServerError
+	}
+
+	defer dst.Close()
+
+	src, err := file.Open()
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to open created avatar file: %v\n", requestId, err)
+		return myerrors.ErrInternalServerError
+	}
+	defer src.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to copy into avatar file: %v\n", requestId, err)
+		return myerrors.ErrInternalServerError
+	}
+
+	return nil
 }

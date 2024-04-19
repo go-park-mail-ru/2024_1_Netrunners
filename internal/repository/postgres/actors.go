@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -63,12 +64,14 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		&actor.Genres,
 		&actor.Spouse)
 	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
+		return domain.ActorData{}, fmt.Errorf("failed to get actor by uuid: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
 	}
 
 	rows, err := storage.pool.Query(context.Background(), getFilmsByActor, actorUuid)
 	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
+		return domain.ActorData{}, fmt.Errorf("failed to get actor's films: %w: %w", err,
+			myerrors.ErrFailInQuery)
 	}
 
 	films := make([]domain.FilmPreview, 0)
@@ -102,7 +105,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		films = append(films, film)
 	}
 	if err != nil {
-		return domain.ActorData{}, myerrors.ErrInternalServerError
+		return domain.ActorData{}, fmt.Errorf("failed to save actor's films: %w: %w", err,
+			myerrors.ErrFailInForEachRow)
 	}
 
 	actor.Films = films
@@ -113,7 +117,8 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getActorsByFilm, filmUuid)
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, fmt.Errorf("failed to get actors by film: %w: %w", err,
+			myerrors.ErrFailInQuery)
 	}
 
 	actors := make([]domain.ActorPreview, 0)
@@ -134,7 +139,8 @@ func (storage *ActorsStorage) GetActorsByFilm(filmUuid string) ([]domain.ActorPr
 		return nil
 	})
 	if err != nil {
-		return nil, myerrors.ErrInternalServerError
+		return nil, fmt.Errorf("failed to save actors by film: %w: %w", err,
+			myerrors.ErrFailInForEachRow)
 	}
 
 	return actors, nil

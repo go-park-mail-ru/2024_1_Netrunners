@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -71,6 +72,8 @@ func TestUserPageHandlers_GetProfilePreview(t *testing.T) {
 		Name:   userData.Name,
 		Avatar: userData.Avatar,
 	}, nil)
+
+	mockAuthService.EXPECT().GetUserDataByUuid(gomock.Any(), "1").Return(domain.User{}, nil)
 
 	req := httptest.NewRequest("GET", "/profile/1/preview", nil)
 	req = mux.SetURLVars(req, map[string]string{"uuid": "1"})
