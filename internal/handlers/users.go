@@ -3,11 +3,14 @@ package handlers
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -257,6 +260,20 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 }
 
 func (UserPageHandlers *UserPageHandlers) Encode(file *multipart.FileHeader) (string, error) {
+	allowedExtensions := map[string]bool{
+		".jpg": true,
+		".png": true,
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if !allowedExtensions[ext] {
+		return "", fmt.Errorf("недопустимый тип файла, поддерживаются только .jpg и .png")
+	}
+
+	maxSize := int64(5 * 1024 * 1024) // 10 MB в байтах
+	if file.Size > maxSize {
+		return "", fmt.Errorf("файл слишком большой, максимальный размер 10 MB")
+	}
+
 	avatar, err := file.Open()
 	if err != nil {
 		return "", err
