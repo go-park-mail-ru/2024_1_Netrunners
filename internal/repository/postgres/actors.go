@@ -35,13 +35,14 @@ const getActorDataByUuid = `
 		WHERE external_id = $1;`
 
 const getFilmsByActor = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
-		FROM film f 
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration,
+        	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
+		FROM film f
 		LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE faa.external_id = $1
-		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
 
 const getActorsByFilm = `
 		SELECT a.external_id, a.name, a.avatar
@@ -50,7 +51,7 @@ const getActorsByFilm = `
 		WHERE faf.external_id = $1;`
 
 func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData, error) {
-	var actor domain.ActorData
+	var actor = domain.ActorData{}
 	err := storage.pool.QueryRow(context.Background(), getActorDataByUuid, actorUuid).Scan(
 		&actor.Uuid,
 		&actor.Name,
@@ -70,21 +71,36 @@ func (storage *ActorsStorage) GetActorByUuid(actorUuid string) (domain.ActorData
 		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}
 
-	films := make([]domain.FilmLink, 0)
+	films := make([]domain.FilmPreview, 0)
 	var (
-		filmUuid  string
-		filmTitle string
+		filmUuid     string
+		filmPreview  string
+		filmTitle    string
+		filmDirector string
+		filmDuration int
+		filmScore    float32
+		filmRating   int
+		filmAgeLimit uint8
 	)
-	_, err = pgx.ForEachRow(rows, []any{&filmUuid, &filmTitle}, func() error {
-		film := domain.FilmLink{
-			Uuid:  filmUuid,
-			Title: filmTitle,
+	for rows.Next() {
+		var film domain.FilmPreview
+		err = rows.Scan(&filmUuid, &filmTitle, &filmPreview, &filmDirector, &filmDuration, &filmScore, &filmRating,
+			&filmAgeLimit)
+		if err != nil {
+			return domain.ActorData{}, err
 		}
 
-		films = append(films, film)
+		film.Uuid = filmUuid
+		film.Title = filmTitle
+		film.Preview = filmPreview
+		film.Director = filmDirector
+		film.Duration = filmDuration
+		film.ScoresCount = filmRating
+		film.AverageScore = filmScore
+		film.AgeLimit = filmAgeLimit
 
-		return nil
-	})
+		films = append(films, film)
+	}
 	if err != nil {
 		return domain.ActorData{}, myerrors.ErrInternalServerError
 	}

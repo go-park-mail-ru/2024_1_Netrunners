@@ -17,10 +17,8 @@ func NewMockActor() domain.ActorData {
 		BirthPlace: "Angarsk",
 		Genres:     "Riddim",
 		Spouse:     "Дабстеп",
-		Films: []domain.FilmLink{
+		Films: []domain.FilmPreview{
 			{Uuid: "1", Title: "Fast n Furious 1"},
-			{Uuid: "2", Title: "Fast n Furious 2"},
-			{Uuid: "3", Title: "Fast n Furious 3"},
 		},
 	}
 }
@@ -55,7 +53,7 @@ func NewMockFilmDataToAdd() domain.FilmDataToAdd {
 		Duration: 240,
 		Actors: []domain.ActorData{
 			{Uuid: "1", Name: "Fast n Furious 1", Avatar: "avatar", Birthday: time.Now(), Career: "", Height: 100,
-				BirthPlace: "", Genres: "", Spouse: "", Films: []domain.FilmLink{
+				BirthPlace: "", Genres: "", Spouse: "", Films: []domain.FilmPreview{
 					{Uuid: "1", Title: "Fast n Furious 1"},
 				},
 			},

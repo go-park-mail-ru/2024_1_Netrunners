@@ -20,9 +20,10 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "link", "name", "data", "duration", "published_at",
-		"avg_score", "scores"}).
+		"avg_score", "scores", "age_limit"}).
 		AddRow(newFilmData.Uuid, newFilmData.Title, newFilmData.Preview, newFilmData.Link, newFilmData.Director,
-			newFilmData.Data, newFilmData.Duration, newFilmData.Date, newFilmData.AverageScore, newFilmData.ScoresCount)
+			newFilmData.Data, newFilmData.Duration, newFilmData.Date, newFilmData.AverageScore,
+			newFilmData.ScoresCount, newFilmData.AgeLimit)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).
@@ -124,9 +125,9 @@ func TestFilmsStorage_GetFilmPreview(t *testing.T) {
 	newFilmPreview := NewMockFilmPreview()
 	uuid := "1"
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores"}).
+	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores", "age_limit"}).
 		AddRow(newFilmPreview.Uuid, newFilmPreview.Title, newFilmPreview.Preview, newFilmPreview.Director,
-			newFilmPreview.Duration, newFilmPreview.AverageScore, newFilmPreview.ScoresCount)
+			newFilmPreview.Duration, newFilmPreview.AverageScore, newFilmPreview.ScoresCount, newFilmPreview.AgeLimit)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).
@@ -149,13 +150,14 @@ func TestFilmsStorage_GetAllFilmsPreviews(t *testing.T) {
 
 	newFilmPreviews := NewMockFilmPreviews()
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores"}).
+	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores",
+		"age_limit"}).
 		AddRow(newFilmPreviews[0].Uuid, newFilmPreviews[0].Title, newFilmPreviews[0].Preview,
 			newFilmPreviews[0].Director, newFilmPreviews[0].Duration, newFilmPreviews[0].AverageScore,
-			newFilmPreviews[0].ScoresCount).
+			newFilmPreviews[0].ScoresCount, newFilmPreviews[0].AgeLimit).
 		AddRow(newFilmPreviews[1].Uuid, newFilmPreviews[1].Title, newFilmPreviews[1].Preview,
 			newFilmPreviews[1].Director, newFilmPreviews[1].Duration, newFilmPreviews[1].AverageScore,
-			newFilmPreviews[1].ScoresCount)
+			newFilmPreviews[1].ScoresCount, newFilmPreviews[0].AgeLimit)
 
 	mock.ExpectQuery("SELECT").
 		WithArgs().

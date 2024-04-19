@@ -23,12 +23,12 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 
 const getFilmDataByUuid = `
 		SELECT f.external_id, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, AVG(c.score),
-		       COUNT(c.id)
+		       COUNT(c.id), age_limit
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
-		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration;`
+		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration, f.age_limit;`
 
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
@@ -73,27 +73,29 @@ const deleteFilm = `
 		WHERE external_id = $1;`
 
 const getFilmPreview = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration,
+        	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
-		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmsPreviews = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
-		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
-		JOIN director d ON f.director = d.id
-		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
+    SELECT f.external_id, f.title, f.banner, d.name, f.duration,
+        COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
+    FROM film f
+    LEFT JOIN comment c ON f.id = c.film
+    JOIN director d ON f.director = d.id
+    GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmComments = `
-		SELECT comment.external_id, film.external_id, users.name AS author_name, comment.text, comment.score, 
-		       comment.added_at
-		FROM comment
-		JOIN users ON comment.author = users.id
-		JOIN film ON comment.film = film.id
-		WHERE film.external_id = $1;`
+		SELECT c.external_id, f.external_id, u.name AS author_name, c.text, c.score, 
+		       c.added_at
+		FROM comment c
+		JOIN users u ON c.author = u.id
+		JOIN film f ON c.film = f.id
+		WHERE f.external_id = $1;`
 
 const getAllFilmActors = `
 		SELECT a.external_id, a.name, a.avatar
@@ -114,10 +116,12 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		&film.Duration,
 		&film.Date,
 		&film.AverageScore,
-		&film.ScoresCount)
+		&film.ScoresCount,
+		&film.AgeLimit)
 	if err != nil {
 		return domain.FilmData{}, err
 	}
+
 	return film, nil
 }
 
@@ -221,7 +225,8 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 		&filmPreview.Director,
 		&filmPreview.Duration,
 		&filmPreview.AverageScore,
-		&filmPreview.ScoresCount)
+		&filmPreview.ScoresCount,
+		&filmPreview.AgeLimit)
 	if err != nil {
 		return domain.FilmPreview{}, myerrors.ErrInternalServerError
 	}
@@ -236,31 +241,33 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 
 	films := make([]domain.FilmPreview, 0)
 	var (
-		FilmUuid     string
-		FilmPreview  string
-		FilmTitle    string
-		FilmDirector string
-		FilmDuration int
-		FilmScore    float32
-		FilmRating   int
+		filmUuid     string
+		filmPreview  string
+		filmTitle    string
+		filmDirector string
+		filmDuration int
+		filmScore    float32
+		filmRating   int
+		filmAgeLimit uint8
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating)
+		err = rows.Scan(&filmUuid, &filmTitle, &filmPreview, &filmDirector, &filmDuration, &filmScore, &filmRating,
+			&filmAgeLimit)
 		if err != nil {
 			return nil, err
 		}
 
-		film.Uuid = FilmUuid
-		film.Title = FilmTitle
-		film.Preview = FilmPreview
-		film.Director = FilmDirector
-		film.Duration = FilmDuration
-		film.ScoresCount = FilmRating
-		film.AverageScore = FilmScore
+		film.Uuid = filmUuid
+		film.Title = filmTitle
+		film.Preview = filmPreview
+		film.Director = filmDirector
+		film.Duration = filmDuration
+		film.ScoresCount = filmRating
+		film.AverageScore = filmScore
+		film.AgeLimit = filmAgeLimit
 
 		films = append(films, film)
-
 	}
 
 	return films, nil

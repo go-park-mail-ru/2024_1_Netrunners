@@ -35,6 +35,7 @@ type FilmPreview struct {
 	AverageScore float32 `json:"average_score"`
 	ScoresCount  int     `json:"scores_count"`
 	Duration     int     `json:"duration"`
+	AgeLimit     uint8   `json:"ageLimit"`
 }
 
 type FilmLink struct {
