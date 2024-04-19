@@ -136,11 +136,6 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	}
 }
 
-// type newData struct {
-// 	Action string `json:"action"`
-// 	Data   string `json:"newData"`
-// }
-
 func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -172,15 +167,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 		return
 	}
-
-	// var data newData
-	// err = json.NewDecoder(r.Body).Decode(&data)
-	// if err != nil {
-	// 	err = WriteError(w, err)
-	// 	if err != nil {
-	// 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-	// 	}
-	// }
 
 	newData := r.FormValue("newData")
 	switch r.FormValue("action") {

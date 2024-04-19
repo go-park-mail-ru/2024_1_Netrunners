@@ -18,9 +18,6 @@ var (
 	ErrUserAlreadyExists        = errors.New("user with given login already exists")
 	ErrIncorrectLoginOrPassword = errors.New("incorrect login or password")
 
-	// // postgres films errors
-	// ErrNoSuchFilmByUuid = errors.New("no such film with given uuid")
-
 	ErrFailInQueryRow            = errors.New("failed to query row")
 	ErrFailInQuery               = errors.New("failed to query rows")
 	ErrFailInExec                = errors.New("failed to exec script")
