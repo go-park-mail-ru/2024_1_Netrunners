@@ -94,16 +94,20 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
-	// user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
-	// if err != nil {
-	// 	err = WriteError(w, err)
-	// 	if err != nil {
-	// 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-	// 	}
-	// 	return
-	// }
+	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
 
-	// userPreview.Avatar = "./uploads/" + user.Email + "avatar.png"
+	avatar := "./uploads/users/" + user.Email + "/avatar.png"
+	_, err = os.Stat(avatar)
+	if err == nil {
+		userPreview.Avatar = avatar
+	}
 
 	escapeUserPreviewData(&userPreview)
 
@@ -132,10 +136,10 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	}
 }
 
-type newData struct {
-	Action string `json:"action"`
-	Data   string `json:"newData"`
-}
+// type newData struct {
+// 	Action string `json:"action"`
+// 	Data   string `json:"newData"`
+// }
 
 func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -169,18 +173,19 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	var data newData
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-	}
+	// var data newData
+	// err = json.NewDecoder(r.Body).Decode(&data)
+	// if err != nil {
+	// 	err = WriteError(w, err)
+	// 	if err != nil {
+	// 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	// 	}
+	// }
 
-	switch {
-	case data.Action == "chPassword":
-		err = service.ValidatePassword(data.Data)
+	newData := r.FormValue("newData")
+	switch r.FormValue("action") {
+	case "chPassword":
+		err = service.ValidatePassword(newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -189,7 +194,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -198,8 +203,8 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-	case data.Action == "chUsername":
-		err = service.ValidateUsername(data.Data)
+	case "chUsername":
+		err = service.ValidateUsername(newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -208,7 +213,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, data.Data)
+		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -216,7 +221,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			}
 			return
 		}
-	case data.Action == "chAvatar":
+	case "chAvatar":
 		files := r.MultipartForm.File["avatar"]
 		if err != nil {
 			err = WriteError(w, err)
@@ -228,8 +233,8 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 		avatarFile := files[0]
 
-		storagePath := "./uploads/" + currUser.Email
-		_, err = os.Stat(storagePath)
+		storagePath := "./uploads/users/" + currUser.Email
+		_, err := os.Stat(storagePath)
 		if err != nil {
 			err = os.Mkdir(storagePath, 0755)
 			if err != nil {
@@ -271,10 +276,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			}
 			return
 		}
-
-		UserPageHandlers.logger.Errorf("[reqid=%s] avatar uploaded successfully\n", requestId)
-
-		// ============
 	}
 
 	version := currUser.Version + 1
