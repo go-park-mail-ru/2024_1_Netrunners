@@ -326,20 +326,14 @@ func (storage *UsersStorage) ChangeUserNameByUuid(uuid, newUsername string) (dom
 	return user, nil
 }
 
-func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error) {
+func (storage *UsersStorage) ChangeAvatarByUuid(uuid, avatar string) (domain.User, error) {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to begin transaction to change username: %w: %w", err,
+		return domain.User{}, fmt.Errorf("failed to begin transaction to change avatar: %w: %w", err,
 			myerrors.ErrFailedToBeginTransaction)
 	}
-	defer func() {
-		err = tx.Rollback(context.Background())
-		if err != nil {
-			fmt.Printf("failed to rollback transaction to change username: %v", err)
-		}
-	}()
 
-	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, filename, uuid)
+	_, err = tx.Exec(context.Background(), putNewUserAvatarByUuid, avatar, uuid)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to change user's avatar: %w: %w", err,
 			myerrors.ErrFailInExec)
@@ -362,7 +356,7 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to commit transaction to change username: %w: %w", err,
+		return domain.User{}, fmt.Errorf("failed to commit transaction to change avatar: %w: %w", err,
 			myerrors.ErrFailedToCommitTransaction)
 	}
 	return user, nil

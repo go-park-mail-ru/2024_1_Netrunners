@@ -127,7 +127,7 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServeTLS("./cert/server.crt", "./cert/server.key"); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

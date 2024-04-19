@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -93,23 +95,6 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
 		return
-	}
-
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
-	if err != nil {
-		err = WriteError(w, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-		return
-	}
-
-	avatar := "./uploads/users/" + user.Email + "/avatar.png"
-	_, err = os.Stat(avatar)
-	if err != nil {
-		userPreview.Avatar = "./uploads/users/default/avatar.png"
-	} else {
-		userPreview.Avatar = avatar
 	}
 
 	escapeUserPreviewData(&userPreview)
@@ -212,6 +197,18 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 	case "chAvatar":
 		files := r.MultipartForm.File["avatar"]
+
+		avatar64, err := UserPageHandlers.Encode(files[0])
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to encode into base64: %v\n", requestId, err)
+			err = WriteError(w, err)
+			if err != nil {
+				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			}
+			return
+		}
+
+		currUser, err = UserPageHandlers.authService.ChangeAvatarByUuid(ctx, uuid, avatar64)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -220,14 +217,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		err = UserPageHandlers.saveFile(files[0], currUser.Email, requestId.(string))
-		if err != nil {
-			err = WriteError(w, err)
-			if err != nil {
-				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-			}
-			return
-		}
 	}
 
 	version := currUser.Version + 1
@@ -265,6 +254,21 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	if err != nil {
 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}
+}
+
+func (UserPageHandlers *UserPageHandlers) Encode(file *multipart.FileHeader) (string, error) {
+	avatar, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer avatar.Close()
+
+	fileBytes, err := ioutil.ReadAll(avatar)
+	if err != nil {
+		return "", err
+	}
+	base64String := base64.StdEncoding.EncodeToString(fileBytes)
+	return base64String, nil
 }
 
 func (UserPageHandlers *UserPageHandlers) saveFile(file *multipart.FileHeader, email string, requestId string) error {

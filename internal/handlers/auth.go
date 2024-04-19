@@ -30,6 +30,7 @@ type AuthService interface {
 	GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error)
 	ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error)
 	ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error)
+	ChangeAvatarByUuid(ctx context.Context, uuid, avatar string) (domain.User, error)
 	IsTokenValid(token *http.Cookie) (jwt.MapClaims, error)
 	GenerateTokens(login string, isAdmin bool, version uint8) (tokenSigned string, err error)
 }

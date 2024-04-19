@@ -27,7 +27,7 @@ type usersStorage interface {
 	GetUserPreview(uuid string) (domain.UserPreview, error)
 	ChangeUserPasswordByUuid(uuid, newPassword string) (domain.User, error)
 	ChangeUserNameByUuid(uuid, newName string) (domain.User, error)
-	ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error)
+	ChangeAvatarByUuid(uuid, avatar string) (domain.User, error)
 }
 
 type AuthService struct {
@@ -224,6 +224,16 @@ func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newN
 	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+	return user, nil
+}
+
+func (service *AuthService) ChangeAvatarByUuid(ctx context.Context, uuid, avatar string) (domain.User, error) {
+	user, err := service.storage.ChangeAvatarByUuid(uuid, avatar)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to change avatar: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return domain.User{}, err
 	}
