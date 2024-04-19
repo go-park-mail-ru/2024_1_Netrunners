@@ -266,12 +266,12 @@ func (UserPageHandlers *UserPageHandlers) Encode(file *multipart.FileHeader) (st
 	}
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if !allowedExtensions[ext] {
-		return "", fmt.Errorf("недопустимый тип файла, поддерживаются только .jpg и .png")
+		return "", fmt.Errorf("wrong extensions, allowed extensions are .jpg and .png")
 	}
 
-	maxSize := int64(5 * 1024 * 1024) // 10 MB в байтах
+	maxSize := int64(5 * 1024 * 1024)
 	if file.Size > maxSize {
-		return "", fmt.Errorf("файл слишком большой, максимальный размер 10 MB")
+		return "", fmt.Errorf("file is too big, max size is 10 MB")
 	}
 
 	avatar, err := file.Open()
