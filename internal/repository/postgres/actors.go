@@ -3,10 +3,11 @@ package database
 import (
 	"context"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 )
 
 type PgxIface interface {
