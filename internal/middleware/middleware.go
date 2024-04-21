@@ -10,7 +10,7 @@ import (
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
-	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -66,17 +66,46 @@ func (middlewareHandlers *Middleware) PanicMiddleware(next http.Handler) http.Ha
 
 func (middlewareHandlers *Middleware) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// here will be our new check function
+		ctx := r.Context()
 
-		next.ServeHTTP(w, r)
+		userToken, err := r.Cookie("access")
+		if err != nil {
+			err = handlers.WriteError(w, myerrors.ErrNotAuthorised)
+			if err != nil {
+				middlewareHandlers.logger.Errorf("forbidden error at %v: %v", r.URL, err)
+			}
+			return
+		}
+
+		tokenClaims, err := middlewareHandlers.authService.IsTokenValid(userToken)
+		if err != nil {
+			err = handlers.WriteError(w, myerrors.ErrTokenIsNotValid)
+			if err != nil {
+				middlewareHandlers.logger.Errorf("error at writing response: %v\n", err)
+			}
+			return
+		}
+
+		err = middlewareHandlers.sessionService.HasSession(ctx, tokenClaims["Login"].(string), userToken.Value)
+		if err != nil {
+			err = handlers.WriteError(w, myerrors.ErrNoActiveSession)
+			if err != nil {
+				middlewareHandlers.logger.Errorf("error at writing response: %v\n", err)
+			}
+			return
+		}
+
+		ctx = context.WithValue(ctx, httpctx.CtxEmail, tokenClaims["Login"].(string))
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
 
 func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqId := reqid.GenerateRequestID()
+		reqId := httpctx.GenerateRequestID()
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, reqid.ReqIDKey, reqId)
+		ctx = context.WithValue(ctx, httpctx.ReqIDKey, reqId)
 		middlewareHandlers.logger.Info("request accessLog", "path", r.URL.Path)
 		start := time.Now()
 		next.ServeHTTP(w, r.WithContext(ctx))

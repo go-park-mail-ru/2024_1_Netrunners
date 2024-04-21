@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
+
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 )
 
 type FilmsStorage interface {
@@ -37,7 +38,7 @@ func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStora
 func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.FilmData, error) {
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(httpctx.ReqIDKey),
 			myerrors.ErrNoSuchFilm)
 		return domain.FilmData{}, err
 	}
@@ -47,7 +48,7 @@ func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string)
 func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAdd) error {
 	err := service.storage.AddFilm(film)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to add film: %v", ctx.Value(requestId.ReqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to add film: %v", ctx.Value(httpctx.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -56,7 +57,7 @@ func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmDataTo
 func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error {
 	err := service.storage.RemoveFilm(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove film: %v", ctx.Value(requestId.ReqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to remove film: %v", ctx.Value(httpctx.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -65,7 +66,7 @@ func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error 
 func (service *FilmsService) GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error) {
 	filmPreview, err := service.storage.GetFilmPreview(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get film preview: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get film preview: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return domain.FilmPreview{}, err
 	}
@@ -76,7 +77,7 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 	filmPreviews, err := service.storage.GetAllFilmsPreviews()
 	if err != nil {
 		service.logger.Errorf("[reqid=%v] failed to get all films previews: %v",
-			ctx.Value(requestId.ReqIDKey), err)
+			ctx.Value(httpctx.ReqIDKey), err)
 		return nil, err
 	}
 	return filmPreviews, nil
@@ -86,7 +87,7 @@ func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string
 	comments, err := service.storage.GetAllFilmComments(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film comments: %v",
-			ctx.Value(requestId.ReqIDKey), err)
+			ctx.Value(httpctx.ReqIDKey), err)
 		return nil, err
 	}
 	return comments, nil
@@ -95,7 +96,7 @@ func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string
 func (service *FilmsService) GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetAllFilmActors(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get all film actors: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get all film actors: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return nil, err
 	}

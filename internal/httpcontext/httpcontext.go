@@ -1,13 +1,14 @@
-package requestId
+package httpcontext
 
 import (
 	"context"
 	"math/rand"
 )
 
-type contextKey string
+type ContextKey string
 
-const ReqIDKey contextKey = "req_id"
+const ReqIDKey ContextKey = "req_id"
+const CtxEmail ContextKey = "email"
 
 const symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 

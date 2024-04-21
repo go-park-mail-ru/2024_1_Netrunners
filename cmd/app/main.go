@@ -95,12 +95,14 @@ func main() {
 	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
 
-	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
-	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
-	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/data",
+		middleware.AuthMiddleware(usersPageHandlers.GetProfileData)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/edit",
+		middleware.AuthMiddleware(usersPageHandlers.ProfileEditByUuid)).Methods("POST", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/preview",
+		middleware.AuthMiddleware(usersPageHandlers.GetProfilePreview)).Methods("GET", "OPTIONS")
 
-	router.HandleFunc("/films",
-		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
 	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
 	router.Use(middleware.CorsMiddleware)
@@ -127,7 +129,7 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServeTLS("./cert/server.crt", "./cert/server.key"); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

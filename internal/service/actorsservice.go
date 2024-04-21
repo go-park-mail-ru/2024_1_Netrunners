@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 )
 
 type ActorsStorage interface {
@@ -30,7 +30,7 @@ func NewActorsService(storage ActorsStorage, logger *zap.SugaredLogger) *ActorsS
 func (service *ActorsService) GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error) {
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(httpctx.ReqIDKey),
 			myerrors.ErrNoSuchActor)
 		return domain.ActorData{}, err
 	}
@@ -41,7 +41,7 @@ func (service *ActorsService) GetActorByUuid(ctx context.Context, actorUuid stri
 func (service *ActorsService) GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.GetActorsByFilm(filmUuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get actors by film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get actors by film: %v", ctx.Value(httpctx.ReqIDKey),
 			myerrors.ErrNoActorsForFilm)
 		return nil, err
 	}
