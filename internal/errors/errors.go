@@ -28,6 +28,8 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrNoActiveSession),
 		errors.Is(err, ErrNoSuchFilm):
 		status = 401
+	case errors.Is(err, ErrForbidden):
+		status = 403
 	case errors.Is(err, ErrInternalServerError),
 		errors.Is(err, ErrTooHighVersion),
 		errors.Is(err, ErrFailInForEachRow),

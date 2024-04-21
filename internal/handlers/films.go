@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 )
 
 type FilmsService interface {
@@ -42,7 +42,7 @@ type filmsPreviewsResponse struct {
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(ctx)
 	if err != nil {
@@ -91,7 +91,7 @@ type filmDataResponse struct {
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(ctx, uuid)
 	if err != nil {
@@ -137,7 +137,7 @@ type filmCommentsResponse struct {
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(ctx, uuid)
 	if err != nil {
@@ -186,7 +186,7 @@ type filmActorsResponse struct {
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(ctx, uuid)
 	if err != nil {
@@ -229,7 +229,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 
 func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	var filmData domain.FilmDataToAdd
 	err := json.NewDecoder(r.Body).Decode(&filmData)

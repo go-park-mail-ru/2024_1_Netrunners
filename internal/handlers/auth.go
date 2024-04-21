@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
@@ -62,7 +63,7 @@ func NewAuthPageHandlers(authService AuthService, sessionService SessionService,
 func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -160,7 +161,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
@@ -214,7 +215,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.Request) {
 	var inputUserData domain.UserSignUp
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
@@ -329,7 +330,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestID := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(httpctx.ReqIDKey)
 
 	userToken, err := r.Cookie("access")
 	if err != nil {

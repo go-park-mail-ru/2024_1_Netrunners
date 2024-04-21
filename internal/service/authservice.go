@@ -13,7 +13,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 )
 
 type usersStorage interface {
@@ -47,7 +47,7 @@ func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthServic
 func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSignUp) error {
 	err := service.storage.CreateUser(user)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to create user: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to create user: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return err
 	}
@@ -57,7 +57,7 @@ func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSign
 func (service *AuthService) RemoveUser(ctx context.Context, login string) error {
 	err := service.storage.RemoveUser(login)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove user: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to remove user: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return err
 	}
@@ -67,7 +67,7 @@ func (service *AuthService) RemoveUser(ctx context.Context, login string) error 
 func (service *AuthService) HasUser(ctx context.Context, login, password string) error {
 	err := service.storage.HasUser(login, password)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to has user: %v", ctx.Value(requestId.ReqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to has user: %v", ctx.Value(httpctx.ReqIDKey), err)
 		return err
 	}
 	return nil
@@ -76,7 +76,7 @@ func (service *AuthService) HasUser(ctx context.Context, login, password string)
 func (service *AuthService) GetUser(ctx context.Context, login string) (domain.User, error) {
 	user, err := service.storage.GetUser(login)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get user: %v", ctx.Value(requestId.ReqIDKey), err)
+		service.logger.Errorf("[reqid=%s] failed to get user: %v", ctx.Value(httpctx.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -86,7 +86,7 @@ func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPa
 	user, err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
-			ctx.Value(requestId.ReqIDKey), err)
+			ctx.Value(httpctx.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -95,7 +95,7 @@ func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPa
 func (service *AuthService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
 	user, err := service.storage.ChangeUserName(login, newName)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return domain.User{}, err
 	}
@@ -193,7 +193,7 @@ func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) 
 	user, err := service.storage.GetUserDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user data: %v",
-			ctx.Value(requestId.ReqIDKey), err)
+			ctx.Value(httpctx.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -202,7 +202,7 @@ func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) 
 func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
 	userPreview, err := service.storage.GetUserPreview(uuid)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return domain.UserPreview{}, err
 	}
@@ -214,7 +214,7 @@ func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, 
 	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
-			ctx.Value(requestId.ReqIDKey), err)
+			ctx.Value(httpctx.ReqIDKey), err)
 		return domain.User{}, err
 	}
 	return user, nil
@@ -223,7 +223,7 @@ func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, 
 func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
 	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(httpctx.ReqIDKey),
 			err)
 		return domain.User{}, err
 	}
