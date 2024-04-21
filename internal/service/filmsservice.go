@@ -3,11 +3,10 @@ package service
 import (
 	"context"
 
-	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
-
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	httpctx "github.com/go-park-mail-ru/2024_1_Netrunners/internal/httpcontext"
 )
 
