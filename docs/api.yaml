@@ -406,6 +406,74 @@ paths:
         default:
           description: Unknown error
 
+  /films/genres/preview:
+    get:
+      tags:
+        - Films
+      summary: get some film previews from all genres
+      security:
+        - AccessCookie: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/AllGenresResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /films/genres/{genre}/all:
+    get:
+      tags:
+        - Films
+      summary: get all films with given genre
+      parameters:
+        - name: genre
+          in: path
+          description: Genre of the film
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'fantasy'
+      security:
+        - AccessCookie: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/GenreResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 # Profile
 
   /profile/{uuid}/data:
@@ -518,7 +586,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ProfileEditRequest'
       responses:
@@ -840,6 +908,95 @@ components:
             film_data:
               type: string
 
+    AllGenresResponse:
+      required:
+        - status
+        - genres
+      properties:
+        status:
+          type: integer
+          example: 200
+        genres:
+          type: array
+          items:
+            type: object
+            required:
+              - genre
+              - films
+            properties:
+              genre:
+                type: string
+                example: 'fantasy'
+              films:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - preview_data
+                    - title
+                    - director
+                    - average_score
+                    - scores_count
+                    - duration
+                  properties:
+                    preview_data:
+                      type: string
+                    title:
+                      type: string
+                      example: 'Transformers'
+                    director:
+                      type: string
+                      example: 'Michael Bell'
+                    average_score:
+                      type: integer
+                      example: 4
+                      pattern: '[0-5]'
+                    scores_count:
+                      type: integer
+                      example: 20324
+                    duration:
+                      type: integer
+                      example: 7560
+        
+    GenreResponse:
+      required:
+        - status
+        - films
+      properties:
+        status:
+          type: integer
+          example: 200
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - preview_data
+              - title
+              - director
+              - average_score
+              - scores_count
+              - duration
+            properties:
+              preview_data:
+                type: string
+              title:
+                type: string
+                example: 'Transformers'
+              director:
+                type: string
+                example: 'Michael Bell'
+              average_score:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scores_count:
+                type: integer
+                example: 20324
+              duration:
+                type: integer
+                example: 7560
+
     CommentsResponse:
       required:
         - status
@@ -930,15 +1087,12 @@ components:
       properties:
         action:
           type: string
-          example: 'ch_password'
-          pattern: '[ch_password | ch_username | ch_avatar]'
-        new_username:
+          example: 'chUsername'
+          pattern: '[chPassword | chUsername | chAvatar]'
+        newData:
           type: string
-          example: 'XXX_nagibator_XXX'
-        new_password:
-          type: string
-          example: 'root'
-        new_avatar:
+          example: 'new_username'
+        avatar:
           type: string
 
 
