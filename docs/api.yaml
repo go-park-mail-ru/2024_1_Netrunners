@@ -1306,6 +1306,95 @@ components:
                 type: integer
                 example: 7560
 
+    AllGenresResponse:
+      required:
+        - status
+        - genres
+      properties:
+        status:
+          type: integer
+          example: 200
+        genres:
+          type: array
+          items:
+            type: object
+            required:
+              - genre
+              - films
+            properties:
+              genre:
+                type: string
+                example: 'fantasy'
+              films:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - preview_data
+                    - title
+                    - director
+                    - average_score
+                    - scores_count
+                    - duration
+                  properties:
+                    preview_data:
+                      type: string
+                    title:
+                      type: string
+                      example: 'Transformers'
+                    director:
+                      type: string
+                      example: 'Michael Bell'
+                    average_score:
+                      type: integer
+                      example: 4
+                      pattern: '[0-5]'
+                    scores_count:
+                      type: integer
+                      example: 20324
+                    duration:
+                      type: integer
+                      example: 7560
+        
+    GenreResponse:
+      required:
+        - status
+        - films
+      properties:
+        status:
+          type: integer
+          example: 200
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - preview_data
+              - title
+              - director
+              - average_score
+              - scores_count
+              - duration
+            properties:
+              preview_data:
+                type: string
+              title:
+                type: string
+                example: 'Transformers'
+              director:
+                type: string
+                example: 'Michael Bell'
+              average_score:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scores_count:
+                type: integer
+                example: 20324
+              duration:
+                type: integer
+                example: 7560
+
     CommentsResponse:
       required:
         - status
@@ -1541,8 +1630,4 @@ components:
                     type: string
                     example: 'Fast & Furious'
                   data:
-<<<<<<< HEAD
                     type: string
-=======
-                    type: string
->>>>>>> 903d143 (№38 feat: change actor fields)
