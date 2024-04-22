@@ -474,6 +474,41 @@ paths:
         default:
           description: Unknown error
 
+  /films/find:
+    get:
+      tags:
+          - Films
+      summary: Find films
+      security:
+        - AccessCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindByTextRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FilmsResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 # Profile
 
   /profile/{uuid}/data:
@@ -617,6 +652,153 @@ paths:
         default:
           description: Unknown error
 
+  /profile/{uuid}/favourites/add:
+    post:
+      tags:
+        - Profile
+      summary: Get user preview
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FilmLinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /profile/{uuid}/favourites/remove:
+    post:
+      tags:
+        - Profile
+      summary: Get user preview
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FilmLinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /profile/{uuid}/favourites/all:
+    get:
+      tags:
+        - Profile
+      summary: Get films from favourites
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FilmsResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 # Actors
 
   /actors/{uuid}:
@@ -711,6 +893,41 @@ paths:
         default:
           description: Unknown error
 
+  /actors/find:
+    get:
+      tags:
+          - Actors
+      summary: Find actor
+      security:
+        - AccessCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindByTextRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/ActorsResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 components:
 
   # Cookies
@@ -739,6 +956,21 @@ components:
           type: integer
           example: 200
         error:
+          type: string
+
+    FindByTextRequest:
+      required:
+        - search_text
+      properties:
+        search_text:
+          type: string
+          example: 'Ryan Gosling'
+
+    FilmLinkRequest:
+      required:
+        - film_link
+      properties:
+        film_link:
           type: string
 
     #Auth
@@ -812,6 +1044,7 @@ components:
           items:
             type: object
             required:
+              - type
               - preview_data
               - title
               - director
@@ -819,6 +1052,9 @@ components:
               - scores_count
               - duration
             properties:
+              type:
+                type: string
+                example: 'serial'
               preview_data:
                 type: string
               title:
@@ -849,6 +1085,7 @@ components:
         film:
           type: object
           required:
+            - type
             - preview_data
             - title
             - director
@@ -856,8 +1093,10 @@ components:
             - scores_count
             - duration
             - release_date
-            - film_data
           properties:
+            type:
+              type: string
+              example: 'serial'
             preview_data:
               type: string
             title:
@@ -881,6 +1120,10 @@ components:
               example: '2011-04-11T10:20:30'
             film_data:
               type: string
+            series:
+              type: array
+              items:
+                type: string
 
     AllGenresResponse:
       required:
@@ -924,6 +1167,7 @@ components:
           items:
             type: object
             required:
+              - type
               - preview_data
               - title
               - director
@@ -931,6 +1175,9 @@ components:
               - scores_count
               - duration
             properties:
+              type:
+                type: string
+                example: 'serial'
               preview_data:
                 type: string
               title:
