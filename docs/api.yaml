@@ -406,6 +406,113 @@ paths:
         default:
           description: Unknown error
 
+  /films/genres/preview:
+    get:
+      tags:
+        - Films
+      summary: get some film previews from all genres
+      security:
+        - AccessCookie: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/AllGenresResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /films/genres/{genre}/all:
+    get:
+      tags:
+        - Films
+      summary: get all films with given genre
+      parameters:
+        - name: genre
+          in: path
+          description: Genre of the film
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'fantasy'
+      security:
+        - AccessCookie: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/GenreResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /films/find:
+    get:
+      tags:
+          - Films
+      summary: Find films
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: search
+          in: query
+          description: Film title
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'Transformers'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FilmsResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 # Profile
 
   /profile/{uuid}/data:
@@ -518,7 +625,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ProfileEditRequest'
       responses:
@@ -549,24 +656,44 @@ paths:
         default:
           description: Unknown error
 
-# Actors
-
-  /actors/all:
-    get:
+  /profile/{uuid}/favourites/add:
+    post:
       tags:
-        - Actors
-      summary: Get all actors
+        - Profile
+      summary: Get user preview
       security:
         - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FilmLinkRequest'
       responses:
         '200':
           description: Success
           content:
             application/form:
               schema:
-                $ref: '#/components/schemas/ActorsResponse'
+                $ref: '#/components/schemas/StatusResponse'
         '401':
           description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
           content:
             application/form:
               schema:
@@ -580,11 +707,109 @@ paths:
         default:
           description: Unknown error
 
+  /profile/{uuid}/favourites/remove:
+    post:
+      tags:
+        - Profile
+      summary: Get user preview
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FilmLinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /profile/{uuid}/favourites/all:
+    get:
+      tags:
+        - Profile
+      summary: Get films from favourites
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FilmsResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+# Actors
+
   /actors/{uuid}:
     get:
       tags:
         - Actors
-      summary: Get actors of the film with given uuid
+      summary: Get information about actor with given uuid
       security:
         - AccessCookie: []
       parameters:
@@ -672,6 +897,45 @@ paths:
         default:
           description: Unknown error
 
+  /actors/find:
+    get:
+      tags:
+          - Actors
+      summary: Find actor
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: search
+          in: query
+          description: Actor name
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'Ryan Gosling'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/ActorsResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
 components:
 
   # Cookies
@@ -700,6 +964,13 @@ components:
           type: integer
           example: 200
         error:
+          type: string
+
+    FilmLinkRequest:
+      required:
+        - film_link
+      properties:
+        film_link:
           type: string
 
     #Auth
@@ -773,6 +1044,7 @@ components:
           items:
             type: object
             required:
+              - type
               - preview_data
               - title
               - director
@@ -780,6 +1052,9 @@ components:
               - scores_count
               - duration
             properties:
+              type:
+                type: string
+                example: 'serial'
               preview_data:
                 type: string
               title:
@@ -810,6 +1085,7 @@ components:
         film:
           type: object
           required:
+            - type
             - preview_data
             - title
             - director
@@ -817,8 +1093,10 @@ components:
             - scores_count
             - duration
             - release_date
-            - film_data
           properties:
+            type:
+              type: string
+              example: 'serial'
             preview_data:
               type: string
             title:
@@ -842,6 +1120,82 @@ components:
               example: '2011-04-11T10:20:30'
             film_data:
               type: string
+            series:
+              type: array
+              items:
+                type: string
+
+    AllGenresResponse:
+      required:
+        - status
+        - genres
+      properties:
+        status:
+          type: integer
+          example: 200
+        genres:
+          type: array
+          items:
+            type: object
+            required:
+              - genre
+              - films
+            properties:
+              genre:
+                type: string
+                example: 'fantasy'
+              films:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - preview_data
+                  properties:
+                    preview_data:
+                      type: string
+        
+    GenreResponse:
+      required:
+        - status
+        - films
+      properties:
+        status:
+          type: integer
+          example: 200
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - preview_data
+              - title
+              - director
+              - average_score
+              - scores_count
+              - duration
+            properties:
+              type:
+                type: string
+                example: 'serial'
+              preview_data:
+                type: string
+              title:
+                type: string
+                example: 'Transformers'
+              director:
+                type: string
+                example: 'Michael Bell'
+              average_score:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scores_count:
+                type: integer
+                example: 20324
+              duration:
+                type: integer
+                example: 7560
 
     CommentsResponse:
       required:
@@ -907,7 +1261,7 @@ components:
               example: false
             avatar:
               type: string
-
+              
     ProfilePreviewResponse:
       required:
         - status
@@ -926,22 +1280,19 @@ components:
               example: 'Ahmed'
             avatar:
               type: string
-
+        
     ProfileEditRequest:
       required:
         - action
       properties:
         action:
           type: string
-          example: 'ch_password'
-          pattern: '[ch_password | ch_username | ch_avatar]'
-        new_username:
+          example: 'chUsername'
+          pattern: '[chPassword | chUsername | chAvatar]'
+        newData:
           type: string
-          example: 'XXX_nagibator_XXX'
-        new_password:
-          type: string
-          example: 'root'
-        new_avatar:
+          example: 'new_username'
+        avatar:
           type: string
 
 # Actors
@@ -949,19 +1300,33 @@ components:
     NewActorRequest:
       required:
         - name
-        - data
-        - birthday
         - avatar
+        - birthday
+        - career
+        - height
+        - birth_place
+        - genres
+        - spouse
       properties:
         name:
           type: string
           example: 'Evgenij Gennadjevich'
-        data:
+        avatar:
           type: string
         birthday:
           type: string
           example: '2011-04-11T10:20:30'
-        avatar:
+        career:
+          type: string
+        height:
+          type: integer
+          example: 135
+        birth_place:
+          type: string
+          example: 'New Jersey'
+        genres:
+          type: string
+        spouse:
           type: string
 
     ActorsResponse:
@@ -997,21 +1362,39 @@ components:
         actor:
           type: object
           required:
+            - uuid
             - name
-            - data
-            - birthday
             - avatar
+            - birthday
+            - career
+            - height
+            - birth_place
+            - genres
+            - spouse
             - films
           properties:
+            uuid:
+              type: string
+              example: 'frfdF48AfJ1MAFfKF13KFAOS'
             name:
               type: string
               example: 'Evgenij Gennadjevich'
-            data:
+            avatar:
               type: string
             birthday:
               type: string
               example: '2011-04-11T10:20:30'
-            avatar:
+            career:
+              type: string
+            height:
+              type: integer
+              example: 135
+            birth_place:
+              type: string
+              example: 'New Jersey'
+            genres:
+              type: string
+            spouse:
               type: string
             films:
               type: array
@@ -1020,6 +1403,7 @@ components:
                 required:
                   - uuid
                   - title
+                  - data
                 properties:
                   uuid:
                     type: string
@@ -1027,3 +1411,5 @@ components:
                   title:
                     type: string
                     example: 'Fast & Furious'
+                  data:
+                    type: string
