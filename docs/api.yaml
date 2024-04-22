@@ -1322,6 +1322,7 @@ components:
           items:
             type: object
             required:
+              - type
               - preview_data
               - title
               - director
@@ -1329,6 +1330,9 @@ components:
               - scores_count
               - duration
             properties:
+              type:
+                type: string
+                example: 'serial'
               preview_data:
                 type: string
               title:
