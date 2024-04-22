@@ -623,7 +623,7 @@ paths:
     get:
       tags:
         - Actors
-      summary: Get actors of the film with given uuid
+      summary: Get information about actor with given uuid
       security:
         - AccessCookie: []
       parameters:
@@ -907,30 +907,9 @@ components:
                   type: object
                   required:
                     - preview_data
-                    - title
-                    - director
-                    - average_score
-                    - scores_count
-                    - duration
                   properties:
                     preview_data:
                       type: string
-                    title:
-                      type: string
-                      example: 'Transformers'
-                    director:
-                      type: string
-                      example: 'Michael Bell'
-                    average_score:
-                      type: integer
-                      example: 4
-                      pattern: '[0-5]'
-                    scores_count:
-                      type: integer
-                      example: 20324
-                    duration:
-                      type: integer
-                      example: 7560
         
     GenreResponse:
       required:
