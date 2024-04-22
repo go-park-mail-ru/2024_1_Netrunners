@@ -799,32 +799,6 @@ components:
         film_data:
           type: string
 
-    NewFilmRequest:
-      required:
-        - title
-        - director
-        - preview_data
-        - duration
-        - release_date
-        - film_data
-      properties:
-        title:
-          type: string
-          example: 'Transformers'
-        director:
-          type: string
-          example: 'Transformers'
-        preview_data:
-          type: string
-        duration:
-          type: integer
-          example: 7560
-        release_date:
-          type: string
-          example: '2011-04-11T10:20:30'
-        film_data:
-          type: string
-
     FilmsResponse:
       required:
         - status
@@ -1093,43 +1067,6 @@ components:
           type: string
           example: 'new_username'
         avatar:
-          type: string
-
-
-    ProfilePreviewResponse:
-      required:
-        - status
-        - profile
-      properties:
-        status:
-          type: integer
-          example: 200
-        profile:
-          required:
-            - name
-            - avatar
-          properties:
-            name:
-              type: string
-              example: 'Ahmed'
-            avatar:
-              type: string
-
-    ProfileEditRequest:
-      required:
-        - action
-      properties:
-        action:
-          type: string
-          example: 'ch_password'
-          pattern: '[ch_password | ch_username | ch_avatar]'
-        new_username:
-          type: string
-          example: 'XXX_nagibator_XXX'
-        new_password:
-          type: string
-          example: 'root'
-        new_avatar:
           type: string
 
 # Actors
