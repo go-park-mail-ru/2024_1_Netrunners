@@ -481,12 +481,16 @@ paths:
       summary: Find films
       security:
         - AccessCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FindByTextRequest'
+      parameters:
+        - name: search
+          in: query
+          description: Film title
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'Transformers'
       responses:
         '200':
           description: Success
@@ -900,12 +904,16 @@ paths:
       summary: Find actor
       security:
         - AccessCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FindByTextRequest'
+      parameters:
+        - name: search
+          in: query
+          description: Actor name
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'Ryan Gosling'
       responses:
         '200':
           description: Success
@@ -957,14 +965,6 @@ components:
           example: 200
         error:
           type: string
-
-    FindByTextRequest:
-      required:
-        - search_text
-      properties:
-        search_text:
-          type: string
-          example: 'Ryan Gosling'
 
     FilmLinkRequest:
       required:
