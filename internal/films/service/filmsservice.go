@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
@@ -18,6 +18,8 @@ type FilmsStorage interface {
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	GetAllFilmComments(uuid string) ([]domain.Comment, error)
 	GetAllFilmActors(uuid string) ([]domain.ActorPreview, error)
+	GetActorByUuid(actorUuid string) (domain.ActorData, error)
+	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
 }
 
 type FilmsService struct {
@@ -26,7 +28,7 @@ type FilmsService struct {
 	localStoragePath string
 }
 
-func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStoragePath string) *FilmsService {
+func InitFilmsServer(storage FilmsStorage, logger *zap.SugaredLogger, localStoragePath string) *FilmsService {
 	return &FilmsService{
 		storage:          storage,
 		logger:           logger,
@@ -102,93 +104,24 @@ func (service *FilmsService) GetAllFilmActors(ctx context.Context, uuid string) 
 	return actors, nil
 }
 
-func (service *FilmsService) AddSomeData() error {
-	data := []domain.FilmDataToAdd{
-		{
-			Preview: "https://m.media-amazon.com/images/M/MV5BNzlkNzVjMDMtOTdhZC00MGE1LTkxODctMzFmMjkwZm" +
-				"MxZjFhXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
-			Title:    "Fast and Furious 1",
-			Duration: 3600,
-			Director: "Dozer",
-			Data:     "Dozer Dozer Dozer Dozer",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Стас Ярушин",
-					Career:     "универский типос",
-					Height:     154,
-					BirthPlace: "Ангарск",
-					Genres:     "Хип-Хоп",
-					Spouse:     "Светлана Ходченкова <3",
-				},
-				{
-					Name:       "Дмитрий Нагиев",
-					Career:     "физрукский типос",
-					Height:     215,
-					BirthPlace: "Шахты",
-					Genres:     "RnB",
-					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
-				},
-			},
-		},
-		{
-			Preview:  "https://m.media-amazon.com/images/I/71Wo+cFznbL.jpg",
-			Title:    "Fast and Furious 2",
-			Duration: 7200,
-			Director: "Dima",
-			Data:     "Dima Dima Dima Dima",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Костя Воронин",
-					Career:     "Костик",
-					Height:     181,
-					BirthPlace: "Россия",
-					Genres:     "Riddim",
-					Spouse:     "Taylor Swift",
-				},
-				{
-					Name:       "Tom Hanks",
-					Career:     "пиццерийных дел мастер",
-					Height:     178,
-					BirthPlace: "Омерика",
-					Genres:     "Riddim",
-					Spouse:     "Вроде Ваенга хз",
-				},
-			},
-		},
-		{
-			Preview:  "https://m.media-amazon.com/images/I/71ql8kIrPKL.jpg",
-			Title:    "Fast and Furious 3",
-			Duration: 4800,
-			Director: "Dima",
-			Data:     "Dima Dima Dima Dima",
-			Actors: []domain.ActorData{
-				{
-					Name:       "Дональд Дак",
-					Career:     "пиццерийных дел мастер",
-					Height:     178,
-					BirthPlace: "Омерика",
-					Genres:     "Riddim",
-					Spouse:     "Вроде Ваенга хз",
-				},
-				{
-					Name:       "Дмитрий Нагиев",
-					Career:     "физрукский типос",
-					Height:     215,
-					BirthPlace: "Шахты",
-					Genres:     "RnB",
-					Spouse:     "ТОЖЕ НЕ Светлана Ходченкова <3",
-				},
-			},
-		},
+func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error) {
+	actor, err := service.storage.GetActorByUuid(actorUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrNoSuchActor)
+		return domain.ActorData{}, err
 	}
 
-	for _, film := range data {
-		err := service.storage.AddFilm(film)
-		if err != nil {
-			service.logger.Errorf("[reqid=%s] failed to add film: %v", err)
-			return err
-		}
+	return actor, nil
+}
+
+func (service *FilmsService) GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error) {
+	actors, err := service.storage.GetActorsByFilm(filmUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get actors by film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrNoActorsForFilm)
+		return nil, err
 	}
 
-	return nil
+	return actors, nil
 }

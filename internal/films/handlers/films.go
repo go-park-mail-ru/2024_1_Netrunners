@@ -1,4 +1,4 @@
-package handlers
+package films_handlers
 
 import (
 	"context"
@@ -9,11 +9,13 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
+	api "github.com/go-park-mail-ru/2024_1_Netrunners/cmd/films"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
-type FilmsService interface {
+type FilmsServer interface {
 	GetFilmDataByUuid(ctx context.Context, uuid string) (domain.FilmData, error)
 	AddFilm(ctx context.Context, film domain.FilmDataToAdd) error
 	RemoveFilm(ctx context.Context, uuid string) error
@@ -24,14 +26,14 @@ type FilmsService interface {
 }
 
 type FilmsPageHandlers struct {
-	filmsService FilmsService
-	logger       *zap.SugaredLogger
+	server *api.FilmsServer
+	logger *zap.SugaredLogger
 }
 
-func NewFilmsPageHandlers(filmsService FilmsService, logger *zap.SugaredLogger) *FilmsPageHandlers {
+func NewFilmsPageHandlers(server *api.FilmsServer, logger *zap.SugaredLogger) *FilmsPageHandlers {
 	return &FilmsPageHandlers{
-		filmsService: filmsService,
-		logger:       logger,
+		server: server,
+		logger: logger,
 	}
 }
 
@@ -44,7 +46,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	films, err := filmsPageHandlers.filmsService.GetAllFilmsPreviews(ctx)
+	var req *session.AllFilmsPreviewsRequest
+	res, err := filmsPageHandlers.server.GetAllFilmsPreviews(ctx, req)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestID, err)
 		err = WriteError(w, err)
@@ -54,13 +57,16 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		return
 	}
 
-	for _, film := range films {
-		escapeFilmPreview(&film)
+	var filmsRegular []domain.FilmPreview
+	for _, film := range res.Films {
+		filmRegular := convertFilmPreviewToRegular(film)
+		escapeFilmPreview(&filmRegular)
+		filmsRegular = append(filmsRegular, convertFilmPreviewToRegular(film))
 	}
 
 	response := filmsPreviewsResponse{
 		Status: http.StatusOK,
-		Films:  films,
+		Films:  filmsRegular,
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -93,7 +99,10 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	filmData, err := filmsPageHandlers.filmsService.GetFilmDataByUuid(ctx, uuid)
+	req := &session.FilmDataByUuidRequest{
+		Uuid: uuid,
+	}
+	filmData, err := filmsPageHandlers.server.GetFilmDataByUuid(ctx, req)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -102,11 +111,12 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		return
 	}
 
-	escapeFilmData(&filmData)
+	filmDataRegular := convertFilmDataToRegular(filmData.FilmData)
+	escapeFilmData(&filmDataRegular)
 
 	response := filmDataResponse{
 		Status:   http.StatusOK,
-		FilmData: filmData,
+		FilmData: filmDataRegular,
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -139,7 +149,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	comments, err := filmsPageHandlers.filmsService.GetAllFilmComments(ctx, uuid)
+	comments, err := filmsPageHandlers.server.GetAllFilmComments(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -188,7 +198,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmActors(w http.ResponseWrit
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	actors, err := filmsPageHandlers.filmsService.GetAllFilmActors(ctx, uuid)
+	actors, err := filmsPageHandlers.server.GetAllFilmActors(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -241,7 +251,7 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = filmsPageHandlers.filmsService.AddFilm(ctx, filmData)
+	err = filmsPageHandlers.server.AddFilm(ctx, filmData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -256,4 +266,117 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 	}
 
 	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] film added successfully", requestID))
+}
+
+type actorResponse struct {
+	Status int              `json:"status"`
+	Actor  domain.ActorData `json:"actor"`
+}
+
+func (actorsHandlers *ActorsHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
+	actorUuid := mux.Vars(r)["uuid"]
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
+
+	actor, err := actorsHandlers.actorsService.server(ctx, actorUuid)
+	if err != nil {
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] error at writing response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	escapeActorData(&actor)
+
+	response := actorResponse{
+		Status: http.StatusOK,
+		Actor:  actor,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+	}
+}
+
+type actorsByFilmResponse struct {
+	Status int
+	Actors []domain.ActorPreview
+}
+
+func (actorsHandlers *ActorsHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
+	filmUuid := mux.Vars(r)["uuid"]
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
+
+	actors, err := actorsHandlers.actorsService.server(ctx, filmUuid)
+	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to get actors by film: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	response := actorsByFilmResponse{
+		Status: http.StatusOK,
+		Actors: actors,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		err = WriteError(w, err)
+		if err != nil {
+			actorsHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+}
+
+func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
+	return domain.FilmPreview{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
+		AgeLimit:     film.AgeLimit,
+	}
+}
+
+func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
+	return domain.FilmData{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		Link:         film.Link,
+		Data:         film.Data,
+		Date:         film.Date,
+		AgeLimit:     film.AgeLimit,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
+		Duration:     film.Duration,
+	}
 }

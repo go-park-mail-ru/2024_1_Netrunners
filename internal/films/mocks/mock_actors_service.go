@@ -2,7 +2,7 @@
 // Source: internal/handlers/actors.go
 
 // Package mockService is a generated GoMock package.
-package mockService
+package mocks
 
 import (
 	context "context"

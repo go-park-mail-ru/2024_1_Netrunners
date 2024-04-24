@@ -7,6 +7,6 @@ type Comment struct {
 	FilmUuid string
 	Author   string
 	Text     string
-	Score    int
+	Score    uint32
 	AddedAt  time.Time
 }

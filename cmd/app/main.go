@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	handlers2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/handlers"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
+	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
 	"log"
 	"net/http"
 	"os"
@@ -62,25 +65,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filmsStorage, err := database.NewFilmsStorage(pool)
+	filmsStorage, err := repository.NewFilmsStorage(pool)
 	if err != nil {
 		log.Fatal(err)
 	}
-	actorsStorage, err := database.NewActorsStorage(pool)
+	actorsStorage, err := repository.NewActorsStorage(pool)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
-	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
-	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
+	actorsService := service2.NewActorsService(actorsStorage, sugarLogger)
+	filmsService := service2.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
 
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
+	filmsPageHandlers := handlers2.NewFilmsPageHandlers(filmsService, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
-	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
+	actorsPageHandlers := handlers2.NewActorsHandlers(actorsService, sugarLogger)
 
 	router := mux.NewRouter()
 
@@ -127,7 +130,7 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServeTLS("./cert/server.crt", "./cert/server.key"); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

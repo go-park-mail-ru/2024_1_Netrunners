@@ -1,6 +1,7 @@
-package database
+package repository
 
 import (
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"testing"
 
 	"github.com/pashagolub/pgxmock/v3"
@@ -14,7 +15,7 @@ func TestActorsStorage_GetActorByUuid(t *testing.T) {
 
 	storage, err := NewActorsStorage(mock)
 
-	newActor := NewMockActor()
+	newActor := database.NewMockActor()
 
 	mockRowsData := pgxmock.NewRows([]string{"uuid", "name", "avatar", "birthday", "career", "height", "birth_place",
 		"genres", "spouse"}).
@@ -47,7 +48,7 @@ func TestActorsStorage_GetActorsByFilm(t *testing.T) {
 
 	storage, err := NewActorsStorage(mock)
 
-	newActorPreviews := NewMockActorPreview()
+	newActorPreviews := database.NewMockActorPreview()
 
 	mockRowsFilms := pgxmock.NewRows([]string{"uuid", "name", "avatar"}).
 		AddRow(newActorPreviews[0].Uuid, newActorPreviews[0].Name, newActorPreviews[0].Avatar).

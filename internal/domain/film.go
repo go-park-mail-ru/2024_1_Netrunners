@@ -9,11 +9,11 @@ type FilmData struct {
 	Link         string    `json:"link"`
 	Director     string    `json:"director"`
 	AverageScore float32   `json:"averageScore"`
-	ScoresCount  int       `json:"scoresCount"`
-	Duration     int       `json:"duration"`
+	ScoresCount  int64     `json:"scoresCount"`
+	Duration     uint32    `json:"duration"`
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
-	AgeLimit     uint8     `json:"ageLimit"`
+	AgeLimit     uint32    `json:"ageLimit"`
 }
 
 type FilmDataToAdd struct {
@@ -21,8 +21,8 @@ type FilmDataToAdd struct {
 	Preview     string
 	Director    string
 	Data        string
-	AgeLimit    uint8
-	Duration    int
+	AgeLimit    uint32
+	Duration    uint32
 	PublishedAt time.Time
 	Actors      []ActorData
 }
@@ -33,12 +33,7 @@ type FilmPreview struct {
 	Title        string  `json:"title"`
 	Director     string  `json:"author"`
 	AverageScore float32 `json:"average_score"`
-	ScoresCount  int     `json:"scores_count"`
-	Duration     int     `json:"duration"`
-	AgeLimit     uint8   `json:"ageLimit"`
-}
-
-type FilmLink struct {
-	Uuid  string `json:"uuid"`
-	Title string `json:"title"`
+	ScoresCount  int64   `json:"scores_count"`
+	Duration     uint32  `json:"duration"`
+	AgeLimit     uint32  `json:"ageLimit"`
 }

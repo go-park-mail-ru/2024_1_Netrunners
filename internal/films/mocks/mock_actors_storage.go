@@ -2,7 +2,7 @@
 // Source: internal/service/actorsservice.go
 
 // Package mock is a generated GoMock package.
-package mock
+package mocks
 
 import (
 	reflect "reflect"

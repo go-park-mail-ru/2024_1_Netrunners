@@ -1,4 +1,4 @@
-package handlers
+package films_handlers
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers/mock"
+	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
 )
 
 func TestActorsHandlers_GetActorByUuid(t *testing.T) {

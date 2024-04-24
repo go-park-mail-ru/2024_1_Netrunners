@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
 )
 
 func TestGetFilmDataByUuid(t *testing.T) {

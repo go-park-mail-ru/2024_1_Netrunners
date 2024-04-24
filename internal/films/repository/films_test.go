@@ -1,6 +1,7 @@
-package database
+package repository
 
 import (
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"testing"
 
 	"github.com/jackc/pgx/v5"
@@ -16,7 +17,7 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmData := NewMockFilmData()
+	newFilmData := database.NewMockFilmData()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "link", "name", "data", "duration", "published_at",
@@ -45,7 +46,7 @@ func TestFilmsStorage_AddFilm(t *testing.T) {
 	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewFilmsStorage(mock)
 
-	newFilm := NewMockFilmDataToAdd()
+	newFilm := database.NewMockFilmDataToAdd()
 
 	mockGetAmountOfDirectorsByName := pgxmock.NewRows([]string{"name"}).
 		AddRow(0)
@@ -124,7 +125,7 @@ func TestFilmsStorage_GetFilmPreview(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmPreview := NewMockFilmPreview()
+	newFilmPreview := database.NewMockFilmPreview()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores", "age_limit"}).
@@ -150,7 +151,7 @@ func TestFilmsStorage_GetAllFilmsPreviews(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmPreviews := NewMockFilmPreviews()
+	newFilmPreviews := database.NewMockFilmPreviews()
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores",
 		"age_limit"}).
@@ -180,7 +181,7 @@ func TestFilmsStorage_GetAllFilmActors(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmActors := NewMockFilmActors()
+	newFilmActors := database.NewMockFilmActors()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "title", "avatar"}).
@@ -207,7 +208,7 @@ func TestFilmsStorage_GetAllFilmComments(t *testing.T) {
 
 	storage, err := NewFilmsStorage(mock)
 
-	newFilmComments := NewMockFilmComments()
+	newFilmComments := database.NewMockFilmComments()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "film_uuid", "author", "text", "score", "added_at"}).

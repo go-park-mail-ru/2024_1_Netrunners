@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
-	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
 )
 
 func TestActorsService_GetActorByUuid(t *testing.T) {
