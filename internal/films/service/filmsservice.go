@@ -17,7 +17,6 @@ type FilmsStorage interface {
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	GetAllFilmComments(uuid string) ([]domain.Comment, error)
-	GetAllFilmActors(uuid string) ([]domain.ActorPreview, error)
 	GetActorByUuid(actorUuid string) (domain.ActorData, error)
 	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
 }
@@ -28,7 +27,7 @@ type FilmsService struct {
 	localStoragePath string
 }
 
-func InitFilmsServer(storage FilmsStorage, logger *zap.SugaredLogger, localStoragePath string) *FilmsService {
+func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStoragePath string) *FilmsService {
 	return &FilmsService{
 		storage:          storage,
 		logger:           logger,
@@ -94,8 +93,8 @@ func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string
 	return comments, nil
 }
 
-func (service *FilmsService) GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
-	actors, err := service.storage.GetAllFilmActors(uuid)
+func (service *FilmsService) GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
+	actors, err := service.storage.GetActorsByFilm(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film actors: %v", ctx.Value(requestId.ReqIDKey),
 			err)
@@ -113,15 +112,4 @@ func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid strin
 	}
 
 	return actor, nil
-}
-
-func (service *FilmsService) GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error) {
-	actors, err := service.storage.GetActorsByFilm(filmUuid)
-	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get actors by film: %v", ctx.Value(requestId.ReqIDKey),
-			myerrors.ErrNoActorsForFilm)
-		return nil, err
-	}
-
-	return actors, nil
 }

@@ -3,22 +3,21 @@ package service
 import (
 	"context"
 	"errors"
-	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
 )
 
 func TestGetFilmDataByUuid(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -46,7 +45,7 @@ func TestGetFilmDataByUuid_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -65,7 +64,7 @@ func TestAddFilm(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -90,7 +89,7 @@ func TestAddFilm_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -117,7 +116,7 @@ func TestRemoveFilm(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -135,7 +134,7 @@ func TestRemoveFilm_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -154,7 +153,7 @@ func TestGetFilmPreview(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -182,7 +181,7 @@ func TestGetFilmPreview_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -201,7 +200,7 @@ func TestGetAllFilmsPreviews(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -223,7 +222,7 @@ func TestGetAllFilmsPreviews_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -241,7 +240,7 @@ func TestGetAllFilmComments(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -264,7 +263,7 @@ func TestGetAllFilmComments_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -283,7 +282,7 @@ func TestGetAllFilmActors(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -294,9 +293,9 @@ func TestGetAllFilmActors(t *testing.T) {
 		{Uuid: "2", Name: "Actor 2"},
 	}
 
-	mockStorage.EXPECT().GetAllFilmActors(uuid).Return(mockActors, nil)
+	mockStorage.EXPECT().GetActorsByFilm(uuid).Return(mockActors, nil)
 
-	actors, err := service.GetAllFilmActors(context.Background(), uuid)
+	actors, err := service.GetActorsByFilm(context.Background(), uuid)
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockActors, actors)
@@ -306,7 +305,7 @@ func TestGetAllFilmActors_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
 	service := NewFilmsService(mockStorage, mockLogger, "")
@@ -314,25 +313,89 @@ func TestGetAllFilmActors_Error(t *testing.T) {
 	uuid := "123"
 	mockError := errors.New("mock error")
 
-	mockStorage.EXPECT().GetAllFilmActors(uuid).Return(nil, mockError)
+	mockStorage.EXPECT().GetActorsByFilm(uuid).Return(nil, mockError)
 
-	_, err := service.GetAllFilmActors(context.Background(), uuid)
+	_, err := service.GetActorsByFilm(context.Background(), uuid)
 
 	assert.Error(t, err)
 }
 
-func TestFilmsService_AddSomeData(t *testing.T) {
+func TestActorsService_GetActorByUuid(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockStorage := mockService.NewMockFilmsStorage(ctrl)
 
-	service := FilmsService{
-		storage: mockStorage,
-		logger:  zap.NewNop().Sugar(),
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	expectedActor := domain.ActorData{
+		Uuid:       "1",
+		Name:       "Danya",
+		Avatar:     "http://avatar",
+		Birthday:   mocks.NewMockActor().Birthday,
+		Career:     "career",
+		Height:     192,
+		BirthPlace: "Angarsk",
+		Genres:     "Riddim",
+		Spouse:     "Дабстеп",
+		Films:      mocks.NewMockActor().Films,
 	}
 
-	mockStorage.EXPECT().AddFilm(gomock.Any()).Return(nil).Times(3)
+	mockStorage.EXPECT().GetActorByUuid("1").Return(expectedActor, nil)
 
-	err := service.AddSomeData()
-	require.NoError(t, err)
+	service := NewFilmsService(mockStorage, mockLogger, "")
+	actor, err := service.GetActorByUuid(context.Background(), "1")
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedActor, actor)
+}
+
+func TestActorsService_GetActorsByFilm(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	expectedActors := mocks.NewMockActorPreview()
+	mockStorage.EXPECT().GetActorsByFilm("1").Return(expectedActors, nil)
+
+	service := NewFilmsService(mockStorage, mockLogger, "")
+	actors, err := service.GetActorsByFilm(context.Background(), "1")
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedActors, actors)
+}
+
+func TestActorsService_GetActorByUuid_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	expectedError := errors.New("storage error")
+	mockStorage.EXPECT().GetActorByUuid("1").Return(domain.ActorData{}, expectedError)
+
+	service := NewFilmsService(mockStorage, mockLogger, "")
+	actor, err := service.GetActorByUuid(context.Background(), "1")
+
+	assert.Error(t, err)
+	assert.Equal(t, domain.ActorData{}, actor)
+}
+
+func TestActorsService_GetActorsByFilm_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStorage := mocks.NewMockFilmsStorage(ctrl)
+	mockLogger := zaptest.NewLogger(t).Sugar()
+
+	expectedError := errors.New("storage error")
+	mockStorage.EXPECT().GetActorsByFilm("1").Return([]domain.ActorPreview{}, expectedError)
+
+	service := NewFilmsService(mockStorage, mockLogger, "")
+	actors, err := service.GetActorsByFilm(context.Background(), "1")
+
+	assert.Error(t, err)
+	assert.Empty(t, actors)
 }

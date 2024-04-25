@@ -1,4 +1,4 @@
-package films
+package api
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
@@ -21,17 +20,16 @@ type FilmsService interface {
 	GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
 	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
-	GetAllFilmActors(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
+	GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
 	GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error)
-	GetActorsByFilm(ctx context.Context, filmUuid string) ([]domain.ActorPreview, error)
 }
 
 type FilmsServer struct {
-	filmsService *service.FilmsService
+	filmsService FilmsService
 	logger       *zap.SugaredLogger
 }
 
-func InitFilmsServer(service *service.FilmsService, logger *zap.SugaredLogger) *FilmsServer {
+func NewFilmsServer(service FilmsService, logger *zap.SugaredLogger) *FilmsServer {
 	return &FilmsServer{
 		filmsService: service,
 		logger:       logger,
@@ -101,9 +99,9 @@ func (server *FilmsServer) GetAllFilmComments(ctx context.Context, req *session.
 	}, nil
 }
 
-func (server *FilmsServer) GetAllFilmActors(ctx context.Context, req *session.AllFilmActorsRequest) (res *session.AllFilmActorsResponse, err error) {
+func (server *FilmsServer) GetActorsByFilm(ctx context.Context, req *session.ActorsByFilmRequest) (res *session.ActorsByFilmResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
-	actors, err := server.filmsService.GetAllFilmActors(ctx, req.Uuid)
+	actors, err := server.filmsService.GetActorsByFilm(ctx, req.Uuid)
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to get all film actors: %v\n", requestId, err)
 		return nil, fmt.Errorf("[reqid=%s] failed to get all film actors: %v\n", requestId, err)
@@ -113,8 +111,8 @@ func (server *FilmsServer) GetAllFilmActors(ctx context.Context, req *session.Al
 		actorsConverted = append(actorsConverted, convertActorPreviewToProto(actor))
 	}
 
-	return &session.AllFilmActorsResponse{
-		ActorPreviews: actorsConverted,
+	return &session.ActorsByFilmResponse{
+		Actors: actorsConverted,
 	}, nil
 }
 
@@ -146,24 +144,6 @@ func (server *FilmsServer) GetActorDataByUuid(ctx context.Context, req *session.
 
 	return &session.ActorDataByUuidResponse{
 		Actor: actorConverted,
-	}, nil
-}
-
-func (server *FilmsServer) GetActorsByFilm(ctx context.Context, req *session.ActorsByFilmRequest) (res *session.ActorsByFilmResponse, err error) {
-	requestId := ctx.Value(reqid.ReqIDKey)
-	actors, err := server.filmsService.GetActorsByFilm(ctx, req.Uuid)
-	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
-	}
-
-	var actorsConverted []*session.ActorPreview
-	for _, actor := range actors {
-		actorsConverted = append(actorsConverted, convertActorPreviewToProto(actor))
-	}
-
-	return &session.ActorsByFilmResponse{
-		Actors: actorsConverted,
 	}, nil
 }
 

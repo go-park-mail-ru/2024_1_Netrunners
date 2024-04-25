@@ -107,7 +107,6 @@ func TestUserPageHandlers_ProfileEditByUuid(t *testing.T) {
 
 	mockAuthService.EXPECT().IsTokenValid(mockUserToken).Return(nil, nil)
 	mockAuthService.EXPECT().GetUserDataByUuid(gomock.Any(), "1").Return(domain.User{}, nil)
-	mockAuthService.EXPECT().ChangeUserPasswordByUuid(gomock.Any(), "1", "newPassword").Return(domain.User{}, nil)
 	mockAuthService.EXPECT().GenerateTokens(gomock.Any(), false, gomock.Any()).Return("newToken", nil)
 	mockSessionService.EXPECT().Add(gomock.Any(), "", "newToken", uint8(1)).Return(nil)
 

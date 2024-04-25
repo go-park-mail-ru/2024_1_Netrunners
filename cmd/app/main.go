@@ -4,9 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	handlers2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/handlers"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
-	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
 	"log"
 	"net/http"
 	"os"
@@ -17,12 +14,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 
+	filmHandlers "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 func main() {
@@ -65,25 +65,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filmsStorage, err := repository.NewFilmsStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
-	actorsStorage, err := repository.NewActorsStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
-	actorsService := service2.NewActorsService(actorsStorage, sugarLogger)
-	filmsService := service2.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
+
+	authConn, err := grpc.Dial(":8010", grpc.WithInsecure())
+	if err != nil {
+		log.Fatal(err)
+	}
+	filmsClient := session.NewFilmsClient(authConn)
 
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	filmsPageHandlers := handlers2.NewFilmsPageHandlers(filmsService, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
-	actorsPageHandlers := handlers2.NewActorsHandlers(actorsService, sugarLogger)
+	filmsPageHandlers := filmHandlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()
 
@@ -95,8 +90,7 @@ func main() {
 	router.HandleFunc("/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetActorsByFilm).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
@@ -104,7 +98,7 @@ func main() {
 
 	router.HandleFunc("/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
-	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
+	router.HandleFunc("/actors/{uuid}/data", filmsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
 	router.Use(middleware.CorsMiddleware)
 	router.Use(middleware.PanicMiddleware)
