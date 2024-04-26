@@ -3,14 +3,14 @@ package api
 import (
 	"context"
 	"fmt"
-	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 type UsersService interface {

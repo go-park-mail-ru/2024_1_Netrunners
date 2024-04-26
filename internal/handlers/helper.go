@@ -3,16 +3,17 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"html"
 	"net/http"
 	"regexp"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 type SuccessResponse struct {
