@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package session;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./session";
+
+service Films {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
+  rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse) {}
+  rpc HasUser(HasUserRequest) returns (HasUserResponse) {}
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc ChangeUserPassword(ChangeUserPasswordRequest) returns (ChangeUserPasswordResponse) {}
+  rpc ChangeUserName(ChangeUserNameRequest) returns (ChangeUserNameResponse) {}
+  rpc GetUserDataByUuid(GetUserDataByUuidRequest) returns (GetUserDataByUuidResponse) {}
+  rpc GetUserPreview(GetUserPreviewRequest) returns (GetUserPreviewResponse) {}
+  rpc ChangeUserPasswordByUuid(ChangeUserPasswordByUuidRequest) returns (ChangeUserPasswordByUuidResponse) {}
+  rpc ChangeUserNameByUuid(ChangeUserNameByUuidRequest) returns (ChangeUserNameByUuidResponse) {}
+  rpc ChangeUserAvatarByUuid(ChangeUserAvatarByUuidRequest) returns (ChangeUserAvatarByUuidResponse) {}
+}
+
+message UserSignUp {
+  string email = 1;
+  string username = 2;
+  string password = 3;
+}
+
+message User {
+  string uuid = 1;
+  string email = 2;
+  string username = 3;
+  string password = 4;
+  uint32 version = 5;
+  bool isAdmin = 6;
+  string avatar = 7;
+  google.protobuf.Timestamp birthday = 8;
+  google.protobuf.Timestamp registeredAt = 9;
+}
+
+message UserPreview {
+  string uuid = 1;
+  string username = 2;
+  string avatar = 3;
+}
+
+message CreateUserRequest {
+    UserSignUp user = 1;
+}
+
+message CreateUserResponse {}
+
+message RemoveUserRequest {
+  string login = 1;
+}
+
+message RemoveUserResponse {}
+
+message HasUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message HasUserResponse {
+  bool has = 1;
+}
+
+message GetUserRequest {
+  string login = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message ChangeUserPasswordRequest {
+  string login = 1;
+  string newPassword = 2;
+}
+
+message ChangeUserPasswordResponse {
+  User user = 1;
+}
+
+message ChangeUserNameRequest {
+  string login = 1;
+  string newUsername = 2;
+}
+
+message ChangeUserNameResponse {
+  User user = 1;
+}
+
+message GetUserDataByUuidRequest {
+  string uuid = 1;
+}
+
+message GetUserDataByUuidResponse {
+  User user = 1;
+}
+
+message GetUserPreviewRequest {
+  string uuid = 1;
+}
+
+message GetUserPreviewResponse {
+    UserPreview user = 1;
+}
+
+message ChangeUserPasswordByUuidRequest {
+  string uuid = 1;
+  string newPassword = 2;
+}
+
+message ChangeUserPasswordByUuidResponse {
+  User user = 1;
+}
+
+message ChangeUserNameByUuidRequest {
+  string uuid = 1;
+  string newUsername = 2;
+}
+
+message ChangeUserNameByUuidResponse {
+  User user = 1;
+}
+
+message ChangeUserAvatarByUuidRequest {
+  string uuid = 1;
+  string newAvatar = 2;
+}
+
+message ChangeUserAvatarByUuidResponse {
+  User user = 1;
+}

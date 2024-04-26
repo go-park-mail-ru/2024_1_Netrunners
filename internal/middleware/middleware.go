@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 	"net/http"
 	"time"
 
@@ -15,13 +16,13 @@ import (
 )
 
 type Middleware struct {
-	authService    *service.AuthService
+	authService    *service2.AuthService
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
 	serverIP       string
 }
 
-func NewMiddleware(authService *service.AuthService,
+func NewMiddleware(authService *service2.AuthService,
 	sessionService *service.SessionService, logger *zap.SugaredLogger, serverIP string) *Middleware {
 	return &Middleware{
 		authService:    authService,

@@ -1,9 +1,13 @@
-package database
+package repository
 
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD:internal/repository/postgres/users.go
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
+=======
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
+>>>>>>> d1f59f7 (boobooboo):internal/users/repository/users.go
 
 	"github.com/jackc/pgx/v5"
 
@@ -12,10 +16,17 @@ import (
 )
 
 type UsersStorage struct {
+<<<<<<< HEAD:internal/repository/postgres/users.go
 	pool repository.PgxIface
 }
 
 func NewUsersStorage(pool repository.PgxIface) (*UsersStorage, error) {
+=======
+	pool database.PgxIface
+}
+
+func NewUsersStorage(pool database.PgxIface) (*UsersStorage, error) {
+>>>>>>> d1f59f7 (boobooboo):internal/users/repository/users.go
 	return &UsersStorage{
 		pool: pool,
 	}, nil
