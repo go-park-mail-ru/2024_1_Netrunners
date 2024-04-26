@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"os"
@@ -69,7 +70,7 @@ func main() {
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
 
-	authConn, err := grpc.Dial(":8010", grpc.WithInsecure())
+	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
