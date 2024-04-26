@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -37,5 +39,7 @@ func NewUsersServer(service UsersService, logger *zap.SugaredLogger) *UsersServe
 	}
 }
 
-func (server *UsersServer) CreateUser(ctx context.Context, user domain.UserSignUp) error {
+func (server *UsersServer) CreateUser(ctx context.Context, req *session.CreateUserRequest) (res *session.CreateUserResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+
 }
