@@ -11,24 +11,17 @@ import (
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
-	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 )
 
 type Middleware struct {
-	authService    *service2.UsersService
-	sessionService *service.SessionService
-	logger         *zap.SugaredLogger
-	serverIP       string
+	logger   *zap.SugaredLogger
+	serverIP string
 }
 
-func NewMiddleware(authService *service2.UsersService,
-	sessionService *service.SessionService, logger *zap.SugaredLogger, serverIP string) *Middleware {
+func NewMiddleware(logger *zap.SugaredLogger, serverIP string) *Middleware {
 	return &Middleware{
-		authService:    authService,
-		sessionService: sessionService,
-		logger:         logger,
-		serverIP:       serverIP,
+		logger:   logger,
+		serverIP: serverIP,
 	}
 }
 

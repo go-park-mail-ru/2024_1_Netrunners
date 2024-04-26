@@ -7,7 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
-	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/service/mock"
+	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/sessions/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +23,7 @@ func TestAddSession(t *testing.T) {
 
 	login := "testuser"
 	token := "token123"
-	version := uint8(1)
+	version := uint32(1)
 
 	mockStorage.EXPECT().Add(login, token, version).Return(nil)
 
@@ -105,7 +105,7 @@ func TestCheckVersion(t *testing.T) {
 
 	login := "testuser"
 	token := "token123"
-	usersVersion := uint8(2)
+	usersVersion := uint32(2)
 
 	mockStorage.EXPECT().CheckVersion(login, token, usersVersion).Return(true, nil)
 
@@ -137,7 +137,7 @@ func TestGetVersion(t *testing.T) {
 
 	login := "testuser"
 	token := "token123"
-	expectedVersion := uint8(3)
+	expectedVersion := uint32(3)
 
 	mockStorage.EXPECT().GetVersion(login, token).Return(expectedVersion, nil)
 

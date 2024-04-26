@@ -26,6 +26,7 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrNotAuthorised),
 		errors.Is(err, ErrTokenIsNotValid),
 		errors.Is(err, ErrNoActiveSession),
+		errors.Is(err, ErrFailedDecode),
 		errors.Is(err, ErrNoSuchFilm):
 		status = 401
 	case errors.Is(err, ErrInternalServerError),

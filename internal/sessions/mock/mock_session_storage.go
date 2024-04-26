@@ -34,7 +34,7 @@ func (m *MocksessionStorage) EXPECT() *MocksessionStorageMockRecorder {
 }
 
 // Add mocks base method.
-func (m *MocksessionStorage) Add(login, token string, version uint8) error {
+func (m *MocksessionStorage) Add(login, token string, version uint32) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", login, token, version)
 	ret0, _ := ret[0].(error)
@@ -64,7 +64,7 @@ func (mr *MocksessionStorageMockRecorder) CheckAllUserSessionTokens(login interf
 }
 
 // CheckVersion mocks base method.
-func (m *MocksessionStorage) CheckVersion(login, token string, usersVersion uint8) (bool, error) {
+func (m *MocksessionStorage) CheckVersion(login, token string, usersVersion uint32) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckVersion", login, token, usersVersion)
 	ret0, _ := ret[0].(bool)
@@ -95,10 +95,10 @@ func (mr *MocksessionStorageMockRecorder) DeleteSession(login, token interface{}
 }
 
 // GetVersion mocks base method.
-func (m *MocksessionStorage) GetVersion(login, token string) (uint8, error) {
+func (m *MocksessionStorage) GetVersion(login, token string) (uint32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVersion", login, token)
-	ret0, _ := ret[0].(uint8)
+	ret0, _ := ret[0].(uint32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

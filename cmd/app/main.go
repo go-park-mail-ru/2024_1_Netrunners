@@ -18,8 +18,6 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
-	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
@@ -46,27 +44,28 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cacheStorage := mycache.NewSessionStorage()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
-
 	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	filmsClient := session.NewFilmsClient(authConn)
-	usersClient := session.NewUsersClient(authConn)
 
-	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
-	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, sessionService, sugarLogger)
+	filmsConn, err := grpc.Dial(":8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	filmsClient := session.NewFilmsClient(filmsConn)
+	usersClient := session.NewUsersClient(usersConn)
+	sessionClient := session.NewSessionsClient(authConn)
+
+	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
+	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()

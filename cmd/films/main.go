@@ -27,7 +27,7 @@ func main() {
 		serverIP     string
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
-	flag.IntVar(&backEndPort, "b-port", 8010, "back-end server port")
+	flag.IntVar(&backEndPort, "b-port", 8020, "back-end server port")
 	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
@@ -66,7 +66,7 @@ func main() {
 	srv := api.NewFilmsServer(filmService, sugarLogger)
 	session.RegisterFilmsServer(s, srv)
 
-	listener, err := net.Listen("tcp", ":8010")
+	listener, err := net.Listen("tcp", ":8020")
 	if err != nil {
 		log.Fatal(err)
 	}
