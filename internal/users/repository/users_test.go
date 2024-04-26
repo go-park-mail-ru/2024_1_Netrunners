@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,7 +108,6 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewUsersStorage(mock)
 
 	email := "cakethefake@gmail.com"
@@ -127,9 +125,6 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 	mock.ExpectQuery("SELECT").
 		WithArgs(email).
 		WillReturnRows(mockRows)
-
-	mock.ExpectCommit()
-	mock.ExpectRollback()
 
 	_, err = storage.ChangeUserPassword(email, password)
 	require.Equal(t, nil, err)
@@ -168,7 +163,6 @@ func TestUsersStorage_ChangeUserPasswordByUuid(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewUsersStorage(mock)
 
 	uuid := "1"
@@ -187,8 +181,6 @@ func TestUsersStorage_ChangeUserPasswordByUuid(t *testing.T) {
 		WithArgs(uuid).
 		WillReturnRows(mockRows)
 
-	mock.ExpectCommit()
-
 	_, err = storage.ChangeUserPasswordByUuid(uuid, password)
 	require.Equal(t, nil, err)
 
@@ -201,7 +193,6 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewUsersStorage(mock)
 
 	email := "cakethefake@gmial.com"
@@ -220,8 +211,6 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 		WithArgs(email).
 		WillReturnRows(mockRows)
 
-	mock.ExpectCommit()
-
 	_, err = storage.ChangeUserName(email, newUsername)
 	require.Equal(t, nil, err)
 
@@ -234,7 +223,6 @@ func TestUsersStorage_ChangeUserNameByUuid(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	storage, err := NewUsersStorage(mock)
 
 	uuid := "1"
@@ -252,8 +240,6 @@ func TestUsersStorage_ChangeUserNameByUuid(t *testing.T) {
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).
 		WillReturnRows(mockRows)
-
-	mock.ExpectCommit()
 
 	_, err = storage.ChangeUserNameByUuid(uuid, password)
 	require.Equal(t, nil, err)
