@@ -36,7 +36,8 @@ func NewFilmsServer(service FilmsService, logger *zap.SugaredLogger) *FilmsServe
 	}
 }
 
-func (server *FilmsServer) GetAllFilmsPreviews(ctx context.Context, req *session.AllFilmsPreviewsRequest) (res *session.AllFilmsPreviewsResponse, err error) {
+func (server *FilmsServer) GetAllFilmsPreviews(ctx context.Context,
+	req *session.AllFilmsPreviewsRequest) (res *session.AllFilmsPreviewsResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	films, err := server.filmsService.GetAllFilmsPreviews(ctx)
 	if err != nil {
@@ -54,7 +55,8 @@ func (server *FilmsServer) GetAllFilmsPreviews(ctx context.Context, req *session
 	}, nil
 }
 
-func (server *FilmsServer) GetFilmDataByUuid(ctx context.Context, req *session.FilmDataByUuidRequest) (res *session.FilmDataByUuidResponse, err error) {
+func (server *FilmsServer) GetFilmDataByUuid(ctx context.Context,
+	req *session.FilmDataByUuidRequest) (res *session.FilmDataByUuidResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	film, err := server.filmsService.GetFilmDataByUuid(ctx, req.Uuid)
 	if err != nil {
@@ -68,7 +70,8 @@ func (server *FilmsServer) GetFilmDataByUuid(ctx context.Context, req *session.F
 	}, nil
 }
 
-func (server *FilmsServer) GetFilmPreviewByUuid(ctx context.Context, req *session.FilmPreviewByUuidRequest) (res *session.FilmPreviewByUuidResponse, err error) {
+func (server *FilmsServer) GetFilmPreviewByUuid(ctx context.Context,
+	req *session.FilmPreviewByUuidRequest) (res *session.FilmPreviewByUuidResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	film, err := server.filmsService.GetFilmPreview(ctx, req.Uuid)
 	if err != nil {
@@ -82,7 +85,8 @@ func (server *FilmsServer) GetFilmPreviewByUuid(ctx context.Context, req *sessio
 	}, nil
 }
 
-func (server *FilmsServer) GetAllFilmComments(ctx context.Context, req *session.AllFilmCommentsRequest) (res *session.AllFilmCommentsResponse, err error) {
+func (server *FilmsServer) GetAllFilmComments(ctx context.Context,
+	req *session.AllFilmCommentsRequest) (res *session.AllFilmCommentsResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	comments, err := server.filmsService.GetAllFilmComments(ctx, req.Uuid)
 	if err != nil {
@@ -99,7 +103,8 @@ func (server *FilmsServer) GetAllFilmComments(ctx context.Context, req *session.
 	}, nil
 }
 
-func (server *FilmsServer) GetActorsByFilm(ctx context.Context, req *session.ActorsByFilmRequest) (res *session.ActorsByFilmResponse, err error) {
+func (server *FilmsServer) GetActorsByFilm(ctx context.Context,
+	req *session.ActorsByFilmRequest) (res *session.ActorsByFilmResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	actors, err := server.filmsService.GetActorsByFilm(ctx, req.Uuid)
 	if err != nil {
@@ -116,7 +121,8 @@ func (server *FilmsServer) GetActorsByFilm(ctx context.Context, req *session.Act
 	}, nil
 }
 
-func (server *FilmsServer) RemoveFilmByUuid(ctx context.Context, req *session.RemoveFilmByUuidRequest) (res *session.RemoveFilmByUuidResponse, err error) {
+func (server *FilmsServer) RemoveFilmByUuid(ctx context.Context,
+	req *session.RemoveFilmByUuidRequest) (res *session.RemoveFilmByUuidResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	err = server.filmsService.RemoveFilm(ctx, req.Uuid)
 	if err != nil {
@@ -126,7 +132,8 @@ func (server *FilmsServer) RemoveFilmByUuid(ctx context.Context, req *session.Re
 	return &session.RemoveFilmByUuidResponse{}, nil
 }
 
-func (server *FilmsServer) GetActorDataByUuid(ctx context.Context, req *session.ActorDataByUuidRequest) (res *session.ActorDataByUuidResponse, err error) {
+func (server *FilmsServer) GetActorDataByUuid(ctx context.Context,
+	req *session.ActorDataByUuidRequest) (res *session.ActorDataByUuidResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	actor, err := server.filmsService.GetActorByUuid(ctx, req.Uuid)
 	if err != nil {

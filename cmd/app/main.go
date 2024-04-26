@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	filmHandlers "github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
