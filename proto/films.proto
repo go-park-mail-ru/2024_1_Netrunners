@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+package session;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./session";
+
+service Films {
+  rpc GetAllFilmsPreviews(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
+  rpc GetFilmDataByUuid(FilmDataByUuidRequest) returns (FilmDataByUuidResponse) {}
+  rpc GetFilmPreviewByUuid(FilmPreviewByUuidRequest) returns (FilmPreviewByUuidResponse) {}
+  rpc GetAllFilmComments(AllFilmCommentsRequest) returns (AllFilmCommentsResponse) {}
+  rpc RemoveFilmByUuid(RemoveFilmByUuidRequest) returns (RemoveFilmByUuidResponse) {}
+  rpc GetActorDataByUuid(ActorDataByUuidRequest) returns (ActorDataByUuidResponse) {}
+  rpc GetActorsByFilm(ActorsByFilmRequest) returns (ActorsByFilmResponse) {}
+}
+
+message FilmPreview {
+  string uuid = 1;
+  string preview = 2;
+  string title = 3;
+  string director = 4;
+  float avg_score = 5;
+  uint64 scores_count = 6;
+  uint32 duration = 7;
+  uint32 age_limit = 8;
+}
+
+message FilmData {
+  string uuid = 1;
+  string preview = 2;
+  string title = 3;
+  string link = 4;
+  string director = 5;
+  float avg_score = 6;
+  uint64 scores_count = 7;
+  uint32 duration = 8;
+  string data = 9;
+  uint32 age_limit = 10;
+  google.protobuf.Timestamp date = 11;
+}
+
+message Comment {
+  string uuid = 1;
+  string film_uuid = 2;
+  string author = 3;
+  string text = 4;
+  uint32 score = 5;
+  google.protobuf.Timestamp added_at = 6;
+}
+
+message ActorData {
+  string uuid = 1;
+  string name = 2;
+  string avatar = 3;
+  google.protobuf.Timestamp birthday = 4;
+  string career = 5;
+  string genres = 6;
+  string spouse = 7;
+  repeated FilmPreview films_previews = 8;
+}
+
+message ActorPreview {
+  string uuid = 1;
+  string name = 2;
+  string avatar = 3;
+}
+
+message StatusMessage {
+  uint32 code = 1;
+}
+
+message AllFilmsPreviewsRequest {}
+
+message AllFilmsPreviewsResponse {
+  repeated FilmPreview films = 1;
+}
+
+message FilmDataByUuidRequest {
+  string uuid = 1;
+}
+
+message FilmDataByUuidResponse {
+  FilmData film_data = 1;
+}
+
+message FilmPreviewByUuidRequest {
+  string uuid = 1;
+}
+
+message FilmPreviewByUuidResponse {
+  FilmPreview film_preview = 1;
+}
+
+message AllFilmCommentsRequest {
+  string uuid = 1;
+}
+
+message AllFilmCommentsResponse {
+  repeated Comment comments = 1;
+}
+
+message AllFilmActorsRequest {
+  string uuid = 1;
+}
+
+message AllFilmActorsResponse {
+  repeated ActorPreview actor_previews = 1;
+}
+
+message RemoveFilmByUuidRequest {
+  string uuid = 1;
+}
+
+message RemoveFilmByUuidResponse {}
+
+message ActorDataByUuidRequest {
+  string uuid = 1;
+}
+
+message ActorDataByUuidResponse {
+  ActorData actor = 1;
+}
+
+message ActorsByFilmRequest {
+  string uuid = 1;
+}
+
+message ActorsByFilmResponse {
+  repeated ActorPreview actors = 1;
+}

@@ -14,12 +14,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
 	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 func main() {
@@ -62,25 +65,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filmsStorage, err := database.NewFilmsStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
-	actorsStorage, err := database.NewActorsStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 	authService := service.NewAuthService(authStorage, sugarLogger)
-	actorsService := service.NewActorsService(actorsStorage, sugarLogger)
-	filmsService := service.NewFilmsService(filmsStorage, sugarLogger, "/root/2024_1_Netrunners/uploads")
+
+	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	filmsClient := session.NewFilmsClient(authConn)
 
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	filmsPageHandlers := handlers.NewFilmsPageHandlers(filmsService, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
-	actorsPageHandlers := handlers.NewActorsHandlers(actorsService, sugarLogger)
+	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()
 
@@ -92,8 +90,7 @@ func main() {
 	router.HandleFunc("/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetAllFilmActors).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/actors", filmsPageHandlers.GetActorsByFilm).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
@@ -101,7 +98,7 @@ func main() {
 
 	router.HandleFunc("/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
-	router.HandleFunc("/actors/{uuid}/data", actorsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
+	router.HandleFunc("/actors/{uuid}/data", filmsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
 	router.Use(middleware.CorsMiddleware)
 	router.Use(middleware.PanicMiddleware)
@@ -127,7 +124,7 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServeTLS("./cert/server.crt", "./cert/server.key"); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

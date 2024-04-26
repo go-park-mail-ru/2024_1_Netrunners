@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
 
 	"github.com/jackc/pgx/v5"
 
@@ -11,10 +12,10 @@ import (
 )
 
 type UsersStorage struct {
-	pool PgxIface
+	pool repository.PgxIface
 }
 
-func NewUsersStorage(pool PgxIface) (*UsersStorage, error) {
+func NewUsersStorage(pool repository.PgxIface) (*UsersStorage, error) {
 	return &UsersStorage{
 		pool: pool,
 	}, nil
