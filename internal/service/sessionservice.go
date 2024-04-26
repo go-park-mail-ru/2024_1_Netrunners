@@ -2,18 +2,25 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"regexp"
+	"time"
 
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-
+	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
+
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
 type sessionStorage interface {
-	Add(login string, token string, version uint8) (err error)
+	Add(login string, token string, version uint32) (err error)
 	DeleteSession(login string, token string) (err error)
 	Update(login string, token string) (err error)
-	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
-	GetVersion(login string, token string) (version uint8, err error)
+	CheckVersion(login string, token string, usersVersion uint32) (hasSession bool, err error)
+	GetVersion(login string, token string) (version uint32, err error)
 	HasSession(login string, token string) error
 	CheckAllUserSessionTokens(login string) error
 }
@@ -21,16 +28,18 @@ type sessionStorage interface {
 type SessionService struct {
 	sessionStorage sessionStorage
 	logger         *zap.SugaredLogger
+	secretKey      string
 }
 
 func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 		logger:         logger,
+		secretKey:      os.Getenv("SECRETKEY"),
 	}
 }
 
-func (service *SessionService) Add(ctx context.Context, login, token string, version uint8) (err error) {
+func (service *SessionService) Add(ctx context.Context, login, token string, version uint32) (err error) {
 	err = service.sessionStorage.Add(login, token, version)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to add session: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -59,7 +68,7 @@ func (service *SessionService) Update(ctx context.Context, login, token string) 
 }
 
 func (service *SessionService) CheckVersion(ctx context.Context, login, token string,
-	usersVersion uint8) (hasSession bool, err error) {
+	usersVersion uint32) (hasSession bool, err error) {
 	hasSession, err = service.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to check version: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -68,7 +77,7 @@ func (service *SessionService) CheckVersion(ctx context.Context, login, token st
 	return hasSession, nil
 }
 
-func (service *SessionService) GetVersion(ctx context.Context, login, token string) (version uint8, err error) {
+func (service *SessionService) GetVersion(ctx context.Context, login, token string) (version uint32, err error) {
 	version, err = service.sessionStorage.GetVersion(login, token)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get version: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -94,4 +103,91 @@ func (service *SessionService) CheckAllUserSessionTokens(ctx context.Context, lo
 		return err
 	}
 	return nil
+}
+
+func (service *SessionService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
+	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(service.secretKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !parsedToken.Valid {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Login"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	_, ok = claims["IsAdmin"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Version"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	return claims, nil
+}
+
+func ValidateLogin(e string) error {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
+	if emailRegex.MatchString(e) {
+		return nil
+	}
+	return myerrors.ErrLoginIsNotValid
+}
+
+func ValidateUsername(username string) error {
+	if len(username) >= 4 {
+		return nil
+	}
+	return myerrors.ErrUsernameIsToShort
+}
+
+func ValidatePassword(password string) error {
+	if len(password) >= 6 {
+		return nil
+	}
+	return myerrors.ErrPasswordIsToShort
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	IsAdmin bool
+	Version uint32
+}
+
+func (service *SessionService) GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string, err error) {
+	tokenCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		IsAdmin: isAdmin,
+		Version: version,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
+
+	tokenSigned, err = token.SignedString([]byte(service.secretKey))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }

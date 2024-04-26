@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 )
 
 var (
@@ -31,17 +31,19 @@ type AuthService interface {
 	ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error)
 	ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error)
 	IsTokenValid(token *http.Cookie) (jwt.MapClaims, error)
-	GenerateTokens(login string, isAdmin bool, version uint8) (tokenSigned string, err error)
+	GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string, err error)
 }
 
 type SessionService interface {
-	Add(ctx context.Context, login string, token string, version uint8) (err error)
+	Add(ctx context.Context, login string, token string, version uint32) (err error)
 	DeleteSession(ctx context.Context, login string, token string) (err error)
 	Update(ctx context.Context, login string, token string) (err error)
-	CheckVersion(ctx context.Context, login string, token string, usersVersion uint8) (hasSession bool, err error)
-	GetVersion(ctx context.Context, login string, token string) (version uint8, err error)
+	CheckVersion(ctx context.Context, login string, token string, usersVersion uint32) (hasSession bool, err error)
+	GetVersion(ctx context.Context, login string, token string) (version uint32, err error)
 	HasSession(ctx context.Context, login string, token string) error
 	CheckAllUserSessionTokens(ctx context.Context, login string) error
+	GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string, err error)
+	IsTokenValid(token *http.Cookie) (jwt.MapClaims, error)
 }
 
 type AuthPageHandlers struct {
@@ -256,7 +258,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var version uint8 = 1
+	var version uint32 = 1
 
 	var user = domain.UserSignUp{
 		Email:    login,
@@ -361,7 +363,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	tokenSigned, err := authPageHandlers.authService.GenerateTokens(
 		tokenClaims["Login"].(string),
 		tokenClaims["IsAdmin"].(bool),
-		uint8(tokenClaims["Version"].(float64)))
+		uint32(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -371,7 +373,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 	err = authPageHandlers.sessionService.Add(ctx, tokenClaims["Login"].(string), tokenSigned,
-		uint8(tokenClaims["Version"].(float64)))
+		uint32(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

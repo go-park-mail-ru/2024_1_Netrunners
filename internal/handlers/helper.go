@@ -177,3 +177,25 @@ func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 func convertProtoToTime(protoTime *timestamppb.Timestamp) time.Time {
 	return protoTime.AsTime()
 }
+
+func convertUserToRegular(user *session.User) domain.User {
+	return domain.User{
+		Uuid:         user.Uuid,
+		Email:        user.Email,
+		Password:     user.Password,
+		Name:         user.Username,
+		Version:      user.Version,
+		IsAdmin:      user.IsAdmin,
+		Avatar:       user.Avatar,
+		Birthday:     convertProtoToTime(user.Birthday),
+		RegisteredAt: convertProtoToTime(user.RegisteredAt),
+	}
+}
+
+func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
+	return domain.UserPreview{
+		Uuid:   user.Uuid,
+		Name:   user.Username,
+		Avatar: user.Avatar,
+	}
+}
