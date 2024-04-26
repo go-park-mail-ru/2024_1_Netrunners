@@ -109,7 +109,8 @@ type customClaims struct {
 	Version uint32
 }
 
-func (service *SessionService) GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string, err error) {
+func (service *SessionService) GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string,
+	err error) {
 	tokenCustomClaims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
