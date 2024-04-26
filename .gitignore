@@ -146,3 +146,5 @@ cover
 cover.out
 
 /cert
+
+internal/repository/.DS_Store

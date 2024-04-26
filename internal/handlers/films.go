@@ -1,4 +1,4 @@
-package films_handlers
+package handlers
 
 import (
 	"encoding/json"
