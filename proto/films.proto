@@ -22,7 +22,7 @@ message FilmPreview {
   string title = 3;
   string director = 4;
   float avg_score = 5;
-  int64 scores_count = 6;
+  uint64 scores_count = 6;
   uint32 duration = 7;
   uint32 age_limit = 8;
 }
@@ -34,7 +34,7 @@ message FilmData {
   string link = 4;
   string director = 5;
   float avg_score = 6;
-  int64 scores_count = 7;
+  uint64 scores_count = 7;
   uint32 duration = 8;
   string data = 9;
   uint32 age_limit = 10;

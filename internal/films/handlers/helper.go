@@ -96,7 +96,7 @@ func escapeComment(comment *domain.Comment) {
 }
 
 func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
-	return domain.FilmPreview{
+	filmNew := domain.FilmPreview{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
 		Preview:      film.Preview,
@@ -104,7 +104,9 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		AgeLimit:     film.AgeLimit,
+		Duration:     film.Duration,
 	}
+	return filmNew
 }
 
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {

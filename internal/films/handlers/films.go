@@ -48,7 +48,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 	for _, film := range res.Films {
 		filmRegular := convertFilmPreviewToRegular(film)
 		escapeFilmPreview(&filmRegular)
-		filmsRegular = append(filmsRegular, convertFilmPreviewToRegular(film))
+		filmsRegular = append(filmsRegular, filmRegular)
 	}
 
 	response := filmsPreviewsResponse{

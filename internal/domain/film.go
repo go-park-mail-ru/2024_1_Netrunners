@@ -9,7 +9,7 @@ type FilmData struct {
 	Link         string    `json:"link"`
 	Director     string    `json:"director"`
 	AverageScore float32   `json:"averageScore"`
-	ScoresCount  int64     `json:"scoresCount"`
+	ScoresCount  uint64    `json:"scoresCount"`
 	Duration     uint32    `json:"duration"`
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
@@ -33,7 +33,7 @@ type FilmPreview struct {
 	Title        string  `json:"title"`
 	Director     string  `json:"author"`
 	AverageScore float32 `json:"average_score"`
-	ScoresCount  int64   `json:"scores_count"`
+	ScoresCount  uint64  `json:"scores_count"`
 	Duration     uint32  `json:"duration"`
 	AgeLimit     uint32  `json:"ageLimit"`
 }

@@ -287,7 +287,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		filmDirector string
 		filmDuration uint32
 		filmScore    float32
-		filmRating   int64
+		filmRating   uint64
 		filmAgeLimit uint32
 	)
 	for rows.Next() {
@@ -443,7 +443,7 @@ func (storage *FilmsStorage) GetActorByUuid(actorUuid string) (domain.ActorData,
 		filmDirector string
 		filmDuration uint32
 		filmScore    float32
-		filmRating   int64
+		filmRating   uint64
 		filmAgeLimit uint32
 	)
 	for rows.Next() {

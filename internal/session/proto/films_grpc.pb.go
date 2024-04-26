@@ -109,7 +109,6 @@ type FilmsServer interface {
 	RemoveFilmByUuid(context.Context, *RemoveFilmByUuidRequest) (*RemoveFilmByUuidResponse, error)
 	GetActorDataByUuid(context.Context, *ActorDataByUuidRequest) (*ActorDataByUuidResponse, error)
 	GetActorsByFilm(context.Context, *ActorsByFilmRequest) (*ActorsByFilmResponse, error)
-	mustEmbedUnimplementedFilmsServer()
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
