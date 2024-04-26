@@ -56,17 +56,18 @@ func main() {
 	}
 
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
-	authService := service.NewAuthService(authStorage, sugarLogger)
+	authService := service.NewService(authStorage, sugarLogger)
 
 	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	filmsClient := session.NewFilmsClient(authConn)
+	usersClient := session.NewUsersClient(authConn)
 
 	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, sessionService, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()

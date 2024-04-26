@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,18 +13,19 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 )
 
 type UserPageHandlers struct {
-	authService    AuthService
+	usersService   service.UsersService
 	sessionService SessionService
 	logger         *zap.SugaredLogger
 }
 
-func NewUserPageHandlers(authService AuthService, sessionService SessionService,
+func NewUserPageHandlers(usersService service.UsersService, sessionService SessionService,
 	logger *zap.SugaredLogger) *UserPageHandlers {
 	return &UserPageHandlers{
-		authService:    authService,
+		usersService:   usersService,
 		sessionService: sessionService,
 		logger:         logger,
 	}
@@ -41,7 +41,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	requestId := ctx.Value(reqid.ReqIDKey)
 
 	uuid := mux.Vars(r)["uuid"]
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	user, err := UserPageHandlers.usersService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -86,7 +86,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	requestId := ctx.Value(reqid.ReqIDKey)
 
 	uuid := mux.Vars(r)["uuid"]
-	userPreview, err := UserPageHandlers.authService.GetUserPreview(ctx, uuid)
+	userPreview, err := UserPageHandlers.usersService.GetUserPreview(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -95,7 +95,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		return
 	}
 
-	user, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	user, err := UserPageHandlers.usersService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -152,7 +152,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	_, err = UserPageHandlers.authService.IsTokenValid(userToken)
+	_, err = UserPageHandlers.usersService.IsTokenValid(userToken)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -162,7 +162,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	}
 
 	uuid := mux.Vars(r)["uuid"]
-	currUser, err := UserPageHandlers.authService.GetUserDataByUuid(ctx, uuid)
+	currUser, err := UserPageHandlers.usersService.GetUserDataByUuid(ctx, uuid)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -183,7 +183,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserPasswordByUuid(ctx, uuid, newData)
+		currUser, err = UserPageHandlers.usersService.ChangeUserPasswordByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -202,7 +202,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 			return
 		}
 
-		currUser, err = UserPageHandlers.authService.ChangeUserNameByUuid(ctx, uuid, newData)
+		currUser, err = UserPageHandlers.usersService.ChangeUserNameByUuid(ctx, uuid, newData)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -232,7 +232,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	version := currUser.Version + 1
 
-	tokenSigned, err := UserPageHandlers.authService.GenerateTokens(currUser.Email, false, version)
+	tokenSigned, err := UserPageHandlers.usersService.GenerateTokens(currUser.Email, false, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

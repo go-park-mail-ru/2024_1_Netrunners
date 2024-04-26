@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 	"regexp"
 	"testing"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
 )
 
 func TestUsersStorage_CreateUser(t *testing.T) {

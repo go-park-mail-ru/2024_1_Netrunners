@@ -14,10 +14,10 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// FilmsClient is the client API for Films service.
+// UsersClient is the client API for Users service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type FilmsClient interface {
+type UsersClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error)
 	HasUser(ctx context.Context, in *HasUserRequest, opts ...grpc.CallOption) (*HasUserResponse, error)
@@ -31,117 +31,117 @@ type FilmsClient interface {
 	ChangeUserAvatarByUuid(ctx context.Context, in *ChangeUserAvatarByUuidRequest, opts ...grpc.CallOption) (*ChangeUserAvatarByUuidResponse, error)
 }
 
-type filmsClient struct {
+type usersClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewFilmsClient(cc grpc.ClientConnInterface) FilmsClient {
-	return &filmsClient{cc}
+func NewUsersClient(cc grpc.ClientConnInterface) UsersClient {
+	return &usersClient{cc}
 }
 
-func (c *filmsClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+func (c *usersClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
 	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/CreateUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error) {
+func (c *usersClient) RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error) {
 	out := new(RemoveUserResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/RemoveUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/RemoveUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) HasUser(ctx context.Context, in *HasUserRequest, opts ...grpc.CallOption) (*HasUserResponse, error) {
+func (c *usersClient) HasUser(ctx context.Context, in *HasUserRequest, opts ...grpc.CallOption) (*HasUserResponse, error) {
 	out := new(HasUserResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/HasUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/HasUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+func (c *usersClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/GetUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) ChangeUserPassword(ctx context.Context, in *ChangeUserPasswordRequest, opts ...grpc.CallOption) (*ChangeUserPasswordResponse, error) {
+func (c *usersClient) ChangeUserPassword(ctx context.Context, in *ChangeUserPasswordRequest, opts ...grpc.CallOption) (*ChangeUserPasswordResponse, error) {
 	out := new(ChangeUserPasswordResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/ChangeUserPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/ChangeUserPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) ChangeUserName(ctx context.Context, in *ChangeUserNameRequest, opts ...grpc.CallOption) (*ChangeUserNameResponse, error) {
+func (c *usersClient) ChangeUserName(ctx context.Context, in *ChangeUserNameRequest, opts ...grpc.CallOption) (*ChangeUserNameResponse, error) {
 	out := new(ChangeUserNameResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/ChangeUserName", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/ChangeUserName", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) GetUserDataByUuid(ctx context.Context, in *GetUserDataByUuidRequest, opts ...grpc.CallOption) (*GetUserDataByUuidResponse, error) {
+func (c *usersClient) GetUserDataByUuid(ctx context.Context, in *GetUserDataByUuidRequest, opts ...grpc.CallOption) (*GetUserDataByUuidResponse, error) {
 	out := new(GetUserDataByUuidResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetUserDataByUuid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/GetUserDataByUuid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) GetUserPreview(ctx context.Context, in *GetUserPreviewRequest, opts ...grpc.CallOption) (*GetUserPreviewResponse, error) {
+func (c *usersClient) GetUserPreview(ctx context.Context, in *GetUserPreviewRequest, opts ...grpc.CallOption) (*GetUserPreviewResponse, error) {
 	out := new(GetUserPreviewResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetUserPreview", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/GetUserPreview", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) ChangeUserPasswordByUuid(ctx context.Context, in *ChangeUserPasswordByUuidRequest, opts ...grpc.CallOption) (*ChangeUserPasswordByUuidResponse, error) {
+func (c *usersClient) ChangeUserPasswordByUuid(ctx context.Context, in *ChangeUserPasswordByUuidRequest, opts ...grpc.CallOption) (*ChangeUserPasswordByUuidResponse, error) {
 	out := new(ChangeUserPasswordByUuidResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/ChangeUserPasswordByUuid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/ChangeUserPasswordByUuid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) ChangeUserNameByUuid(ctx context.Context, in *ChangeUserNameByUuidRequest, opts ...grpc.CallOption) (*ChangeUserNameByUuidResponse, error) {
+func (c *usersClient) ChangeUserNameByUuid(ctx context.Context, in *ChangeUserNameByUuidRequest, opts ...grpc.CallOption) (*ChangeUserNameByUuidResponse, error) {
 	out := new(ChangeUserNameByUuidResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/ChangeUserNameByUuid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/ChangeUserNameByUuid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *filmsClient) ChangeUserAvatarByUuid(ctx context.Context, in *ChangeUserAvatarByUuidRequest, opts ...grpc.CallOption) (*ChangeUserAvatarByUuidResponse, error) {
+func (c *usersClient) ChangeUserAvatarByUuid(ctx context.Context, in *ChangeUserAvatarByUuidRequest, opts ...grpc.CallOption) (*ChangeUserAvatarByUuidResponse, error) {
 	out := new(ChangeUserAvatarByUuidResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/ChangeUserAvatarByUuid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/session.Users/ChangeUserAvatarByUuid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// FilmsServer is the server API for Films service.
-// All implementations must embed UnimplementedFilmsServer
+// UsersServer is the server API for Users service.
+// All implementations must embed UnimplementedUsersServer
 // for forward compatibility
-type FilmsServer interface {
+type UsersServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error)
 	HasUser(context.Context, *HasUserRequest) (*HasUserResponse, error)
@@ -153,307 +153,306 @@ type FilmsServer interface {
 	ChangeUserPasswordByUuid(context.Context, *ChangeUserPasswordByUuidRequest) (*ChangeUserPasswordByUuidResponse, error)
 	ChangeUserNameByUuid(context.Context, *ChangeUserNameByUuidRequest) (*ChangeUserNameByUuidResponse, error)
 	ChangeUserAvatarByUuid(context.Context, *ChangeUserAvatarByUuidRequest) (*ChangeUserAvatarByUuidResponse, error)
-	mustEmbedUnimplementedFilmsServer()
 }
 
-// UnimplementedFilmsServer must be embedded to have forward compatible implementations.
-type UnimplementedFilmsServer struct {
+// UnimplementedUsersServer must be embedded to have forward compatible implementations.
+type UnimplementedUsersServer struct {
 }
 
-func (UnimplementedFilmsServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+func (UnimplementedUsersServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedFilmsServer) RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error) {
+func (UnimplementedUsersServer) RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveUser not implemented")
 }
-func (UnimplementedFilmsServer) HasUser(context.Context, *HasUserRequest) (*HasUserResponse, error) {
+func (UnimplementedUsersServer) HasUser(context.Context, *HasUserRequest) (*HasUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HasUser not implemented")
 }
-func (UnimplementedFilmsServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
+func (UnimplementedUsersServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedFilmsServer) ChangeUserPassword(context.Context, *ChangeUserPasswordRequest) (*ChangeUserPasswordResponse, error) {
+func (UnimplementedUsersServer) ChangeUserPassword(context.Context, *ChangeUserPasswordRequest) (*ChangeUserPasswordResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeUserPassword not implemented")
 }
-func (UnimplementedFilmsServer) ChangeUserName(context.Context, *ChangeUserNameRequest) (*ChangeUserNameResponse, error) {
+func (UnimplementedUsersServer) ChangeUserName(context.Context, *ChangeUserNameRequest) (*ChangeUserNameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeUserName not implemented")
 }
-func (UnimplementedFilmsServer) GetUserDataByUuid(context.Context, *GetUserDataByUuidRequest) (*GetUserDataByUuidResponse, error) {
+func (UnimplementedUsersServer) GetUserDataByUuid(context.Context, *GetUserDataByUuidRequest) (*GetUserDataByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserDataByUuid not implemented")
 }
-func (UnimplementedFilmsServer) GetUserPreview(context.Context, *GetUserPreviewRequest) (*GetUserPreviewResponse, error) {
+func (UnimplementedUsersServer) GetUserPreview(context.Context, *GetUserPreviewRequest) (*GetUserPreviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserPreview not implemented")
 }
-func (UnimplementedFilmsServer) ChangeUserPasswordByUuid(context.Context, *ChangeUserPasswordByUuidRequest) (*ChangeUserPasswordByUuidResponse, error) {
+func (UnimplementedUsersServer) ChangeUserPasswordByUuid(context.Context, *ChangeUserPasswordByUuidRequest) (*ChangeUserPasswordByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeUserPasswordByUuid not implemented")
 }
-func (UnimplementedFilmsServer) ChangeUserNameByUuid(context.Context, *ChangeUserNameByUuidRequest) (*ChangeUserNameByUuidResponse, error) {
+func (UnimplementedUsersServer) ChangeUserNameByUuid(context.Context, *ChangeUserNameByUuidRequest) (*ChangeUserNameByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeUserNameByUuid not implemented")
 }
-func (UnimplementedFilmsServer) ChangeUserAvatarByUuid(context.Context, *ChangeUserAvatarByUuidRequest) (*ChangeUserAvatarByUuidResponse, error) {
+func (UnimplementedUsersServer) ChangeUserAvatarByUuid(context.Context, *ChangeUserAvatarByUuidRequest) (*ChangeUserAvatarByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeUserAvatarByUuid not implemented")
 }
-func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
+func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 
-// UnsafeFilmsServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to FilmsServer will
+// UnsafeUsersServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UsersServer will
 // result in compilation errors.
-type UnsafeFilmsServer interface {
-	mustEmbedUnimplementedFilmsServer()
+type UnsafeUsersServer interface {
+	mustEmbedUnimplementedUsersServer()
 }
 
-func RegisterFilmsServer(s grpc.ServiceRegistrar, srv FilmsServer) {
-	s.RegisterService(&Films_ServiceDesc, srv)
+func RegisterUsersServer(s grpc.ServiceRegistrar, srv UsersServer) {
+	s.RegisterService(&Users_ServiceDesc, srv)
 }
 
-func _Films_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).CreateUser(ctx, in)
+		return srv.(UsersServer).CreateUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/CreateUser",
+		FullMethod: "/session.Users/CreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).CreateUser(ctx, req.(*CreateUserRequest))
+		return srv.(UsersServer).CreateUser(ctx, req.(*CreateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).RemoveUser(ctx, in)
+		return srv.(UsersServer).RemoveUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/RemoveUser",
+		FullMethod: "/session.Users/RemoveUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).RemoveUser(ctx, req.(*RemoveUserRequest))
+		return srv.(UsersServer).RemoveUser(ctx, req.(*RemoveUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_HasUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_HasUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HasUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).HasUser(ctx, in)
+		return srv.(UsersServer).HasUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/HasUser",
+		FullMethod: "/session.Users/HasUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).HasUser(ctx, req.(*HasUserRequest))
+		return srv.(UsersServer).HasUser(ctx, req.(*HasUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).GetUser(ctx, in)
+		return srv.(UsersServer).GetUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/GetUser",
+		FullMethod: "/session.Users/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).GetUser(ctx, req.(*GetUserRequest))
+		return srv.(UsersServer).GetUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_ChangeUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_ChangeUserPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ChangeUserPasswordRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).ChangeUserPassword(ctx, in)
+		return srv.(UsersServer).ChangeUserPassword(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/ChangeUserPassword",
+		FullMethod: "/session.Users/ChangeUserPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).ChangeUserPassword(ctx, req.(*ChangeUserPasswordRequest))
+		return srv.(UsersServer).ChangeUserPassword(ctx, req.(*ChangeUserPasswordRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_ChangeUserName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_ChangeUserName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ChangeUserNameRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).ChangeUserName(ctx, in)
+		return srv.(UsersServer).ChangeUserName(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/ChangeUserName",
+		FullMethod: "/session.Users/ChangeUserName",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).ChangeUserName(ctx, req.(*ChangeUserNameRequest))
+		return srv.(UsersServer).ChangeUserName(ctx, req.(*ChangeUserNameRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_GetUserDataByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_GetUserDataByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserDataByUuidRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).GetUserDataByUuid(ctx, in)
+		return srv.(UsersServer).GetUserDataByUuid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/GetUserDataByUuid",
+		FullMethod: "/session.Users/GetUserDataByUuid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).GetUserDataByUuid(ctx, req.(*GetUserDataByUuidRequest))
+		return srv.(UsersServer).GetUserDataByUuid(ctx, req.(*GetUserDataByUuidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_GetUserPreview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_GetUserPreview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserPreviewRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).GetUserPreview(ctx, in)
+		return srv.(UsersServer).GetUserPreview(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/GetUserPreview",
+		FullMethod: "/session.Users/GetUserPreview",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).GetUserPreview(ctx, req.(*GetUserPreviewRequest))
+		return srv.(UsersServer).GetUserPreview(ctx, req.(*GetUserPreviewRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_ChangeUserPasswordByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_ChangeUserPasswordByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ChangeUserPasswordByUuidRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).ChangeUserPasswordByUuid(ctx, in)
+		return srv.(UsersServer).ChangeUserPasswordByUuid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/ChangeUserPasswordByUuid",
+		FullMethod: "/session.Users/ChangeUserPasswordByUuid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).ChangeUserPasswordByUuid(ctx, req.(*ChangeUserPasswordByUuidRequest))
+		return srv.(UsersServer).ChangeUserPasswordByUuid(ctx, req.(*ChangeUserPasswordByUuidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_ChangeUserNameByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_ChangeUserNameByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ChangeUserNameByUuidRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).ChangeUserNameByUuid(ctx, in)
+		return srv.(UsersServer).ChangeUserNameByUuid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/ChangeUserNameByUuid",
+		FullMethod: "/session.Users/ChangeUserNameByUuid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).ChangeUserNameByUuid(ctx, req.(*ChangeUserNameByUuidRequest))
+		return srv.(UsersServer).ChangeUserNameByUuid(ctx, req.(*ChangeUserNameByUuidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Films_ChangeUserAvatarByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_ChangeUserAvatarByUuid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ChangeUserAvatarByUuidRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FilmsServer).ChangeUserAvatarByUuid(ctx, in)
+		return srv.(UsersServer).ChangeUserAvatarByUuid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/ChangeUserAvatarByUuid",
+		FullMethod: "/session.Users/ChangeUserAvatarByUuid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).ChangeUserAvatarByUuid(ctx, req.(*ChangeUserAvatarByUuidRequest))
+		return srv.(UsersServer).ChangeUserAvatarByUuid(ctx, req.(*ChangeUserAvatarByUuidRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Films_ServiceDesc is the grpc.ServiceDesc for Films service.
+// Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Films_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "session.Films",
-	HandlerType: (*FilmsServer)(nil),
+var Users_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "session.Users",
+	HandlerType: (*UsersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateUser",
-			Handler:    _Films_CreateUser_Handler,
+			Handler:    _Users_CreateUser_Handler,
 		},
 		{
 			MethodName: "RemoveUser",
-			Handler:    _Films_RemoveUser_Handler,
+			Handler:    _Users_RemoveUser_Handler,
 		},
 		{
 			MethodName: "HasUser",
-			Handler:    _Films_HasUser_Handler,
+			Handler:    _Users_HasUser_Handler,
 		},
 		{
 			MethodName: "GetUser",
-			Handler:    _Films_GetUser_Handler,
+			Handler:    _Users_GetUser_Handler,
 		},
 		{
 			MethodName: "ChangeUserPassword",
-			Handler:    _Films_ChangeUserPassword_Handler,
+			Handler:    _Users_ChangeUserPassword_Handler,
 		},
 		{
 			MethodName: "ChangeUserName",
-			Handler:    _Films_ChangeUserName_Handler,
+			Handler:    _Users_ChangeUserName_Handler,
 		},
 		{
 			MethodName: "GetUserDataByUuid",
-			Handler:    _Films_GetUserDataByUuid_Handler,
+			Handler:    _Users_GetUserDataByUuid_Handler,
 		},
 		{
 			MethodName: "GetUserPreview",
-			Handler:    _Films_GetUserPreview_Handler,
+			Handler:    _Users_GetUserPreview_Handler,
 		},
 		{
 			MethodName: "ChangeUserPasswordByUuid",
-			Handler:    _Films_ChangeUserPasswordByUuid_Handler,
+			Handler:    _Users_ChangeUserPasswordByUuid_Handler,
 		},
 		{
 			MethodName: "ChangeUserNameByUuid",
-			Handler:    _Films_ChangeUserNameByUuid_Handler,
+			Handler:    _Users_ChangeUserNameByUuid_Handler,
 		},
 		{
 			MethodName: "ChangeUserAvatarByUuid",
-			Handler:    _Films_ChangeUserAvatarByUuid_Handler,
+			Handler:    _Users_ChangeUserAvatarByUuid_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

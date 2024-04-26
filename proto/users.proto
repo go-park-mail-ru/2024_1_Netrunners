@@ -6,7 +6,7 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "./session";
 
-service Films {
+service Users {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
   rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse) {}
   rpc HasUser(HasUserRequest) returns (HasUserResponse) {}
