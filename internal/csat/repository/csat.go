@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"fmt"
+
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 
@@ -56,7 +57,7 @@ const getVarById = `
                                               AND external_id = $3;`
 
 func (storage *StatStorage) AddQuestion(question domain.AddQuestion) error {
-
+	return nil
 }
 
 func (storage *StatStorage) GetPageQuestions(page string) ([]domain.Question, error) {
