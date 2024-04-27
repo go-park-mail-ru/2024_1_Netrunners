@@ -96,7 +96,7 @@ func main() {
 	router.HandleFunc("/actors/{uuid}/data", filmsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/csat/questions/get", csatHandlers.GetPageQuestions).Methods("GET", "OPTIONS")
-	router.HandleFunc("/csat/stat/get", csatHandlers.GetPageQuestions).Methods("GET", "OPTIONS")
+	router.HandleFunc("/csat/stat/get", csatHandlers.GetStatisticsByPage).Methods("GET", "OPTIONS")
 	router.HandleFunc("/csat/stat/add", csatHandlers.AddStatistics).Methods("POST", "OPTIONS")
 
 	router.Use(middleware.CorsMiddleware)

@@ -32,9 +32,8 @@ type Question struct {
 
 type AddQuestionStatistics struct {
 	Uuid         string `json:"uuid"`
-	IsAdditional bool   `json:"title"`
+	IsAdditional bool   `json:"isAdditional"`
 	Score        int32  `json:"score"`
-	// CheckVariant int32
 }
 
 type AddQuestion struct {
