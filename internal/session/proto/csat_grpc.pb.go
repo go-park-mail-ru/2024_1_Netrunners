@@ -75,7 +75,6 @@ type CsatServer interface {
 	GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error)
 	GetQuestionsByPage(context.Context, *GetQuestionsByPageRequest) (*QuestionsResponse, error)
 	AddStatistics(context.Context, *AddStatisticsRequest) (*AddStatisticsResponse, error)
-	mustEmbedUnimplementedCsatServer()
 }
 
 // UnimplementedCsatServer must be embedded to have forward compatible implementations.

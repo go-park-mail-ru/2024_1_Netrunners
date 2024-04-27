@@ -59,14 +59,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	csatConn, err := grpc.Dial(":8050", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	filmsClient := session.NewFilmsClient(filmsConn)
 	usersClient := session.NewUsersClient(usersConn)
 	sessionClient := session.NewSessionsClient(authConn)
+	csatClient := session.NewCsatClient(csatConn)
 
 	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
+	csatHandlers := handlers.NewCsatHandlers(&csatClient, sugarLogger)
 
 	router := mux.NewRouter()
 
@@ -87,6 +94,8 @@ func main() {
 	router.HandleFunc("/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
 	router.HandleFunc("/actors/{uuid}/data", filmsPageHandlers.GetActorByUuid).Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/csat/blyat", csatHandlers.GetPageQuestions).Methods("GET", "OPTIONS")
 
 	router.Use(middleware.CorsMiddleware)
 	router.Use(middleware.PanicMiddleware)
