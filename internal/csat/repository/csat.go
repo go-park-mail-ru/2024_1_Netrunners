@@ -31,10 +31,23 @@ func (storage *StatStorage) AddQuestion(question domain.AddQuestion) error {
 	return nil
 }
 func (storage *StatStorage) GetPageQuestions(page string) ([]domain.Question, error) {
-	return []domain.Question{}, nil
+	return []domain.Question{
+		{
+			Title: "sad",
+			AdditionalQuestion: domain.AdditionalQuestion{
+				Title: "dsa",
+				CheckVars: []domain.Variant{
+					{
+						Id:    1,
+						Title: "sfddadf",
+					},
+				},
+			},
+		},
+	}, nil
 }
 
-func (storage *StatStorage) AddStatistics(statistics []domain.AddQuestionStatistics) error {
+func (storage *StatStorage) AddStatistics(page string, statistics []domain.AddQuestionStatistics) error {
 	return nil
 }
 

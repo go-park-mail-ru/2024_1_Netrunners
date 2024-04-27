@@ -11,7 +11,7 @@ import (
 type CsatStorage interface {
 	AddQuestion(question domain.AddQuestion) error
 	GetPageQuestions(page string) ([]domain.Question, error)
-	AddStatistics(statistics []domain.AddQuestionStatistics) error
+	AddStatistics(page string, statistics []domain.AddQuestionStatistics) error
 	GetStatisticsByPage(page string) ([]domain.QuestionStatistics, error)
 }
 
@@ -47,8 +47,8 @@ func (csatService *CsatService) GetPageQuestions(ctx context.Context, page strin
 	return questions, nil
 }
 
-func (csatService *CsatService) AddStatistics(ctx context.Context, statistics []domain.AddQuestionStatistics) error {
-	err := csatService.storage.AddStatistics(statistics)
+func (csatService *CsatService) AddStatistics(ctx context.Context, page string, statistics []domain.AddQuestionStatistics) error {
+	err := csatService.storage.AddStatistics(page, statistics)
 	if err != nil {
 		csatService.logger.Errorf("[reqid=%s] failed to add statistics: %w", ctx.Value(requestId.ReqIDKey), err)
 		return err

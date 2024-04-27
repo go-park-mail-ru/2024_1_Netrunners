@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Csat_GetStatistics_FullMethodName      = "/session.Csat/GetStatistics"
-	Csat_GetQuestionsByPage_FullMethodName = "/session.Csat/GetQuestionsByPage"
-	Csat_AddStatistics_FullMethodName      = "/session.Csat/AddStatistics"
+	Csat_GetStatisticsByPage_FullMethodName = "/session.Csat/GetStatisticsByPage"
+	Csat_GetQuestionsByPage_FullMethodName  = "/session.Csat/GetQuestionsByPage"
+	Csat_AddStatistics_FullMethodName       = "/session.Csat/AddStatistics"
 )
 
 // CsatClient is the client API for Csat service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CsatClient interface {
-	GetStatistics(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error)
+	GetStatisticsByPage(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error)
 	GetQuestionsByPage(ctx context.Context, in *GetQuestionsByPageRequest, opts ...grpc.CallOption) (*QuestionsResponse, error)
 	AddStatistics(ctx context.Context, in *AddStatisticsRequest, opts ...grpc.CallOption) (*AddStatisticsResponse, error)
 }
@@ -41,9 +41,9 @@ func NewCsatClient(cc grpc.ClientConnInterface) CsatClient {
 	return &csatClient{cc}
 }
 
-func (c *csatClient) GetStatistics(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error) {
+func (c *csatClient) GetStatisticsByPage(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error) {
 	out := new(GetStatisticsResponse)
-	err := c.cc.Invoke(ctx, Csat_GetStatistics_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Csat_GetStatisticsByPage_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *csatClient) AddStatistics(ctx context.Context, in *AddStatisticsRequest
 // All implementations must embed UnimplementedCsatServer
 // for forward compatibility
 type CsatServer interface {
-	GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error)
+	GetStatisticsByPage(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error)
 	GetQuestionsByPage(context.Context, *GetQuestionsByPageRequest) (*QuestionsResponse, error)
 	AddStatistics(context.Context, *AddStatisticsRequest) (*AddStatisticsResponse, error)
 }
@@ -81,8 +81,8 @@ type CsatServer interface {
 type UnimplementedCsatServer struct {
 }
 
-func (UnimplementedCsatServer) GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStatistics not implemented")
+func (UnimplementedCsatServer) GetStatisticsByPage(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStatisticsByPage not implemented")
 }
 func (UnimplementedCsatServer) GetQuestionsByPage(context.Context, *GetQuestionsByPageRequest) (*QuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuestionsByPage not implemented")
@@ -103,20 +103,20 @@ func RegisterCsatServer(s grpc.ServiceRegistrar, srv CsatServer) {
 	s.RegisterService(&Csat_ServiceDesc, srv)
 }
 
-func _Csat_GetStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Csat_GetStatisticsByPage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetStatisticsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CsatServer).GetStatistics(ctx, in)
+		return srv.(CsatServer).GetStatisticsByPage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Csat_GetStatistics_FullMethodName,
+		FullMethod: Csat_GetStatisticsByPage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CsatServer).GetStatistics(ctx, req.(*GetStatisticsRequest))
+		return srv.(CsatServer).GetStatisticsByPage(ctx, req.(*GetStatisticsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -165,8 +165,8 @@ var Csat_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CsatServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetStatistics",
-			Handler:    _Csat_GetStatistics_Handler,
+			MethodName: "GetStatisticsByPage",
+			Handler:    _Csat_GetStatisticsByPage_Handler,
 		},
 		{
 			MethodName: "GetQuestionsByPage",

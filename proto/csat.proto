@@ -5,21 +5,39 @@ package session;
 option go_package = "./session";
 
 service Csat {
-    rpc GetStatistics(GetStatisticsRequest) returns (GetStatisticsResponse) {}
+    rpc GetStatisticsByPage(GetStatisticsRequest) returns (GetStatisticsResponse) {}
     rpc GetQuestionsByPage(GetQuestionsByPageRequest) returns (QuestionsResponse) {}
     rpc AddStatistics(AddStatisticsRequest) returns (AddStatisticsResponse) {}
 }
 
-message Question {
+message Variant {
+    uint32 id = 1;
+    string title = 2;
+}
+
+message AdditionalQuestion {
+    string uuid = 1;
+    string title = 2;
+    repeated Variant checkVars = 3;
+}
+
+message CheckQuestionStatistics {
     string title = 1;
-    string tag = 2;
-    uint32 score = 3;
+    int32 count = 2;
+}
+
+message Question {
+    string uuid = 1;
+    string title = 2;
+    AdditionalQuestion additionalQuestion = 3;
 }
 
 message Statistics {
     string title = 1;
-    uint32 scoresCount = 2;
-    float average = 3;
+    bool isAdditional = 2;
+    uint32 scoresCount = 3;
+    float averageScore = 4;
+    repeated CheckQuestionStatistics checkStatistics = 5;
 }
 
 message GetStatisticsRequest {
@@ -38,8 +56,15 @@ message QuestionsResponse {
     repeated Question questions = 1;
 }
 
-message AddStatisticsRequest {
+message NewStatistics {
+    string uuid = 1;
+    bool isAdditional = 2;
+    int32 score = 3;
+}
 
+message AddStatisticsRequest {
+    string page = 1;
+    repeated NewStatistics newStatistics = 2;
 }
 
 message AddStatisticsResponse {}
