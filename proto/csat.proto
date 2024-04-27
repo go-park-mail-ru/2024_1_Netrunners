@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package session;
+
+option go_package = "./session";
+
+service Csat {
+    rpc GetStatistics(GetStatisticsRequest) returns (GetStatisticsResponse) {}
+    rpc GetQuestionsByPage(GetQuestionsByPageRequest) returns (QuestionsResponse) {}
+    rpc AddStatistics(AddStatisticsRequest) returns (AddStatisticsResponse) {}
+}
+
+message Question {
+    string title = 1;
+    string tag = 2;
+    uint32 score = 3;
+}
+
+message Statistics {
+    string title = 1;
+    uint32 scoresCount = 2;
+    float average = 3;
+}
+
+message GetStatisticsRequest {
+    string page = 1;
+}
+
+message GetStatisticsResponse {
+    repeated Statistics statistics = 1;
+}
+
+message GetQuestionsByPageRequest {
+    string page = 1;
+}
+
+message QuestionsResponse {
+    repeated Question questions = 1;
+}
+
+message AddStatisticsRequest {
+
+}
+
+message AddStatisticsResponse {}
