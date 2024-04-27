@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -44,6 +45,15 @@ func NewCsatHandlers(csatClient *session.CsatClient, logger *zap.SugaredLogger) 
 func (csatHandlers *CsatHandlers) GetPageQuestions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
+
+	_, ok := r.URL.Query()["p"]
+	if !ok {
+		err := WriteError(w, errors.New("failed to get page from query"))
+		if err != nil {
+			csatHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
 
 	questions, err := (*csatHandlers.csatClient).GetQuestionsByPage(ctx, convertGetPageQuestionsToProto(r))
 	if err != nil {
@@ -152,6 +162,15 @@ func (csatHandlers *CsatHandlers) AddStatistics(w http.ResponseWriter, r *http.R
 func (csatHandlers *CsatHandlers) GetStatisticsByPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
+
+	_, ok := r.URL.Query()["p"]
+	if !ok {
+		err := WriteError(w, errors.New("failed to get page from query"))
+		if err != nil {
+			csatHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
 
 	statistics, err := (*csatHandlers.csatClient).GetStatisticsByPage(ctx, convertGetStatisticsByPageToProto(r))
 	if err != nil {

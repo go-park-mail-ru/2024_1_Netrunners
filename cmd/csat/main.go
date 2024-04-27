@@ -27,7 +27,7 @@ func main() {
 		serverIP     string
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
-	flag.IntVar(&backEndPort, "b-port", 8050, "back-end server port")
+	flag.IntVar(&backEndPort, "b-port", 8040, "back-end server port")
 	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
@@ -61,7 +61,7 @@ func main() {
 	srv := api.NewCsatServer(csatService, sugarLogger)
 	session.RegisterCsatServer(s, srv)
 
-	listener, err := net.Listen("tcp", ":8050")
+	listener, err := net.Listen("tcp", ":8040")
 	if err != nil {
 		log.Fatal(err)
 	}
