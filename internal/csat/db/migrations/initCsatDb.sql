@@ -38,14 +38,6 @@ CREATE TABLE IF NOT EXISTS film_data_question
 	question    TEXT                                  NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS film_data_additional_question
-(
-	id                   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	id_inside_question   INTEGER NOT NULL,
-	QUESTION_EXTERNAL_ID UUID    NOT NULL,
-	question             TEXT    NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS film_data_stat
 (
 	id                   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -60,14 +52,6 @@ CREATE TABLE IF NOT EXISTS actor_question
 	id          INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	external_id UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
 	question    TEXT                                  NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS actor_additional_question
-(
-	id                   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	id_inside_question   INTEGER NOT NULL,
-	QUESTION_EXTERNAL_ID UUID    NOT NULL,
-	question             TEXT    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS actor_stat
@@ -86,19 +70,10 @@ CREATE TABLE IF NOT EXISTS film_question
 	question    TEXT                                  NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS film_additional_question
-(
-	id                   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	id_inside_question   INTEGER NOT NULL,
-	QUESTION_EXTERNAL_ID UUID    NOT NULL,
-	question             TEXT    NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS film_stat
 (
 	id                   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	question_external_id UUID    NOT NULL,
 	score                INTEGER NOT NULL,
 	is_additional_score  BOOL DEFAULT FALSE
-
 );
