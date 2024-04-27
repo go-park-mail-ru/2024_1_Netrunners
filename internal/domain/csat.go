@@ -6,30 +6,39 @@ type CheckQuestionStatistics struct {
 }
 
 type QuestionStatistics struct {
-	Type          string // decimal / check
 	Title         string
+	IsAdditional  bool
 	ScoresCount   uint32
 	AverageScore  float32
 	CheckVariants []CheckQuestionStatistics
 }
 
-type Question struct {
+type Variant struct {
+	Id    uint32
+	Title string
+}
+
+type AdditionalQuestion struct {
 	Uuid      string
 	Title     string
-	Type      string // decimal / check
-	CheckVars []string
+	CheckVars []Variant
+}
+
+type Question struct {
+	Uuid               string
+	Title              string
+	AdditionalQuestion AdditionalQuestion
 }
 
 type AddQuestionStatistics struct {
 	Uuid         string
-	Type         string // decimal / check
+	IsAdditional bool
 	Score        int32
-	CheckVariant int32
+	// CheckVariant int32
 }
 
 type AddQuestion struct {
 	Page          string
 	Title         string
-	Type          string // decimal / check
 	CheckVariants []string
 }
