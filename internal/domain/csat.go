@@ -1,44 +1,44 @@
 package domain
 
 type CheckQuestionStatistics struct {
-	Title string
-	Count int32
+	Title string `json:"title"`
+	Count int32  `json:"count"`
 }
 
 type QuestionStatistics struct {
-	Title         string
-	IsAdditional  bool
-	ScoresCount   uint32
-	AverageScore  float32
-	CheckVariants []CheckQuestionStatistics
+	Title         string                    `json:"title"`
+	IsAdditional  bool                      `json:"isAdditional"`
+	ScoresCount   uint32                    `json:"scoresCount"`
+	AverageScore  float32                   `json:"averageScore"`
+	CheckVariants []CheckQuestionStatistics `json:"checkVariants"`
 }
 
 type Variant struct {
-	Id    uint32
-	Title string
+	Id    uint32 `json:"id"`
+	Title string `json:"title"`
 }
 
 type AdditionalQuestion struct {
-	Uuid      string
-	Title     string
-	CheckVars []Variant
+	Uuid      string    `json:"uuid"`
+	Title     string    `json:"title"`
+	CheckVars []Variant `json:"checkVars"`
 }
 
 type Question struct {
-	Uuid               string
-	Title              string
-	AdditionalQuestion AdditionalQuestion
+	Uuid               string             `json:"uuid"`
+	Title              string             `json:"title"`
+	AdditionalQuestion AdditionalQuestion `json:"additionalQuestion"`
 }
 
 type AddQuestionStatistics struct {
-	Uuid         string
-	IsAdditional bool
-	Score        int32
+	Uuid         string `json:"uuid"`
+	IsAdditional bool   `json:"title"`
+	Score        int32  `json:"score"`
 	// CheckVariant int32
 }
 
 type AddQuestion struct {
-	Page          string
-	Title         string
-	CheckVariants []string
+	Page          string   `json:"page"`
+	Title         string   `json:"title"`
+	CheckVariants []string `json:"checkVariants"`
 }
