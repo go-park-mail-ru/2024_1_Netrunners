@@ -27,40 +27,40 @@ func NewCsatService(storage CsatStorage, logger *zap.SugaredLogger) *CsatService
 	}
 }
 
-func (csatservice *CsatService) AddQuestion(ctx context.Context, question domain.AddQuestion) error {
-	err := csatservice.storage.AddQuestion(question)
+func (csatService *CsatService) AddQuestion(ctx context.Context, question domain.AddQuestion) error {
+	err := csatService.storage.AddQuestion(question)
 	if err != nil {
-		csatservice.logger.Errorf("[reqid=%s] failed to add question: %w", ctx.Value(requestId.ReqIDKey), err)
+		csatService.logger.Errorf("[reqid=%s] failed to add question: %w", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 
 	return nil
 }
 
-func (csatservice *CsatService) GetPageQuestions(ctx context.Context, page string) ([]domain.Question, error) {
-	questions, err := csatservice.storage.GetPageQuestions(page)
+func (csatService *CsatService) GetPageQuestions(ctx context.Context, page string) ([]domain.Question, error) {
+	questions, err := csatService.storage.GetPageQuestions(page)
 	if err != nil {
-		csatservice.logger.Errorf("[reqid=%s] failed to get page questions: %w", ctx.Value(requestId.ReqIDKey), err)
+		csatService.logger.Errorf("[reqid=%s] failed to get page questions: %w", ctx.Value(requestId.ReqIDKey), err)
 		return []domain.Question{}, err
 	}
 
 	return questions, nil
 }
 
-func (csatservice *CsatService) AddStatistics(ctx context.Context, statistics []domain.AddQuestionStatistics) error {
-	err := csatservice.storage.AddStatistics(statistics)
+func (csatService *CsatService) AddStatistics(ctx context.Context, statistics []domain.AddQuestionStatistics) error {
+	err := csatService.storage.AddStatistics(statistics)
 	if err != nil {
-		csatservice.logger.Errorf("[reqid=%s] failed to add statistics: %w", ctx.Value(requestId.ReqIDKey), err)
+		csatService.logger.Errorf("[reqid=%s] failed to add statistics: %w", ctx.Value(requestId.ReqIDKey), err)
 		return err
 	}
 
 	return nil
 }
 
-func (csatservice *CsatService) GetStatisticsByPage(ctx context.Context, page string) ([]domain.QuestionStatistics, error) {
-	questions, err := csatservice.storage.GetStatisticsByPage(page)
+func (csatService *CsatService) GetStatisticsByPage(ctx context.Context, page string) ([]domain.QuestionStatistics, error) {
+	questions, err := csatService.storage.GetStatisticsByPage(page)
 	if err != nil {
-		csatservice.logger.Errorf("[reqid=%s] failed to get statistics by page: %w", ctx.Value(requestId.ReqIDKey), err)
+		csatService.logger.Errorf("[reqid=%s] failed to get statistics by page: %w", ctx.Value(requestId.ReqIDKey), err)
 		return []domain.QuestionStatistics{}, err
 	}
 
