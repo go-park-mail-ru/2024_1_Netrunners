@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/mocks"
 )
 
 func TestUsersStorage_CreateUser(t *testing.T) {
@@ -19,7 +19,7 @@ func TestUsersStorage_CreateUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := database.NewMockUserSignUp()
+	newUser := mocks.NewMockUserSignUp()
 
 	mock.ExpectExec("INSERT").
 		WithArgs(newUser.Email, newUser.Name, newUser.Password).
@@ -39,7 +39,7 @@ func TestUsersStorage_GetUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
@@ -85,7 +85,7 @@ func TestUsersStorage_HasUser(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	email := "cakethefake@gmail.com"
 	password := "123456789"
 
@@ -117,7 +117,7 @@ func TestUsersStorage_ChangeUserPassword(t *testing.T) {
 		WithArgs(password, email).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "name", "avatar", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
@@ -140,7 +140,7 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 
 	storage, err := NewUsersStorage(mock)
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
@@ -172,7 +172,7 @@ func TestUsersStorage_ChangeUserPasswordByUuid(t *testing.T) {
 		WithArgs(password, uuid).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
@@ -202,7 +202,7 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 		WithArgs(newUsername, email).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
@@ -232,7 +232,7 @@ func TestUsersStorage_ChangeUserNameByUuid(t *testing.T) {
 		WithArgs(password, uuid).
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
-	newUser := database.NewMockUser()
+	newUser := mocks.NewMockUser()
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,

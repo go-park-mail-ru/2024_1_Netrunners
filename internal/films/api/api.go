@@ -157,7 +157,8 @@ func (server *FilmsServer) GetActorDataByUuid(ctx context.Context,
 	}, nil
 }
 
-func (server *FilmsServer) PutFavorite(ctx context.Context, req *session.PutFavoriteRequest) (res *session.PutFavoriteResponse, err error) {
+func (server *FilmsServer) PutFavorite(ctx context.Context,
+	req *session.PutFavoriteRequest) (res *session.PutFavoriteResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	err = server.filmsService.PutFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
 	if err != nil {
@@ -168,7 +169,8 @@ func (server *FilmsServer) PutFavorite(ctx context.Context, req *session.PutFavo
 	return &session.PutFavoriteResponse{}, nil
 }
 
-func (server *FilmsServer) DeleteFavorite(ctx context.Context, req *session.DeleteFavoriteRequest) (res *session.DeleteFavoriteResponse, err error) {
+func (server *FilmsServer) DeleteFavorite(ctx context.Context,
+	req *session.DeleteFavoriteRequest) (res *session.DeleteFavoriteResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	err = server.filmsService.RemoveFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
 	if err != nil {
@@ -179,7 +181,8 @@ func (server *FilmsServer) DeleteFavorite(ctx context.Context, req *session.Dele
 	return &session.DeleteFavoriteResponse{}, nil
 }
 
-func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context, req *session.GetAllFavoriteFilmsRequest) (res *session.GetAllFavoriteFilmsResponse, err error) {
+func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context,
+	req *session.GetAllFavoriteFilmsRequest) (res *session.GetAllFavoriteFilmsResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
 	films, err := server.filmsService.GetAllFavoriteFilms(ctx, req.UserUuid)
 	if err != nil {
