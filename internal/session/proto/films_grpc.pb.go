@@ -142,7 +142,6 @@ type FilmsServer interface {
 	PutFavorite(context.Context, *PutFavoriteRequest) (*PutFavoriteResponse, error)
 	DeleteFavorite(context.Context, *DeleteFavoriteRequest) (*DeleteFavoriteResponse, error)
 	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
-	mustEmbedUnimplementedFilmsServer()
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.

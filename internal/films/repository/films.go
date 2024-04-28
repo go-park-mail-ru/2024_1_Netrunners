@@ -137,30 +137,35 @@ const getActorsByFilm = `
 		WHERE faf.external_id = $1;`
 
 const putFavoriteFilm = `
-		INSERT INTO favorite_film (film_id, user_id) VALUES ($1, $2);`
+		INSERT INTO favorite_film (film_external_id, user_external_id) VALUES ($1, $2);`
 
 const removeFavoriteFilm = `
 		DELETE FROM favorite_film
-		WHERE film_id = $1 AND user_id = $2;`
+		WHERE film_external_id = $1 AND user_external_id = $2;`
 
-const getUserIdByUuid = `
-		SELECT id
+const getAmountOfUserByUuid = `
+		SELECT COUNT(id)
 		FROM users
 		WHERE users.external_id = $1;`
 
-const getFilmIdByUuid = `
-		SELECT id
+const getAmountOfFilmByUuid = `
+		SELECT COUNT(id)
 		FROM film
 		WHERE film.external_id = $1;`
 
 const getAllFavoriteFilms = `
 		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id)
 		FROM film f
-		INNER JOIN favorite_film fav ON f.id = fav.film_id
+		INNER JOIN favorite_film fav ON f.external_id = fav.film_external_id
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
-		WHERE fav.user_id = $1
+		WHERE fav.user_external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration;`
+
+const getOneFavoriteByUuids = `
+		SELECT film_external_id, user_external_id 
+		FROM favorite_film 
+		WHERE film_external_id = $1 AND user_external_id = $2;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
@@ -520,47 +525,59 @@ func (storage *FilmsStorage) GetActorByUuid(actorUuid string) (domain.ActorData,
 
 func (storage *FilmsStorage) PutFavoriteFilm(filmUuid string, userUuid string) error {
 	var (
-		filmId int
-		userId int
+		amountOfUsers   int
+		amountOfFilms   int
+		filmUuidExisted string
+		userUuidExisted string
 	)
-	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, userUuid).Scan(&userId)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, userUuid)
-	} else if err != nil {
-		return err
-	}
-
-	err = storage.pool.QueryRow(context.Background(), getFilmIdByUuid, filmUuid).Scan(&filmId)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, filmUuid)
-	} else if err != nil {
-		return err
-	}
-
-	_, err = storage.pool.Exec(context.Background(), putFavoriteFilm, filmId, userId)
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, userUuid).Scan(&amountOfUsers)
 	if err != nil {
 		return err
 	}
-	return nil
+	if amountOfUsers == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getAmountOfFilmByUuid, filmUuid).Scan(&amountOfFilms)
+	if err != nil {
+		return err
+	}
+	if amountOfFilms == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getOneFavoriteByUuids, filmUuid, userUuid).Scan(&filmUuidExisted,
+		&userUuidExisted)
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, err = storage.pool.Exec(context.Background(), putFavoriteFilm, filmUuid, userUuid)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("%w", myerrors.ErrFavoriteAlreadyExists)
+
 }
 
 func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string) error {
 	var (
-		filmId int
-		userId int
+		amountOfUsers int
+		amountOfFilms int
 	)
-	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, userUuid).Scan(&userId)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, userUuid)
-	} else if err != nil {
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, userUuid).Scan(&amountOfUsers)
+	if err != nil {
 		return err
 	}
+	if amountOfUsers == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
 
-	err = storage.pool.QueryRow(context.Background(), getFilmIdByUuid, filmUuid).Scan(&filmId)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w, %s", myerrors.ErrNotFound, filmUuid)
-	} else if err != nil {
+	err = storage.pool.QueryRow(context.Background(), getAmountOfFilmByUuid, filmUuid).Scan(&amountOfFilms)
+	if err != nil {
 		return err
+	}
+	if amountOfFilms == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
 	}
 
 	_, err = storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
@@ -570,18 +587,21 @@ func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string
 	return nil
 }
 
-func (storage *FilmsStorage) GetAllFavoriteFilms(uuid string) ([]domain.FilmPreview, error) {
-	var userId int
-	err := storage.pool.QueryRow(context.Background(), getUserIdByUuid, uuid).Scan(&userId)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
-	} else if err != nil {
+func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error) {
+	var (
+		amountOfUsers int
+	)
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, userUuid).Scan(&amountOfUsers)
+	if err != nil {
 		return nil, err
 	}
+	if amountOfUsers == 0 {
+		return nil, fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
 
-	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, userId)
+	rows, err := storage.pool.Query(context.Background(), getAllFavoriteFilms, userUuid)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, uuid)
+		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, userUuid)
 	} else if err != nil {
 		return nil, err
 	}

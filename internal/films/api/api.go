@@ -161,8 +161,8 @@ func (server *FilmsServer) PutFavorite(ctx context.Context, req *session.PutFavo
 	requestId := ctx.Value(reqid.ReqIDKey)
 	err = server.filmsService.PutFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
 	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
+		server.logger.Errorf("[reqid=%s] failed to put favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to put favorite: %v\n", requestId, err)
 	}
 
 	return &session.PutFavoriteResponse{}, nil
@@ -172,8 +172,8 @@ func (server *FilmsServer) DeleteFavorite(ctx context.Context, req *session.Dele
 	requestId := ctx.Value(reqid.ReqIDKey)
 	err = server.filmsService.RemoveFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
 	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
+		server.logger.Errorf("[reqid=%s] failed to remove favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to remove favorite: %v\n", requestId, err)
 	}
 
 	return &session.DeleteFavoriteResponse{}, nil
@@ -183,8 +183,8 @@ func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context, req *session
 	requestId := ctx.Value(reqid.ReqIDKey)
 	films, err := server.filmsService.GetAllFavoriteFilms(ctx, req.UserUuid)
 	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to get actor data: %v\n", requestId, err)
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
 	}
 
 	var filmsConverted []*session.FilmPreview

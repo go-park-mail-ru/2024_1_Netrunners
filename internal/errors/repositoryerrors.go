@@ -25,5 +25,6 @@ var (
 	ErrFailedToBeginTransaction  = errors.New("failed to begin transaction")
 	ErrFailedToCommitTransaction = errors.New("failed to commit transaction")
 
-	ErrNotFound = errors.New("no rows for given uuid")
+	ErrNotFound              = errors.New("no rows for given uuid")
+	ErrFavoriteAlreadyExists = errors.New("favorite already exists")
 )

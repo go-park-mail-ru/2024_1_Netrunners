@@ -301,7 +301,8 @@ func (filmsPageHandlers *FilmsPageHandlers) PutFavoriteFilm(w http.ResponseWrite
 		return
 	}
 
-	err = filmsPageHandlers.filmsService.PutFavoriteFilm(ctx, data.FilmUuid, data.UserUuid)
+	req := session.PutFavoriteRequest{FilmUuid: data.FilmUuid, UserUuid: data.UserUuid}
+	_, err = (*filmsPageHandlers.client).PutFavorite(ctx, &req)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to put favorite film: %v\n", requestId, err)
 		err := WriteError(w, err)
@@ -334,7 +335,8 @@ func (filmsPageHandlers *FilmsPageHandlers) RemoveFavoriteFilm(w http.ResponseWr
 		}
 	}
 
-	err = filmsPageHandlers.filmsService.RemoveFavoriteFilm(ctx, data.FilmUuid, data.UserUuid)
+	req := session.DeleteFavoriteRequest{FilmUuid: data.FilmUuid, UserUuid: data.UserUuid}
+	_, err = (*filmsPageHandlers.client).DeleteFavorite(ctx, &req)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to remove favorite film: %v\n", requestId, err)
 		err = WriteError(w, err)
@@ -356,7 +358,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 	requestId := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 
-	films, err := filmsPageHandlers.filmsService.GetAllFavoriteFilms(ctx, uuid)
+	req := session.GetAllFavoriteFilmsRequest{UserUuid: uuid}
+	films, err := (*filmsPageHandlers.client).GetAllFavoriteFilms(ctx, &req)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all favorite film: %v\n", requestId, err)
 		err = WriteError(w, err)
@@ -366,13 +369,16 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 		return
 	}
 
-	for _, film := range films {
-		escapeFilmPreview(&film)
+	var filmsConverted []domain.FilmPreview
+	for _, film := range films.Films {
+		filmConverted := convertFilmPreviewToRegular(film)
+		escapeFilmPreview(&filmConverted)
+		filmsConverted = append(filmsConverted, filmConverted)
 	}
 
 	response := filmsPreviewsResponse{
 		Status: http.StatusOK,
-		Films:  films,
+		Films:  filmsConverted,
 	}
 
 	jsonResponse, err := json.Marshal(response)
