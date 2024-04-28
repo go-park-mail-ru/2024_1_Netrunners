@@ -29,6 +29,8 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrFailedDecode),
 		errors.Is(err, ErrNoSuchFilm):
 		status = 401
+	case errors.Is(err, ErrNotFound):
+		status = 404
 	case errors.Is(err, ErrInternalServerError),
 		errors.Is(err, ErrTooHighVersion),
 		errors.Is(err, ErrFailInForEachRow),

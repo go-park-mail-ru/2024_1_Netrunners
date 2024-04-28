@@ -25,6 +25,9 @@ type FilmsClient interface {
 	RemoveFilmByUuid(ctx context.Context, in *RemoveFilmByUuidRequest, opts ...grpc.CallOption) (*RemoveFilmByUuidResponse, error)
 	GetActorDataByUuid(ctx context.Context, in *ActorDataByUuidRequest, opts ...grpc.CallOption) (*ActorDataByUuidResponse, error)
 	GetActorsByFilm(ctx context.Context, in *ActorsByFilmRequest, opts ...grpc.CallOption) (*ActorsByFilmResponse, error)
+	PutFavorite(ctx context.Context, in *PutFavoriteRequest, opts ...grpc.CallOption) (*PutFavoriteResponse, error)
+	DeleteFavorite(ctx context.Context, in *DeleteFavoriteRequest, opts ...grpc.CallOption) (*DeleteFavoriteResponse, error)
+	GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error)
 }
 
 type filmsClient struct {
@@ -98,6 +101,33 @@ func (c *filmsClient) GetActorsByFilm(ctx context.Context, in *ActorsByFilmReque
 	return out, nil
 }
 
+func (c *filmsClient) PutFavorite(ctx context.Context, in *PutFavoriteRequest, opts ...grpc.CallOption) (*PutFavoriteResponse, error) {
+	out := new(PutFavoriteResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/PutFavorite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) DeleteFavorite(ctx context.Context, in *DeleteFavoriteRequest, opts ...grpc.CallOption) (*DeleteFavoriteResponse, error) {
+	out := new(DeleteFavoriteResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/DeleteFavorite", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error) {
+	out := new(GetAllFavoriteFilmsResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/GetAllFavoriteFilms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -109,6 +139,10 @@ type FilmsServer interface {
 	RemoveFilmByUuid(context.Context, *RemoveFilmByUuidRequest) (*RemoveFilmByUuidResponse, error)
 	GetActorDataByUuid(context.Context, *ActorDataByUuidRequest) (*ActorDataByUuidResponse, error)
 	GetActorsByFilm(context.Context, *ActorsByFilmRequest) (*ActorsByFilmResponse, error)
+	PutFavorite(context.Context, *PutFavoriteRequest) (*PutFavoriteResponse, error)
+	DeleteFavorite(context.Context, *DeleteFavoriteRequest) (*DeleteFavoriteResponse, error)
+	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
+	mustEmbedUnimplementedFilmsServer()
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -135,6 +169,15 @@ func (UnimplementedFilmsServer) GetActorDataByUuid(context.Context, *ActorDataBy
 }
 func (UnimplementedFilmsServer) GetActorsByFilm(context.Context, *ActorsByFilmRequest) (*ActorsByFilmResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetActorsByFilm not implemented")
+}
+func (UnimplementedFilmsServer) PutFavorite(context.Context, *PutFavoriteRequest) (*PutFavoriteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutFavorite not implemented")
+}
+func (UnimplementedFilmsServer) DeleteFavorite(context.Context, *DeleteFavoriteRequest) (*DeleteFavoriteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFavorite not implemented")
+}
+func (UnimplementedFilmsServer) GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllFavoriteFilms not implemented")
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -275,6 +318,60 @@ func _Films_GetActorsByFilm_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_PutFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutFavoriteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).PutFavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/PutFavorite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).PutFavorite(ctx, req.(*PutFavoriteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_DeleteFavorite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFavoriteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).DeleteFavorite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/DeleteFavorite",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).DeleteFavorite(ctx, req.(*DeleteFavoriteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_GetAllFavoriteFilms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllFavoriteFilmsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).GetAllFavoriteFilms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/GetAllFavoriteFilms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).GetAllFavoriteFilms(ctx, req.(*GetAllFavoriteFilmsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Films_ServiceDesc is the grpc.ServiceDesc for Films service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -309,6 +406,18 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetActorsByFilm",
 			Handler:    _Films_GetActorsByFilm_Handler,
+		},
+		{
+			MethodName: "PutFavorite",
+			Handler:    _Films_PutFavorite_Handler,
+		},
+		{
+			MethodName: "DeleteFavorite",
+			Handler:    _Films_DeleteFavorite_Handler,
+		},
+		{
+			MethodName: "GetAllFavoriteFilms",
+			Handler:    _Films_GetAllFavoriteFilms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

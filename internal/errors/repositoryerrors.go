@@ -24,4 +24,6 @@ var (
 	ErrFailInForEachRow          = errors.New("unexpected error at ForEachRow")
 	ErrFailedToBeginTransaction  = errors.New("failed to begin transaction")
 	ErrFailedToCommitTransaction = errors.New("failed to commit transaction")
+
+	ErrNotFound = errors.New("no rows for given uuid")
 )

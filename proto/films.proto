@@ -14,6 +14,9 @@ service Films {
   rpc RemoveFilmByUuid(RemoveFilmByUuidRequest) returns (RemoveFilmByUuidResponse) {}
   rpc GetActorDataByUuid(ActorDataByUuidRequest) returns (ActorDataByUuidResponse) {}
   rpc GetActorsByFilm(ActorsByFilmRequest) returns (ActorsByFilmResponse) {}
+  rpc PutFavorite(PutFavoriteRequest) returns (PutFavoriteResponse) {}
+  rpc DeleteFavorite(DeleteFavoriteRequest) returns (DeleteFavoriteResponse) {}
+  rpc GetAllFavoriteFilms(GetAllFavoriteFilmsRequest) returns (GetAllFavoriteFilmsResponse) {}
 }
 
 message FilmPreview {
@@ -129,4 +132,26 @@ message ActorsByFilmRequest {
 
 message ActorsByFilmResponse {
   repeated ActorPreview actors = 1;
+}
+
+message PutFavoriteRequest {
+  string film_uuid = 1;
+  string user_uuid = 2;
+}
+
+message PutFavoriteResponse {}
+
+message DeleteFavoriteRequest {
+  string film_uuid = 1;
+  string user_uuid = 2;
+}
+
+message DeleteFavoriteResponse {}
+
+message GetAllFavoriteFilmsRequest {
+  string user_uuid = 1;
+}
+
+message GetAllFavoriteFilmsResponse {
+  repeated FilmPreview films = 1;
 }
