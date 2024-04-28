@@ -111,7 +111,6 @@ func TestUsersServer_ChangeUserPassword(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	// Add assertions for response fields if needed...
 }
 
 func TestUsersServer_ChangeUserName(t *testing.T) {
@@ -177,7 +176,6 @@ func TestUsersServer_GetUserPreview(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	// Add assertions for response fields if needed...
 }
 
 func TestUsersServer_ChangeUserPasswordByUuid(t *testing.T) {
@@ -191,7 +189,6 @@ func TestUsersServer_ChangeUserPasswordByUuid(t *testing.T) {
 	mockUser := domain.User{
 		Email:    "test@example.com",
 		Password: "password",
-		// Add other fields as needed...
 	}
 
 	mockUsersService.EXPECT().ChangeUserPasswordByUuid(gomock.Any(), "uuid", "newPassword").Return(mockUser, nil)
@@ -201,7 +198,6 @@ func TestUsersServer_ChangeUserPasswordByUuid(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	// Add assertions for response fields if needed...
 }
 
 func TestUsersServer_ChangeUserNameByUuid(t *testing.T) {
@@ -224,7 +220,6 @@ func TestUsersServer_ChangeUserNameByUuid(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	// Add assertions for response fields if needed...
 }
 
 func TestUsersServer_ChangeUserAvatarByUuid(t *testing.T) {

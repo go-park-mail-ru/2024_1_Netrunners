@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
@@ -32,7 +33,7 @@ func main() {
 
 	flag.Parse()
 
-	err := initUploads()
+	err := helper.InitUploads()
 	if err != nil {
 		log.Fatal(err)
 	}

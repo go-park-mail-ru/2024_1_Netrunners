@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/repository"
@@ -32,7 +33,7 @@ func main() {
 
 	flag.Parse()
 
-	err := initUploads()
+	err := helper.InitUploads()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,43 +93,4 @@ func main() {
 	<-stopped
 
 	fmt.Println("Server stopped")
-}
-
-func initUploads() error {
-	storagePath := "./uploads/"
-	_, err := os.Stat(storagePath)
-	if err != nil {
-		err = os.Mkdir(storagePath, 0755)
-		if err != nil {
-			return err
-		}
-		err = os.Mkdir(storagePath+"users/", 0755)
-		if err != nil {
-			return err
-		}
-		err = os.Mkdir(storagePath+"films/", 0755)
-		if err != nil {
-			return err
-		}
-	} else {
-		storagePath = "./uploads/users/"
-		_, err = os.Stat(storagePath)
-		if err != nil {
-			err = os.Mkdir(storagePath, 0755)
-			if err != nil {
-				return err
-			}
-		}
-
-		storagePath := "./uploads/films/"
-		_, err = os.Stat(storagePath)
-		if err != nil {
-			err = os.Mkdir(storagePath, 0755)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
