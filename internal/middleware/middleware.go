@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"fmt"
-	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 	"net/http"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+<<<<<<< HEAD
 )
 
 type Middleware struct {
@@ -23,12 +23,20 @@ type Middleware struct {
 func NewMiddleware(logger *zap.SugaredLogger, serverIP string) *Middleware {
 =======
 	authService    *service2.AuthService
+=======
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
+	service2 "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
+)
+
+type Middleware struct {
+	authService    *service2.UsersService
+>>>>>>> a871897 (users done, waits for sessions)
 	sessionService *service.SessionService
 	logger         *zap.SugaredLogger
 	serverIP       string
 }
 
-func NewMiddleware(authService *service2.AuthService,
+func NewMiddleware(authService *service2.UsersService,
 	sessionService *service.SessionService, logger *zap.SugaredLogger, serverIP string) *Middleware {
 >>>>>>> 6fcd4c8 (everything wrong)
 	return &Middleware{

@@ -13,19 +13,19 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 type UserPageHandlers struct {
-	usersService   service.UsersService
+	client         *session.UsersClient
 	sessionService SessionService
 	logger         *zap.SugaredLogger
 }
 
-func NewUserPageHandlers(usersService service.UsersService, sessionService SessionService,
+func NewUserPageHandlers(client *session.UsersClient, sessionService SessionService,
 	logger *zap.SugaredLogger) *UserPageHandlers {
 	return &UserPageHandlers{
-		usersService:   usersService,
+		client:         client,
 		sessionService: sessionService,
 		logger:         logger,
 	}
@@ -41,7 +41,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	requestId := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 	req := session.GetUserDataByUuidRequest{Uuid: uuid}
-	userProto, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &req)
+	userProto, err := (*UserPageHandlers.client).GetUserDataByUuid(ctx, &req)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -87,8 +87,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	requestId := ctx.Value(reqid.ReqIDKey)
 
 	uuid := mux.Vars(r)["uuid"]
-	req := session.GetUserPreviewRequest{Uuid: uuid}
-	userPreviewProto, err := (*UserPageHandlers.usersClient).GetUserPreview(ctx, &req)
+	userPreviewProto, err := (*UserPageHandlers.client).GetUserPreview(ctx, &req)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -99,7 +98,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	userPreview := convertUserPreviewToRegular(userPreviewProto.User)
 
 	reqData := session.GetUserDataByUuidRequest{Uuid: uuid}
-	userProto, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &reqData)
+	userProto, err := (*UserPageHandlers.client).GetUserDataByUuid(ctx, &reqData)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -168,7 +167,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	uuid := mux.Vars(r)["uuid"]
 	req := session.GetUserDataByUuidRequest{Uuid: uuid}
-	getUserByDataRes, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &req)
+	getUserByDataRes, err := (*UserPageHandlers.client).GetUserDataByUuid(ctx, &req)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -191,7 +190,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 
 		reqPass := session.ChangeUserPasswordByUuidRequest{Uuid: uuid, NewPassword: newData}
-		changePassRes, err := (*UserPageHandlers.usersClient).ChangeUserPasswordByUuid(ctx, &reqPass)
+		changePassRes, err := (*UserPageHandlers.client).ChangeUserPasswordByUuid(ctx, &reqPass)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {
@@ -212,7 +211,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		}
 
 		reqName := session.ChangeUserNameByUuidRequest{Uuid: uuid, NewUsername: newData}
-		changeNameRes, err := (*UserPageHandlers.usersClient).ChangeUserNameByUuid(ctx, &reqName)
+		changeNameRes, err := (*UserPageHandlers.client).ChangeUserNameByUuid(ctx, &reqName)
 		if err != nil {
 			err = WriteError(w, err)
 			if err != nil {

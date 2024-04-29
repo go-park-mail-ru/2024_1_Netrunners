@@ -51,7 +51,6 @@ func main() {
 	}
 
 	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
-	authService := service.NewService(authStorage, sugarLogger)
 
 >>>>>>> a2b550a (done)
 	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
