@@ -662,7 +662,8 @@ func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.Film
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating, &FilmAgeLimit)
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating,
+			&FilmAgeLimit)
 		if err != nil {
 			return nil, err
 		}
@@ -703,7 +704,8 @@ func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.Film
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating, &FilmAgeLimit)
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating,
+			&FilmAgeLimit)
 		if err != nil {
 			return nil, err
 		}
@@ -757,7 +759,8 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 		)
 		for filmsRows.Next() {
 			var film domain.FilmPreview
-			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating, &FilmAgeLimit)
+			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
+				&FilmRating, &FilmAgeLimit)
 			if err != nil {
 				return nil, err
 			}
