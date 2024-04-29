@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"os"
 
@@ -386,22 +387,9 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	reqGen := session.GenerateTokenRequest{Login: tokenClaims["Login"].(string), IsAdmin: tokenClaims["IsAdmin"].(bool),
 		Version: uint32(tokenClaims["Version"].(float64))}
 	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
-=======
-	tokenSigned, err := authPageHandlers.authService.GenerateTokens(
-		tokenClaims["Login"].(string),
-		tokenClaims["IsAdmin"].(bool),
-		uint32(tokenClaims["Version"].(float64)))
->>>>>>> a871897 (users done, waits for sessions)
-=======
-	reqGen := session.GenerateTokenRequest{Login: tokenClaims["Login"].(string), IsAdmin: tokenClaims["IsAdmin"].(bool),
-		Version: uint32(tokenClaims["Version"].(float64))}
-	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
->>>>>>> d726255 (all microservices r done)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
