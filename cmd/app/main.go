@@ -124,7 +124,7 @@ func main() {
 	router.HandleFunc("/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
 	router.HandleFunc("/films/remove_favorite", filmsPageHandlers.RemoveFavoriteFilm).Methods("POST", "OPTIONS")
 	router.HandleFunc("/films/{uuid}/all_favorite", filmsPageHandlers.GetAllFavoriteFilms).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/genres/{genre}/all", filmsPageHandlers.GetAllFilmsByGenre).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/genres/{uuid}/all", filmsPageHandlers.GetAllFilmsByGenre).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/genres/preview", filmsPageHandlers.GetAllGenres).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")

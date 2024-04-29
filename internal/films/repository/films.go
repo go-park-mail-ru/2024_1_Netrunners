@@ -688,8 +688,8 @@ func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.Film
 		return nil, err
 	}
 
-	films := make([]domain.FilmPreview, 0)
 	var (
+		films        []domain.FilmPreview
 		FilmUuid     string
 		FilmPreview  string
 		FilmTitle    string
