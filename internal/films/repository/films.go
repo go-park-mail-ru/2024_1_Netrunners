@@ -556,7 +556,6 @@ func (storage *FilmsStorage) PutFavoriteFilm(filmUuid string, userUuid string) e
 		return nil
 	}
 	return fmt.Errorf("%w", myerrors.ErrFavoriteAlreadyExists)
-
 }
 
 func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string) error {
@@ -579,7 +578,6 @@ func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string
 	if amountOfFilms == 0 {
 		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
 	}
-
 	_, err = storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
 	if err != nil {
 		return err
