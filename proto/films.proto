@@ -19,6 +19,11 @@ service Films {
   rpc GetAllFavoriteFilms(GetAllFavoriteFilmsRequest) returns (GetAllFavoriteFilmsResponse) {}
   rpc GetAllFilmsByGenre(GetAllFilmsByGenreRequest) returns (GetAllFilmsByGenreResponse) {}
   rpc GetAllGenres(GetAllGenresRequest) returns (GetAllGenresResponse) {}
+  rpc FindFilmsShort(FindFilmsShortRequest) returns (FindFilmsShortResponse) {}
+  rpc FindFilmsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
+  rpc FindSerialsShort(FindFilmsShortRequest) returns (FindFilmsShortResponse) {}
+  rpc FindSerialsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
+  rpc FindActorsShort(FindActorsShortRequest) returns (FindActorsShortResponse) {}
 }
 
 message FilmPreview {
@@ -30,6 +35,7 @@ message FilmPreview {
   uint64 scores_count = 6;
   uint32 duration = 7;
   uint32 age_limit = 8;
+  bool is_serial = 9;
 }
 
 message FilmData {
@@ -177,4 +183,39 @@ message GenreFilms {
 
 message GetAllGenresResponse {
   repeated GenreFilms genres = 1;
+}
+  
+message FindFilmsShortRequest {
+  string key = 1;
+  uint32 page = 2;
+}
+
+message FindFilmsShortResponse {
+  repeated FilmPreview films = 1;
+}
+
+message FildFilmLong {
+  string uuid = 1;
+  bool is_serial = 2;
+  string preview = 3;
+  string title = 4;
+  string director = 5;
+  float avg_score = 6;
+  uint64 scores_count = 7;
+  uint32 duration = 8;
+  uint32 age_limit = 9;
+  google.protobuf.Timestamp date = 11;
+}
+
+message FindFilmsLongResponse {
+  repeated FildFilmLong films = 1;
+}
+
+message FindActorsShortRequest {
+  string key = 1;
+  uint32 page = 2;
+}
+
+message FindActorsShortResponse {
+  repeated ActorPreview actors = 1;
 }

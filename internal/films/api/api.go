@@ -25,8 +25,16 @@ type FilmsService interface {
 	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
 	RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
 	GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error)
+<<<<<<< HEAD
 	GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error)
 	GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error)
+=======
+	FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error)
+	FindFilmsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error)
+	FindSerialsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error)
+	FindSerialsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error)
+	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
+>>>>>>> 4f68b5a (feat: search - take 1)
 }
 
 type FilmsServer struct {
@@ -201,6 +209,7 @@ func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context,
 	}, nil
 }
 
+<<<<<<< HEAD
 func (server *FilmsServer) GetAllFilmsByGenre(ctx context.Context,
 	req *session.GetAllFilmsByGenreRequest) (res *session.GetAllFilmsByGenreResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -208,6 +217,14 @@ func (server *FilmsServer) GetAllFilmsByGenre(ctx context.Context,
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to get genre films: %v\n", requestId, err)
 		return nil, fmt.Errorf("[reqid=%s] failed to get genre films: %v\n", requestId, err)
+=======
+func (server *FilmsServer) FindFilmsShort(ctx context.Context, request *session.FindFilmsShortRequest) (*session.FindFilmsShortResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.FindFilmsShort(ctx, request.Key, int(request.Page))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+>>>>>>> 4f68b5a (feat: search - take 1)
 	}
 
 	var filmsConverted []*session.FilmPreview
@@ -215,11 +232,16 @@ func (server *FilmsServer) GetAllFilmsByGenre(ctx context.Context,
 		filmsConverted = append(filmsConverted, convertFilmPreviewToProto(&film))
 	}
 
+<<<<<<< HEAD
 	return &session.GetAllFilmsByGenreResponse{
+=======
+	return &session.FindFilmsShortResponse{
+>>>>>>> 4f68b5a (feat: search - take 1)
 		Films: filmsConverted,
 	}, nil
 }
 
+<<<<<<< HEAD
 func (server *FilmsServer) GetAllGenres(ctx context.Context,
 	req *session.GetAllGenresRequest) (res *session.GetAllGenresResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -236,6 +258,77 @@ func (server *FilmsServer) GetAllGenres(ctx context.Context,
 	}
 	return &session.GetAllGenresResponse{
 		Genres: genresConverted,
+=======
+func (server *FilmsServer) FindFilmsLong(ctx context.Context, request *session.FindFilmsShortRequest) (*session.FindFilmsLongResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.FindFilmsLong(ctx, request.Key, int(request.Page))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+	}
+
+	var filmsConverted []*session.FildFilmLong
+	for _, film := range films {
+		filmsConverted = append(filmsConverted, convertFindFilmLongToProto(&film))
+	}
+
+	return &session.FindFilmsLongResponse{
+		Films: filmsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) FindSerialsShort(ctx context.Context, request *session.FindFilmsShortRequest) (*session.FindFilmsShortResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	serials, err := server.filmsService.FindSerialsShort(ctx, request.Key, int(request.Page))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+	}
+
+	var serialsConverted []*session.FilmPreview
+	for _, serial := range serials {
+		serialsConverted = append(serialsConverted, convertFilmPreviewToProto(&serial))
+	}
+
+	return &session.FindFilmsShortResponse{
+		Films: serialsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) FindSerialsLong(ctx context.Context, request *session.FindFilmsShortRequest) (*session.FindFilmsLongResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	serials, err := server.filmsService.FindSerialsLong(ctx, request.Key, int(request.Page))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+	}
+
+	var serialsConverted []*session.FildFilmLong
+	for _, serial := range serials {
+		serialsConverted = append(serialsConverted, convertFindFilmLongToProto(&serial))
+	}
+
+	return &session.FindFilmsLongResponse{
+		Films: serialsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) FindActorsShort(ctx context.Context, request *session.FindActorsShortRequest) (*session.FindActorsShortResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	actors, err := server.filmsService.FindActorsShort(ctx, request.Key, int(request.Page))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+	}
+
+	var actorsConverted []*session.ActorPreview
+	for _, actor := range actors {
+		actorsConverted = append(actorsConverted, convertActorPreviewToProto(actor))
+	}
+
+	return &session.FindActorsShortResponse{
+		Actors: actorsConverted,
+>>>>>>> 4f68b5a (feat: search - take 1)
 	}, nil
 }
 
@@ -249,6 +342,7 @@ func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 		ScoresCount: film.ScoresCount,
 		Duration:    film.Duration,
 		AgeLimit:    film.AgeLimit,
+		IsSerial:    film.IsSerial,
 	}
 }
 
@@ -266,6 +360,21 @@ func convertFilmDataToProto(film *domain.FilmData) *session.FilmData {
 		Date:        convertTimeToProto(film.Date),
 		Data:        film.Data,
 		Genres:      film.Genres,
+	}
+}
+
+func convertFindFilmLongToProto(film *domain.FilmData) *session.FildFilmLong {
+	return &session.FildFilmLong{
+		Uuid:        film.Uuid,
+		Preview:     film.Preview,
+		Title:       film.Title,
+		Director:    film.Director,
+		AvgScore:    film.AverageScore,
+		ScoresCount: film.ScoresCount,
+		Duration:    film.Duration,
+		AgeLimit:    film.AgeLimit,
+		Date:        convertTimeToProto(film.Date),
+		IsSerial:    film.IsSerial,
 	}
 }
 

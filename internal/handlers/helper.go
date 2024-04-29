@@ -128,9 +128,25 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		AgeLimit:     film.AgeLimit,
+		IsSerial:     film.IsSerial,
 		Duration:     film.Duration,
 	}
 	return filmNew
+}
+
+func convertLongFilmPreviewToRegular(film *session.FildFilmLong) domain.FilmData {
+	return domain.FilmData{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		Date:         convertProtoToTime(film.Date),
+		AgeLimit:     film.AgeLimit,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
+		IsSerial:     film.IsSerial,
+		Duration:     film.Duration,
+	}
 }
 
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {

@@ -4,6 +4,7 @@ import "time"
 
 type FilmData struct {
 	Uuid         string    `json:"uuid"`
+	IsSerial     bool      `json:"isSerial"`
 	Preview      string    `json:"preview"`
 	Title        string    `json:"title"`
 	Link         string    `json:"link"`
@@ -15,6 +16,27 @@ type FilmData struct {
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
 	Genres       []string  `json:"genres"`
+}
+
+type Season struct {
+	Series []struct {
+		Link string `json:"link"`
+	} `json:"series"`
+}
+
+type SerialData struct {
+	Uuid         string    `json:"uuid"`
+	IsSerial     bool      `json:"isSerial"`
+	Preview      string    `json:"preview"`
+	Title        string    `json:"title"`
+	Seasons      []Season  `json:"seasons"`
+	Director     string    `json:"director"`
+	AverageScore float32   `json:"averageScore"`
+	ScoresCount  uint64    `json:"scoresCount"`
+	Duration     uint32    `json:"duration"`
+	Date         time.Time `json:"date"`
+	Data         string    `json:"data"`
+	AgeLimit     uint32    `json:"ageLimit"`
 }
 
 type FilmDataToAdd struct {
@@ -31,6 +53,7 @@ type FilmDataToAdd struct {
 
 type FilmPreview struct {
 	Uuid         string  `json:"uuid"`
+	IsSerial     bool    `json:"isSerial"`
 	Preview      string  `json:"preview_data"`
 	Title        string  `json:"title"`
 	Director     string  `json:"author"`

@@ -17,8 +17,13 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrFailInQueryRow),
 		errors.Is(err, ErrFailInQuery),
 		errors.Is(err, ErrNoSuchActor),
+<<<<<<< HEAD
 		errors.Is(err, ErrNoGenres),
 		errors.Is(err, ErrFailInExec):
+=======
+		errors.Is(err, ErrFailInExec),
+		errors.Is(err, ErrIncorrectSearchParams):
+>>>>>>> 4f68b5a (feat: search - take 1)
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),
 		errors.Is(err, ErrNoSuchSessionInTheCache),
