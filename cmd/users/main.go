@@ -15,9 +15,13 @@ import (
 	"google.golang.org/grpc"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
 =======
 >>>>>>> a2b550a (done)
+=======
+	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
+>>>>>>> 0d3cf02 (PR fixes)
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/repository"
@@ -45,10 +49,14 @@ func main() {
 	flag.Parse()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	err := helper.InitUploads()
 =======
 	err := initUploads()
 >>>>>>> a2b550a (done)
+=======
+	err := helper.InitUploads()
+>>>>>>> 0d3cf02 (PR fixes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,6 +126,7 @@ func main() {
 	fmt.Println("Server stopped")
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 func initUploads() error {
@@ -159,3 +168,5 @@ func initUploads() error {
 	return nil
 }
 >>>>>>> a2b550a (done)
+=======
+>>>>>>> 0d3cf02 (PR fixes)
