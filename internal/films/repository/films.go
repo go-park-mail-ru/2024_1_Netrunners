@@ -578,6 +578,14 @@ func (storage *FilmsStorage) RemoveFavoriteFilm(filmUuid string, userUuid string
 	if amountOfFilms == 0 {
 		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
 	}
+
+	err = storage.pool.QueryRow(context.Background(), getAmountOfFilmByUuid, filmUuid).Scan(&amountOfFilms)
+	if err != nil {
+		return err
+	}
+	if amountOfFilms == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
 	_, err = storage.pool.Exec(context.Background(), removeFavoriteFilm, filmUuid, userUuid)
 	if err != nil {
 		return err

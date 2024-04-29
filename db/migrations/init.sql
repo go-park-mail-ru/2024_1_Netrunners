@@ -82,4 +82,3 @@ CREATE TABLE IF NOT EXISTS favorite_film
 	FOREIGN KEY (user_external_id) REFERENCES users (external_id) ON DELETE CASCADE,
 	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
 );
-
