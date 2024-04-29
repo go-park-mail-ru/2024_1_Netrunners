@@ -28,6 +28,8 @@ type FilmsClient interface {
 	PutFavorite(ctx context.Context, in *PutFavoriteRequest, opts ...grpc.CallOption) (*PutFavoriteResponse, error)
 	DeleteFavorite(ctx context.Context, in *DeleteFavoriteRequest, opts ...grpc.CallOption) (*DeleteFavoriteResponse, error)
 	GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error)
+	GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error)
+	GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error)
 }
 
 type filmsClient struct {
@@ -128,6 +130,24 @@ func (c *filmsClient) GetAllFavoriteFilms(ctx context.Context, in *GetAllFavorit
 	return out, nil
 }
 
+func (c *filmsClient) GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error) {
+	out := new(GetAllFilmsByGenreResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/GetAllFilmsByGenre", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error) {
+	out := new(GetAllGenresResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/GetAllGenres", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -142,6 +162,8 @@ type FilmsServer interface {
 	PutFavorite(context.Context, *PutFavoriteRequest) (*PutFavoriteResponse, error)
 	DeleteFavorite(context.Context, *DeleteFavoriteRequest) (*DeleteFavoriteResponse, error)
 	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
+	GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error)
+	GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error)
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -177,6 +199,12 @@ func (UnimplementedFilmsServer) DeleteFavorite(context.Context, *DeleteFavoriteR
 }
 func (UnimplementedFilmsServer) GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllFavoriteFilms not implemented")
+}
+func (UnimplementedFilmsServer) GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllFilmsByGenre not implemented")
+}
+func (UnimplementedFilmsServer) GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllGenres not implemented")
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -371,6 +399,42 @@ func _Films_GetAllFavoriteFilms_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_GetAllFilmsByGenre_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllFilmsByGenreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).GetAllFilmsByGenre(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/GetAllFilmsByGenre",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).GetAllFilmsByGenre(ctx, req.(*GetAllFilmsByGenreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_GetAllGenres_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllGenresRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).GetAllGenres(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/GetAllGenres",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).GetAllGenres(ctx, req.(*GetAllGenresRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Films_ServiceDesc is the grpc.ServiceDesc for Films service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -417,6 +481,14 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllFavoriteFilms",
 			Handler:    _Films_GetAllFavoriteFilms_Handler,
+		},
+		{
+			MethodName: "GetAllFilmsByGenre",
+			Handler:    _Films_GetAllFilmsByGenre_Handler,
+		},
+		{
+			MethodName: "GetAllGenres",
+			Handler:    _Films_GetAllGenres_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

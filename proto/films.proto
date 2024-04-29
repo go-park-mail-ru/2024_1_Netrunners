@@ -17,6 +17,8 @@ service Films {
   rpc PutFavorite(PutFavoriteRequest) returns (PutFavoriteResponse) {}
   rpc DeleteFavorite(DeleteFavoriteRequest) returns (DeleteFavoriteResponse) {}
   rpc GetAllFavoriteFilms(GetAllFavoriteFilmsRequest) returns (GetAllFavoriteFilmsResponse) {}
+  rpc GetAllFilmsByGenre(GetAllFilmsByGenreRequest) returns (GetAllFilmsByGenreResponse) {}
+  rpc GetAllGenres(GetAllGenresRequest) returns (GetAllGenresResponse) {}
 }
 
 message FilmPreview {
@@ -154,4 +156,24 @@ message GetAllFavoriteFilmsRequest {
 
 message GetAllFavoriteFilmsResponse {
   repeated FilmPreview films = 1;
+}
+
+message GetAllFilmsByGenreRequest {
+  string genre_uuid = 1;
+}
+
+message GetAllFilmsByGenreResponse {
+   repeated FilmPreview films = 1;
+}
+
+message GetAllGenresRequest {}
+
+message GenreFilms {
+  string genre = 1;
+  string genre_uuid = 2;
+  repeated FilmPreview films = 3;
+}
+
+message GetAllGenresResponse {
+  repeated GenreFilms genres = 1;
 }

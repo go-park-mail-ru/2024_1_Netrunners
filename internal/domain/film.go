@@ -14,6 +14,7 @@ type FilmData struct {
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
+	Genres       []string  `json:"genres"`
 }
 
 type FilmDataToAdd struct {
@@ -25,6 +26,7 @@ type FilmDataToAdd struct {
 	Duration    uint32
 	PublishedAt time.Time
 	Actors      []ActorData
+	Genres      []string
 }
 
 type FilmPreview struct {

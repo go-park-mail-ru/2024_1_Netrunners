@@ -402,3 +402,106 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 		return
 	}
 }
+
+func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+	uuid := mux.Vars(r)["uuid"]
+
+	req := session.GetAllFilmsByGenreRequest{GenreUuid: uuid}
+	films, err := (*filmsPageHandlers.client).GetAllFilmsByGenre(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all genre films: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	var filmsConverted []domain.FilmPreview
+	for _, film := range films.Films {
+		filmConverted := convertFilmPreviewToRegular(film)
+		escapeFilmPreview(&filmConverted)
+		filmsConverted = append(filmsConverted, filmConverted)
+	}
+
+	response := filmsPreviewsResponse{
+		Status: http.StatusOK,
+		Films:  filmsConverted,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+type genresResponse struct {
+	Status      int                 `json:"status"`
+	GenresFilms []domain.GenreFilms `json:"genres"`
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var req session.GetAllGenresRequest
+	genresFilms, err := (*filmsPageHandlers.client).GetAllGenres(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get genres: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+	var genresConverted []domain.GenreFilms
+	for _, genre := range genresFilms.Genres {
+		genreConverted := convertGenreFilmsToRegular(genre)
+		escapeGenreFilms(&genreConverted)
+		genresConverted = append(genresConverted, genreConverted)
+	}
+
+	response := genresResponse{
+		Status:      http.StatusOK,
+		GenresFilms: genresConverted,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}

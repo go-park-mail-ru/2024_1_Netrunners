@@ -82,7 +82,6 @@ func escapeActorData(actor *domain.ActorData) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
 	actor.Spouse = html.EscapeString(actor.Spouse)
-	actor.Genres = html.EscapeString(actor.Genres)
 	actor.BirthPlace = html.EscapeString(actor.BirthPlace)
 	actor.Career = html.EscapeString(actor.Career)
 }
@@ -92,6 +91,9 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
+	for _, genre := range filmData.Genres {
+		genre = html.EscapeString(genre)
+	}
 }
 
 func escapeActorPreview(actor *domain.ActorPreview) {
@@ -108,6 +110,10 @@ func escapeFilmPreview(film *domain.FilmPreview) {
 func escapeComment(comment *domain.Comment) {
 	comment.Text = html.EscapeString(comment.Text)
 	comment.Author = html.EscapeString(comment.Author)
+}
+
+func escapeGenreFilms(genreFilms *domain.GenreFilms) {
+	genreFilms.Name = html.EscapeString(genreFilms.Name)
 }
 
 func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
@@ -173,7 +179,6 @@ func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 		Birthday: convertProtoToTime(actor.Birthday),
 		Career:   actor.Career,
 		Spouse:   actor.Spouse,
-		Genres:   actor.Genres,
 		Films:    filmsPreview,
 	}
 }
@@ -209,6 +214,18 @@ func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
 		Uuid:   user.Uuid,
 		Name:   user.Username,
 		Avatar: user.Avatar,
+	}
+}
+
+func convertGenreFilmsToRegular(genreFilms *session.GenreFilms) domain.GenreFilms {
+	var filmsConverted []domain.FilmPreview
+	for _, film := range genreFilms.Films {
+		filmsConverted = append(filmsConverted, convertFilmPreviewToRegular(film))
+	}
+	return domain.GenreFilms{
+		Name:  genreFilms.Genre,
+		Uuid:  genreFilms.GenreUuid,
+		Films: filmsConverted,
 	}
 }
 
