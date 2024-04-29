@@ -141,7 +141,6 @@ func TestUsersStorage_GetUserDataByUuid(t *testing.T) {
 	storage, err := NewUsersStorage(mock)
 
 	newUser := mocks.NewMockUser()
-
 	uuid := "1"
 
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday", "is_admin"}).
@@ -174,7 +173,6 @@ func TestUsersStorage_ChangeUserPasswordByUuid(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := mocks.NewMockUser()
-
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
@@ -205,7 +203,6 @@ func TestUsersStorage_ChangeUserName(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := mocks.NewMockUser()
-
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
@@ -236,7 +233,6 @@ func TestUsersStorage_ChangeUserNameByUuid(t *testing.T) {
 		WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
 	newUser := mocks.NewMockUser()
-
 	mockRows := pgxmock.NewRows([]string{"uuid", "email", "avatar", "name", "password", "registered_at", "birthday",
 		"is_admin"}).
 		AddRow(newUser.Uuid, newUser.Email, newUser.Avatar, newUser.Name, newUser.Password, newUser.RegisteredAt,
