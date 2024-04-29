@@ -556,17 +556,17 @@ paths:
         default:
           description: Unknown error
 
-  /films/find:
+  /films/find/short:
     get:
       tags:
-        - Films
-      summary: Find films
+          - Films
+      summary: Find films/serials/sctors
       security:
         - AccessCookie: []
       parameters:
-        - name: search
+        - name: s
           in: query
-          description: Film title
+          description: Film's/serial's title or actor's name
           required: true
           content:
             application/form:
@@ -579,7 +579,55 @@ paths:
           content:
             application/form:
               schema:
-                $ref: '#/components/schemas/FilmsResponse'
+                $ref: '#/components/schemas/FindResponse'
+        '400':
+          description: Incorrect actor uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /films/find/long:
+    get:
+      tags:
+          - Films
+      summary: Find films/serials/sctors
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: s
+          in: query
+          description: Film's/serial's title or actor's name
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: 'Transformers'
+        - name: fb
+          in: query
+          description: Find by film/actor/serial
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: '[actor | film | serial]'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/FindResponse'
         '400':
           description: Incorrect actor uuid
           content:
@@ -1315,6 +1363,65 @@ components:
               release_date:
                 type: string
                 example: '2011-04-11T10:20:30'
+                
+    FindResponse:
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          example: 200
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - preview_data
+              - title
+              - director
+              - average_score
+              - scores_count
+              - duration
+            properties:
+              type:
+                type: string
+                example: 'serial'
+              preview_data:
+                type: string
+              title:
+                type: string
+                example: 'Transformers'
+              director:
+                type: string
+                example: 'Michael Bell'
+              average_score:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scores_count:
+                type: integer
+                example: 20324
+              duration:
+                type: integer
+                example: 7560
+        actors:
+          type: array
+          items:
+            type: object
+            required:
+              - uuid
+              - name
+              - avatar
+            properties:
+              uuid:
+                type: string
+                example: 'frfdF48AfJ1MAFfKF13KFAOS'
+              name:
+                type: string
+                example: 'Evgenij Gennadjevich'
+              avatar:
+                type: string
 
     NewCommentRequest:
       required:
