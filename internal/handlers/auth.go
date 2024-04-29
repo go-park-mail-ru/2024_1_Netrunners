@@ -132,8 +132,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	reqGen := session.GenerateTokenRequest{Login: user.User.Email, IsAdmin: user.User.IsAdmin, Version: user.User.Version}
-	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
+	tokenSigned, err := GenerateTokens(user.User.Email, user.User.IsAdmin, user.User.Version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -142,7 +141,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	reqAdd := session.AddRequest{Login: user.User.Email, Token: tokenSigned.TokenSigned, Version: user.User.Version}
+	reqAdd := session.AddRequest{Login: user.User.Email, Token: tokenSigned, Version: user.User.Version}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
 		err = WriteError(w, err)
@@ -165,7 +164,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    tokenSigned.TokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
@@ -299,8 +298,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	reqGen := session.GenerateTokenRequest{Login: user.Email, IsAdmin: false, Version: version}
-	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
+	tokenSigned, err := GenerateTokens(user.Email, false, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -309,7 +307,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 		return
 	}
 
-	reqAdd := session.AddRequest{Login: user.Email, Token: tokenSigned.TokenSigned}
+	reqAdd := session.AddRequest{Login: user.Email, Token: tokenSigned}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
 		err = WriteError(w, err)
@@ -341,7 +339,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    tokenSigned.TokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
@@ -388,9 +386,8 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	reqGen := session.GenerateTokenRequest{Login: tokenClaims["Login"].(string), IsAdmin: tokenClaims["IsAdmin"].(bool),
-		Version: uint32(tokenClaims["Version"].(float64))}
-	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
+	tokenSigned, err := GenerateTokens(tokenClaims["Login"].(string), tokenClaims["IsAdmin"].(bool),
+		uint32(tokenClaims["Version"].(float64)))
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -399,7 +396,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	reqAdd := session.AddRequest{Login: tokenClaims["Login"].(string), Token: tokenSigned.TokenSigned,
+	reqAdd := session.AddRequest{Login: tokenClaims["Login"].(string), Token: tokenSigned,
 		Version: uint32(tokenClaims["Version"].(float64))}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
@@ -412,7 +409,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 
 	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    tokenSigned.TokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		MaxAge:   tokenCookieExpirationTime,

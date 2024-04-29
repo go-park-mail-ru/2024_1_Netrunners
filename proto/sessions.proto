@@ -12,7 +12,6 @@ service Sessions {
   rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
   rpc HasSession(HasSessionRequest) returns (HasSessionResponse) {}
   rpc CheckAllUserSessionTokens(CheckAllUserSessionTokensRequest) returns (CheckAllUserSessionTokensResponse) {}
-  rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
 }
 
 message AddRequest {
@@ -68,13 +67,3 @@ message CheckAllUserSessionTokensRequest {
 }
 
 message CheckAllUserSessionTokensResponse {}
-
-message GenerateTokenRequest {
-  string login = 1;
-  bool isAdmin = 2;
-  uint32 version = 3;
-}
-
-message GenerateTokenResponse {
-  string tokenSigned = 1;
-}

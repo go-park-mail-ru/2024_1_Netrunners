@@ -166,7 +166,6 @@ func TestFilmsServer_GetActorDataByUuid(t *testing.T) {
 		Birthday: time.Now(),
 		Career:   "Career",
 		Spouse:   "Spouse",
-		Genres:   "Genre 1",
 		Films: []domain.FilmPreview{
 			{Uuid: "1", Title: "Film 1", Director: "Director 1"},
 			{Uuid: "2", Title: "Film 2", Director: "Director 2"},

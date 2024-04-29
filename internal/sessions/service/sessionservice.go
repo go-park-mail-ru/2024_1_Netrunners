@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-	"os"
-
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
@@ -22,14 +20,12 @@ type sessionStorage interface {
 type SessionService struct {
 	sessionStorage sessionStorage
 	logger         *zap.SugaredLogger
-	secretKey      string
 }
 
 func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 		logger:         logger,
-		secretKey:      os.Getenv("SECRETKEY"),
 	}
 }
 

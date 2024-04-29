@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -286,4 +287,33 @@ func ValidatePassword(password string) error {
 		return nil
 	}
 	return myerrors.ErrPasswordIsToShort
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	IsAdmin bool
+	Version uint32
+}
+
+func GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string,
+	err error) {
+	tokenCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		IsAdmin: isAdmin,
+		Version: version,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
+
+	tokenSigned, err = token.SignedString([]byte(os.Getenv("SECRETKEY")))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }

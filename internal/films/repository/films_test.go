@@ -31,6 +31,11 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 		WithArgs(uuid).
 		WillReturnRows(mockRows)
 
+	genreRows := pgxmock.NewRows([]string{"genre"}).AddRow("1").AddRow("2").AddRow("3")
+	mock.ExpectQuery("SELECT").
+		WithArgs(uuid).
+		WillReturnRows(genreRows)
+
 	filmData, err := storage.GetFilmDataByUuid(uuid)
 	require.NoError(t, err)
 	require.Equal(t, newFilmData, filmData)
@@ -241,10 +246,9 @@ func TestActorsStorage_GetActorByUuid(t *testing.T) {
 
 	newActor := mocks.NewMockActor()
 
-	mockRowsData := pgxmock.NewRows([]string{"uuid", "name", "avatar", "birthday", "career", "height", "birth_place",
-		"genres", "spouse"}).
+	mockRowsData := pgxmock.NewRows([]string{"uuid", "name", "avatar", "birthday", "career", "height", "birth_place", "spouse"}).
 		AddRow(newActor.Uuid, newActor.Name, newActor.Avatar, newActor.Birthday, newActor.Career, newActor.Height,
-			newActor.BirthPlace, newActor.Genres, newActor.Spouse)
+			newActor.BirthPlace, newActor.Spouse)
 	mockRowsFilms := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores", "age_limit"}).
 		AddRow(newActor.Films[0].Uuid, newActor.Films[0].Title, newActor.Films[0].Preview, newActor.Films[0].Director,
 			newActor.Films[0].Duration, newActor.Films[0].AverageScore, newActor.Films[0].ScoresCount,
