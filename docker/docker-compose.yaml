@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root1234
+    build:
+      dockerfile: ./postgres.dockerfile
+    ports:
+      - 5432:5432
+    networks:
+      - app_network
+    restart: always
+
+  films:
+    container_name: films
+    build:
+      dockerfile: ./films.dockerfile
+    ports:
+      - 8020:8020
+    networks:
+      - app_network
+    depends_on:
+      - postgres
+    restart: always
+
+  users:
+    container_name: users
+    build:
+      dockerfile: ./users.dockerfile
+    ports:
+      - 8030:8030
+    networks:
+      - app_network
+    depends_on:
+      - postgres
+    restart: always
+
+  sessions:
+    container_name: sessions
+    environment:
+      SECRETKEY: SECRETKEY
+    build:
+      dockerfile: ./sessions.dockerfile
+    ports:
+      - 8010:8010
+    networks:
+      - app_network
+    depends_on:
+      - postgres
+    restart: always
+
+  app:
+    container_name: app
+    build:
+      dockerfile: ./main.dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - app_network
+    depends_on:
+      - films
+      - users
+      - sessions
+      - postgres
+    restart: always
+
+networks:
+  app_network:
+    driver: bridge
