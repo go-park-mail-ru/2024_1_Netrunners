@@ -1050,9 +1050,9 @@ components:
 
     FilmLinkRequest:
       required:
-        - film_link
+        - film_uuid
       properties:
-        film_link:
+        film_uuid:
           type: string
 
     #Auth
@@ -1175,6 +1175,7 @@ components:
             - scores_count
             - duration
             - release_date
+            - genre
           properties:
             type:
               type: string
@@ -1200,6 +1201,9 @@ components:
             release_date:
               type: string
               example: '2011-04-11T10:20:30'
+            genre:
+              type: string
+              example: 'fantasy'
             film_data:
               type: string
             series:
