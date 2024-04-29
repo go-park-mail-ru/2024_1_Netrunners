@@ -1,4 +1,4 @@
-package database
+package mocks
 
 import (
 	"time"

@@ -15,10 +15,10 @@ import (
 	"google.golang.org/grpc"
 
 	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/api"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/api"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/repository"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		serverIP     string
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
-	flag.IntVar(&backEndPort, "b-port", 8020, "back-end server port")
+	flag.IntVar(&backEndPort, "b-port", 8030, "back-end server port")
 	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
@@ -56,18 +56,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	filmsStorage, err := repository.NewFilmsStorage(pool)
+	usersStorage, err := repository.NewUsersStorage(pool)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	filmService := service.NewFilmsService(filmsStorage, sugarLogger, "./uploads/films")
+	usersService := service.NewUsersService(usersStorage, sugarLogger)
 
 	s := grpc.NewServer()
-	srv := api.NewFilmsServer(filmService, sugarLogger)
-	session.RegisterFilmsServer(s, srv)
+	srv := api.NewUsersServer(usersService, sugarLogger)
+	session.RegisterUsersServer(s, srv)
 
-	listener, err := net.Listen("tcp", ":8020")
+	listener, err := net.Listen("tcp", ":8030")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -12,7 +12,7 @@ func TestAddSession(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"add new session",
@@ -37,7 +37,7 @@ func TestAddSession(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"add existed session",
@@ -93,7 +93,7 @@ func TestDeleteSession(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"delete existed session",
@@ -118,7 +118,7 @@ func TestDeleteSession(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"delete non-existed session",
@@ -241,7 +241,7 @@ func TestGetVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get existed version",
@@ -266,7 +266,7 @@ func TestGetVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get non-existed version",
@@ -323,7 +323,7 @@ func TestCheckVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get existed version",
@@ -348,7 +348,7 @@ func TestCheckVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get non-existed version",
@@ -409,7 +409,7 @@ func TestUpdateVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get existed version",
@@ -434,7 +434,7 @@ func TestUpdateVersion(t *testing.T) {
 		testName string
 		login    string
 		token    string
-		version  uint8
+		version  uint32
 	}{
 		{
 			"get non-existed version",
@@ -478,7 +478,7 @@ func TestSessionStorage_CheckAllUserSessionTokens(t *testing.T) {
 	storage := NewSessionStorage()
 
 	// Set up some mock data in the cache
-	mockCacheData := map[string]uint8{
+	mockCacheData := map[string]uint32{
 		"token1": 1,
 		"token2": 2,
 	}

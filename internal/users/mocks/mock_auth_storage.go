@@ -2,7 +2,7 @@
 // Source: internal/service/authservice.go
 
 // Package mock is a generated GoMock package.
-package mock
+package mocks
 
 import (
 	reflect "reflect"

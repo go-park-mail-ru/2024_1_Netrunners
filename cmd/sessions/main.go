@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -10,15 +9,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/api"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/sessions/api"
+	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/sessions/repository/cache"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/sessions/service"
 )
 
 func main() {
@@ -28,15 +25,10 @@ func main() {
 		serverIP     string
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
-	flag.IntVar(&backEndPort, "b-port", 8020, "back-end server port")
+	flag.IntVar(&backEndPort, "b-port", 8010, "back-end server port")
 	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
-
-	err := helper.InitUploads()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -44,30 +36,18 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
-		"5432",
-		"postgres",
-		"root1234",
-		"netrunnerflix",
-	))
+	cacheStorage := mycache.NewSessionStorage()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	filmsStorage, err := repository.NewFilmsStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	filmService := service.NewFilmsService(filmsStorage, sugarLogger, "./uploads/films")
+	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
 
 	s := grpc.NewServer()
-	srv := api.NewFilmsServer(filmService, sugarLogger)
-	session.RegisterFilmsServer(s, srv)
+	srv := api.NewSessionServer(sessionService, sugarLogger)
+	session.RegisterSessionsServer(s, srv)
 
-	listener, err := net.Listen("tcp", ":8020")
+	listener, err := net.Listen("tcp", ":8010")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,18 +2,22 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-
-	"go.uber.org/zap"
 )
 
 type sessionStorage interface {
-	Add(login string, token string, version uint8) (err error)
+	Add(login string, token string, version uint32) (err error)
 	DeleteSession(login string, token string) (err error)
 	Update(login string, token string) (err error)
-	CheckVersion(login string, token string, usersVersion uint8) (hasSession bool, err error)
-	GetVersion(login string, token string) (version uint8, err error)
+	CheckVersion(login string, token string, usersVersion uint32) (hasSession bool, err error)
+	GetVersion(login string, token string) (version uint32, err error)
 	HasSession(login string, token string) error
 	CheckAllUserSessionTokens(login string) error
 }
@@ -21,16 +25,18 @@ type sessionStorage interface {
 type SessionService struct {
 	sessionStorage sessionStorage
 	logger         *zap.SugaredLogger
+	secretKey      string
 }
 
 func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 		logger:         logger,
+		secretKey:      os.Getenv("SECRETKEY"),
 	}
 }
 
-func (service *SessionService) Add(ctx context.Context, login, token string, version uint8) (err error) {
+func (service *SessionService) Add(ctx context.Context, login, token string, version uint32) (err error) {
 	err = service.sessionStorage.Add(login, token, version)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to add session: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -59,7 +65,7 @@ func (service *SessionService) Update(ctx context.Context, login, token string) 
 }
 
 func (service *SessionService) CheckVersion(ctx context.Context, login, token string,
-	usersVersion uint8) (hasSession bool, err error) {
+	usersVersion uint32) (hasSession bool, err error) {
 	hasSession, err = service.sessionStorage.CheckVersion(login, token, usersVersion)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to check version: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -68,7 +74,7 @@ func (service *SessionService) CheckVersion(ctx context.Context, login, token st
 	return hasSession, nil
 }
 
-func (service *SessionService) GetVersion(ctx context.Context, login, token string) (version uint8, err error) {
+func (service *SessionService) GetVersion(ctx context.Context, login, token string) (version uint32, err error) {
 	version, err = service.sessionStorage.GetVersion(login, token)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get version: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -94,4 +100,33 @@ func (service *SessionService) CheckAllUserSessionTokens(ctx context.Context, lo
 		return err
 	}
 	return nil
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	IsAdmin bool
+	Version uint32
+}
+
+func (service *SessionService) GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string,
+	err error) {
+	tokenCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		IsAdmin: isAdmin,
+		Version: version,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
+
+	tokenSigned, err = token.SignedString([]byte(service.secretKey))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }

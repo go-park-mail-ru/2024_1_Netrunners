@@ -7,7 +7,7 @@ type User struct {
 	Email        string    `json:"login"`
 	Name         string    `json:"username"`
 	Password     string    `json:"password"`
-	Version      uint8     `json:"version"`
+	Version      uint32    `json:"version"`
 	IsAdmin      bool      `json:"isAdmin"`
 	Avatar       string    `json:"avatar"`
 	RegisteredAt time.Time `json:"registeredAt"`

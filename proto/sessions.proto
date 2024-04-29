@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package session;
+
+option go_package = "./session";
+
+service Sessions {
+  rpc Add(AddRequest) returns (AddResponse) {}
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse) {}
+  rpc Update(UpdateRequest) returns (UpdateRequestResponse) {}
+  rpc CheckVersion(CheckVersionRequest) returns (CheckVersionResponse) {}
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
+  rpc HasSession(HasSessionRequest) returns (HasSessionResponse) {}
+  rpc CheckAllUserSessionTokens(CheckAllUserSessionTokensRequest) returns (CheckAllUserSessionTokensResponse) {}
+  rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
+}
+
+message AddRequest {
+  string login = 1;
+  string token = 2;
+  uint32 version = 3;
+}
+
+message AddResponse {}
+
+message DeleteSessionRequest {
+  string login = 1;
+  string token = 2;
+}
+
+message DeleteSessionResponse {}
+
+message UpdateRequest {
+  string login = 1;
+  string token = 2;
+}
+
+message UpdateRequestResponse {}
+
+message CheckVersionRequest {
+  string login = 1;
+  string token = 2;
+  uint32 version = 3;
+}
+
+message CheckVersionResponse {
+  bool hasSession = 1;
+}
+
+message GetVersionRequest {
+  string login = 1;
+  string token = 2;
+}
+
+message GetVersionResponse {
+  uint32 version = 1;
+}
+
+message HasSessionRequest {
+  string login = 1;
+  string token = 2;
+}
+
+message HasSessionResponse {}
+
+message CheckAllUserSessionTokensRequest {
+  string login = 1;
+}
+
+message CheckAllUserSessionTokensResponse {}
+
+message GenerateTokenRequest {
+  string login = 1;
+  bool isAdmin = 2;
+  uint32 version = 3;
+}
+
+message GenerateTokenResponse {
+  string tokenSigned = 1;
+}

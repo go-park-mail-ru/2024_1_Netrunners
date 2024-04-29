@@ -19,6 +19,9 @@ type FilmsStorage interface {
 	GetAllFilmComments(uuid string) ([]domain.Comment, error)
 	GetActorByUuid(actorUuid string) (domain.ActorData, error)
 	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
+	PutFavoriteFilm(filmUuid string, userUuid string) error
+	RemoveFavoriteFilm(filmUuid string, userUuid string) error
+	GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error)
 }
 
 type FilmsService struct {
@@ -112,4 +115,34 @@ func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid strin
 	}
 
 	return actor, nil
+}
+
+func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	err := service.storage.PutFavoriteFilm(filmUuid, userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to put favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return err
+	}
+	return nil
+}
+
+func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	err := service.storage.RemoveFavoriteFilm(filmUuid, userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return err
+	}
+	return nil
+}
+
+func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error) {
+	films, err := service.storage.GetAllFavoriteFilms(userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
 }

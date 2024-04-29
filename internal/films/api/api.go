@@ -22,6 +22,9 @@ type FilmsService interface {
 	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
 	GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
 	GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error)
+	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
+	RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
+	GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error)
 }
 
 type FilmsServer struct {
@@ -151,6 +154,49 @@ func (server *FilmsServer) GetActorDataByUuid(ctx context.Context,
 
 	return &session.ActorDataByUuidResponse{
 		Actor: actorConverted,
+	}, nil
+}
+
+func (server *FilmsServer) PutFavorite(ctx context.Context,
+	req *session.PutFavoriteRequest) (res *session.PutFavoriteResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	err = server.filmsService.PutFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to put favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to put favorite: %v\n", requestId, err)
+	}
+
+	return &session.PutFavoriteResponse{}, nil
+}
+
+func (server *FilmsServer) DeleteFavorite(ctx context.Context,
+	req *session.DeleteFavoriteRequest) (res *session.DeleteFavoriteResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	err = server.filmsService.RemoveFavoriteFilm(ctx, req.FilmUuid, req.UserUuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to remove favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to remove favorite: %v\n", requestId, err)
+	}
+
+	return &session.DeleteFavoriteResponse{}, nil
+}
+
+func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context,
+	req *session.GetAllFavoriteFilmsRequest) (res *session.GetAllFavoriteFilmsResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.GetAllFavoriteFilms(ctx, req.UserUuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get favorite: %v\n", requestId, err)
+	}
+
+	var filmsConverted []*session.FilmPreview
+	for _, film := range films {
+		filmsConverted = append(filmsConverted, convertFilmPreviewToProto(&film))
+	}
+
+	return &session.GetAllFavoriteFilmsResponse{
+		Films: filmsConverted,
 	}, nil
 }
 

@@ -12,16 +12,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
-	mycache "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/cache"
-	database "github.com/go-park-mail-ru/2024_1_Netrunners/internal/repository/postgres"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
@@ -37,47 +33,34 @@ func main() {
 
 	flag.Parse()
 
-	err := initUploads()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatal(err)
 	}
 	sugarLogger := logger.Sugar()
 
-	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
-		"5432",
-		"postgres",
-		"root1234",
-		"netrunnerflix",
-	))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cacheStorage := mycache.NewSessionStorage()
-	authStorage, err := database.NewUsersStorage(pool)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
-	authService := service.NewAuthService(authStorage, sugarLogger)
-
 	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	filmsClient := session.NewFilmsClient(authConn)
 
-	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
-	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(authService, sessionService, sugarLogger)
+	filmsConn, err := grpc.Dial(":8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	filmsClient := session.NewFilmsClient(filmsConn)
+	usersClient := session.NewUsersClient(usersConn)
+	sessionClient := session.NewSessionsClient(authConn)
+
+	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
+	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()
@@ -95,6 +78,10 @@ func main() {
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+
+	router.HandleFunc("/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/remove_favorite", filmsPageHandlers.RemoveFavoriteFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/{uuid}/all_favorite", filmsPageHandlers.GetAllFavoriteFilms).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
@@ -131,43 +118,4 @@ func main() {
 	<-stopped
 
 	fmt.Println("Server stopped")
-}
-
-func initUploads() error {
-	storagePath := "./uploads/"
-	_, err := os.Stat(storagePath)
-	if err != nil {
-		err = os.Mkdir(storagePath, 0755)
-		if err != nil {
-			return err
-		}
-		err = os.Mkdir(storagePath+"users/", 0755)
-		if err != nil {
-			return err
-		}
-		err = os.Mkdir(storagePath+"films/", 0755)
-		if err != nil {
-			return err
-		}
-	} else {
-		storagePath = "./uploads/users/"
-		_, err = os.Stat(storagePath)
-		if err != nil {
-			err = os.Mkdir(storagePath, 0755)
-			if err != nil {
-				return err
-			}
-		}
-
-		storagePath := "./uploads/films/"
-		_, err = os.Stat(storagePath)
-		if err != nil {
-			err = os.Mkdir(storagePath, 0755)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }

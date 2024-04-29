@@ -2,14 +2,18 @@ package handlers
 
 import (
 	"encoding/json"
-	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"fmt"
 	"html"
 	"net/http"
+	"regexp"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 type SuccessResponse struct {
@@ -176,4 +180,92 @@ func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 
 func convertProtoToTime(protoTime *timestamppb.Timestamp) time.Time {
 	return protoTime.AsTime()
+}
+
+func convertUserToRegular(user *session.User) domain.User {
+	return domain.User{
+		Uuid:         user.Uuid,
+		Email:        user.Email,
+		Password:     user.Password,
+		Name:         user.Username,
+		Version:      user.Version,
+		IsAdmin:      user.IsAdmin,
+		Avatar:       user.Avatar,
+		Birthday:     convertProtoToTime(user.Birthday),
+		RegisteredAt: convertProtoToTime(user.RegisteredAt),
+	}
+}
+
+func convertUserSignUpDataToRegular(userData domain.UserSignUp) *session.UserSignUp {
+	return &session.UserSignUp{
+		Email:    userData.Email,
+		Password: userData.Password,
+		Username: userData.Name,
+	}
+}
+
+func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
+	return domain.UserPreview{
+		Uuid:   user.Uuid,
+		Name:   user.Username,
+		Avatar: user.Avatar,
+	}
+}
+
+func IsTokenValid(token *http.Cookie, secretKey string) (jwt.MapClaims, error) {
+	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !parsedToken.Valid {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Login"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+	_, ok = claims["IsAdmin"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	_, ok = claims["Version"]
+	if !ok {
+		return nil, fmt.Errorf("invalid token: %w", myerrors.ErrNotAuthorised)
+	}
+
+	return claims, nil
+}
+
+func ValidateLogin(e string) error {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
+	if emailRegex.MatchString(e) {
+		return nil
+	}
+	return myerrors.ErrLoginIsNotValid
+}
+
+func ValidateUsername(username string) error {
+	if len(username) >= 4 {
+		return nil
+	}
+	return myerrors.ErrUsernameIsToShort
+}
+
+func ValidatePassword(password string) error {
+	if len(password) >= 6 {
+		return nil
+	}
+	return myerrors.ErrPasswordIsToShort
 }

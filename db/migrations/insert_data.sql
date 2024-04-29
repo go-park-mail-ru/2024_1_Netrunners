@@ -7,8 +7,8 @@ INSERT INTO director (name, avatar) VALUES ('Мартин Чарльз Скор�
 INSERT INTO film (title, data, banner, s3_link, director, age_limit, duration) VALUES ('Славные парни', 'История о Генри Хилле — начинающем гангстере, занимающемся грабежами вместе с подельниками Джими Конвеем и Томми Де Вито, которые с легкостью убивают любого, кто встаёт у них на пути.', 'https://avatars.mds.yandex.net/get-kinopoisk-image/1900788/9d56c458-1c44-4da0-b718-2899ccbf6b5b/300x', '', 1, 16, 127);
 
 INSERT INTO comment (text, score, author, film) VALUES ('один из любимых моих фильмов', 5, 1, 1);
-INSERT INTO comment (text, score, author, film) VALUES ('проходняк)))', 5, 2, 1);
-INSERT INTO comment (text, score, author, film) VALUES ('классика, что тут еще говорить', 5, 3, 1);
+INSERT INTO comment (text, score, author, film) VALUES ('проходняк)))', 5, 1, 1);
+INSERT INTO comment (text, score, author, film) VALUES ('классика, что тут еще говорить', 5, 1, 1);
 
 INSERT INTO film_actor (film, actor) VALUES (1, 1);
 INSERT INTO film_actor (film, actor) VALUES (1, 2);
