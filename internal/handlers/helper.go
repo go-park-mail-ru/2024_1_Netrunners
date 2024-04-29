@@ -196,7 +196,6 @@ func convertUserToRegular(user *session.User) domain.User {
 	}
 }
 
-<<<<<<< HEAD
 func convertUserSignUpDataToRegular(userData domain.UserSignUp) *session.UserSignUp {
 	return &session.UserSignUp{
 		Email:    userData.Email,
@@ -205,8 +204,6 @@ func convertUserSignUpDataToRegular(userData domain.UserSignUp) *session.UserSig
 	}
 }
 
-=======
->>>>>>> a871897 (users done, waits for sessions)
 func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
 	return domain.UserPreview{
 		Uuid:   user.Uuid,
@@ -214,7 +211,6 @@ func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
 		Avatar: user.Avatar,
 	}
 }
-<<<<<<< HEAD
 
 func IsTokenValid(token *http.Cookie, secretKey string) (jwt.MapClaims, error) {
 	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
@@ -273,5 +269,3 @@ func ValidatePassword(password string) error {
 	}
 	return myerrors.ErrPasswordIsToShort
 }
-=======
->>>>>>> a871897 (users done, waits for sessions)

@@ -6,25 +6,18 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-<<<<<<< HEAD
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
-=======
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/service"
->>>>>>> a871897 (users done, waits for sessions)
 )
 
 var (
 	tokenCookieExpirationTime = 48 * 3600
 )
 
-<<<<<<< HEAD
-=======
 type AuthService interface {
 	CreateUser(ctx context.Context, user domain.UserSignUp) error
 	RemoveUser(ctx context.Context, email string) error
@@ -52,7 +45,6 @@ type SessionService interface {
 	IsTokenValid(token *http.Cookie) (jwt.MapClaims, error)
 }
 
->>>>>>> a871897 (users done, waits for sessions)
 type AuthPageHandlers struct {
 	usersClient    *session.UsersClient
 	sessionsClient *session.SessionsClient
@@ -395,6 +387,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	reqGen := session.GenerateTokenRequest{Login: tokenClaims["Login"].(string), IsAdmin: tokenClaims["IsAdmin"].(bool),
 		Version: uint32(tokenClaims["Version"].(float64))}
 	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
@@ -404,6 +397,11 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		tokenClaims["IsAdmin"].(bool),
 		uint32(tokenClaims["Version"].(float64)))
 >>>>>>> a871897 (users done, waits for sessions)
+=======
+	reqGen := session.GenerateTokenRequest{Login: tokenClaims["Login"].(string), IsAdmin: tokenClaims["IsAdmin"].(bool),
+		Version: uint32(tokenClaims["Version"].(float64))}
+	tokenSigned, err := (*authPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
+>>>>>>> d726255 (all microservices r done)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -412,14 +410,9 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		return
 	}
 
-<<<<<<< HEAD
 	reqAdd := session.AddRequest{Login: tokenClaims["Login"].(string), Token: tokenSigned.TokenSigned,
 		Version: uint32(tokenClaims["Version"].(float64))}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
-=======
-	err = authPageHandlers.sessionService.Add(ctx, tokenClaims["Login"].(string), tokenSigned,
-		uint32(tokenClaims["Version"].(float64)))
->>>>>>> a871897 (users done, waits for sessions)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {

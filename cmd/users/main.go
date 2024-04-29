@@ -32,10 +32,14 @@ func main() {
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
 <<<<<<< HEAD
+<<<<<<< HEAD
 	flag.IntVar(&backEndPort, "b-port", 8030, "back-end server port")
 =======
 	flag.IntVar(&backEndPort, "b-port", 8020, "back-end server port")
 >>>>>>> a2b550a (done)
+=======
+	flag.IntVar(&backEndPort, "b-port", 8030, "back-end server port")
+>>>>>>> d726255 (all microservices r done)
 	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
 
 	flag.Parse()
@@ -79,10 +83,14 @@ func main() {
 	session.RegisterUsersServer(s, srv)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	listener, err := net.Listen("tcp", ":8030")
 =======
 	listener, err := net.Listen("tcp", ":8010")
 >>>>>>> a2b550a (done)
+=======
+	listener, err := net.Listen("tcp", ":8030")
+>>>>>>> d726255 (all microservices r done)
 	if err != nil {
 		log.Fatal(err)
 	}

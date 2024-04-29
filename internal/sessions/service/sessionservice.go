@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 <<<<<<< HEAD:internal/sessions/service/sessionservice.go
 	"os"
 	"time"
@@ -12,15 +13,19 @@ import (
 
 =======
 	"net/http"
+=======
+>>>>>>> d726255 (all microservices r done)
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
+<<<<<<< HEAD
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 >>>>>>> a871897 (users done, waits for sessions):internal/service/sessionservice.go
+=======
+>>>>>>> d726255 (all microservices r done)
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
@@ -114,6 +119,7 @@ func (service *SessionService) CheckAllUserSessionTokens(ctx context.Context, lo
 	return nil
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD:internal/sessions/service/sessionservice.go
 =======
 func (service *SessionService) IsTokenValid(token *http.Cookie) (jwt.MapClaims, error) {
@@ -176,6 +182,8 @@ func ValidatePassword(password string) error {
 }
 
 >>>>>>> a871897 (users done, waits for sessions):internal/service/sessionservice.go
+=======
+>>>>>>> d726255 (all microservices r done)
 type customClaims struct {
 	jwt.StandardClaims
 	Login   string

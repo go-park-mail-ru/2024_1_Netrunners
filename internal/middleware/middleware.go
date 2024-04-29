@@ -12,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 <<<<<<< HEAD
+<<<<<<< HEAD
 )
 
 type Middleware struct {
@@ -39,6 +40,16 @@ type Middleware struct {
 func NewMiddleware(authService *service2.UsersService,
 	sessionService *service.SessionService, logger *zap.SugaredLogger, serverIP string) *Middleware {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+)
+
+type Middleware struct {
+	logger   *zap.SugaredLogger
+	serverIP string
+}
+
+func NewMiddleware(logger *zap.SugaredLogger, serverIP string) *Middleware {
+>>>>>>> d726255 (all microservices r done)
 	return &Middleware{
 		logger:   logger,
 		serverIP: serverIP,
