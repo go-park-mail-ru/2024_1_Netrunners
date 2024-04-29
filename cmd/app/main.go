@@ -39,29 +39,10 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cacheStorage := mycache.NewSessionStorage()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sessionService := service.NewSessionService(cacheStorage, sugarLogger)
-
->>>>>>> a2b550a (done)
-=======
->>>>>>> d726255 (all microservices r done)
 	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 	filmsConn, err := grpc.Dial(":8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -80,34 +61,6 @@ func main() {
 	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
 	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
 	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
-=======
-	filmsClient := session.NewFilmsClient(authConn)
-	usersClient := session.NewUsersClient(authConn)
-
-	middleware := middleware.NewMiddleware(authService, sessionService, sugarLogger, serverIP)
-	authPageHandlers := handlers.NewAuthPageHandlers(authService, sessionService, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, sessionService, sugarLogger)
->>>>>>> a2b550a (done)
-=======
-
-	filmsConn, err := grpc.Dial(":8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	filmsClient := session.NewFilmsClient(filmsConn)
-	usersClient := session.NewUsersClient(usersConn)
-	sessionClient := session.NewSessionsClient(authConn)
-
-	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
-	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
->>>>>>> d726255 (all microservices r done)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
 
 	router := mux.NewRouter()
