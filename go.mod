@@ -10,7 +10,6 @@ require (
 	github.com/pashagolub/pgxmock/v3 v3.4.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.9.0
-	go.uber.org/mock v0.4.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/mock"
 	"testing"
 	"time"
 
@@ -11,7 +12,11 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+<<<<<<< HEAD
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/mocks"
+=======
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+>>>>>>> 6fcd4c8 (everything wrong)
 )
 
 func TestAuthService_HasUser(t *testing.T) {
