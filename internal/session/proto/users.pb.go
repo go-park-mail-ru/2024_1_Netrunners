@@ -1559,29 +1559,29 @@ var file_proto_users_proto_depIdxs = []int32{
 	2,  // 7: session.GetUserPreviewResponse.user:type_name -> session.UserPreview
 	1,  // 8: session.ChangeUserPasswordByUuidResponse.user:type_name -> session.User
 	1,  // 9: session.ChangeUserNameByUuidResponse.user:type_name -> session.User
-	1,  // 10: session.ChangeUserAvatarByUuidResponse.user:type_name -> session.User =
-	3,  // 11: session.Films.CreateUser:input_type -> session.CreateUserRequest
-	5,  // 12: session.Films.RemoveUser:input_type -> session.RemoveUserRequest
-	7,  // 13: session.Films.HasUser:input_type -> session.HasUserRequest
-	9,  // 14: session.Films.GetUser:input_type -> session.GetUserRequest
-	11, // 15: session.Films.ChangeUserPassword:input_type -> session.ChangeUserPasswordRequest
-	13, // 16: session.Films.ChangeUserName:input_type -> session.ChangeUserNameRequest
-	15, // 17: session.Films.GetUserDataByUuid:input_type -> session.GetUserDataByUuidRequest
-	17, // 18: session.Films.GetUserPreview:input_type -> session.GetUserPreviewRequest
-	19, // 19: session.Films.ChangeUserPasswordByUuid:input_type -> session.ChangeUserPasswordByUuidRequest
-	21, // 20: session.Films.ChangeUserNameByUuid:input_type -> session.ChangeUserNameByUuidRequest
-	23, // 21: session.Films.ChangeUserAvatarByUuid:input_type -> session.ChangeUserAvatarByUuidRequest
-	4,  // 22: session.Films.CreateUser:output_type -> session.CreateUserResponse
-	6,  // 23: session.Films.RemoveUser:output_type -> session.RemoveUserResponse
-	8,  // 24: session.Films.HasUser:output_type -> session.HasUserResponse
-	10, // 25: session.Films.GetUser:output_type -> session.GetUserResponse
-	12, // 26: session.Films.ChangeUserPassword:output_type -> session.ChangeUserPasswordResponse
-	14, // 27: session.Films.ChangeUserName:output_type -> session.ChangeUserNameResponse
-	16, // 28: session.Films.GetUserDataByUuid:output_type -> session.GetUserDataByUuidResponse
-	18, // 29: session.Films.GetUserPreview:output_type -> session.GetUserPreviewResponse
-	20, // 30: session.Films.ChangeUserPasswordByUuid:output_type -> session.ChangeUserPasswordByUuidResponse
-	22, // 31: session.Films.ChangeUserNameByUuid:output_type -> session.ChangeUserNameByUuidResponse
-	24, // 32: session.Films.ChangeUserAvatarByUuid:output_type -> session.ChangeUserAvatarByUuidResponse
+	1,  // 10: session.ChangeUserAvatarByUuidResponse.user:type_name -> session.User
+	3,  // 11: session.Users.CreateUser:input_type -> session.CreateUserRequest
+	5,  // 12: session.Users.RemoveUser:input_type -> session.RemoveUserRequest
+	7,  // 13: session.Users.HasUser:input_type -> session.HasUserRequest
+	9,  // 14: session.Users.GetUser:input_type -> session.GetUserRequest
+	11, // 15: session.Users.ChangeUserPassword:input_type -> session.ChangeUserPasswordRequest
+	13, // 16: session.Users.ChangeUserName:input_type -> session.ChangeUserNameRequest
+	15, // 17: session.Users.GetUserDataByUuid:input_type -> session.GetUserDataByUuidRequest
+	17, // 18: session.Users.GetUserPreview:input_type -> session.GetUserPreviewRequest
+	19, // 19: session.Users.ChangeUserPasswordByUuid:input_type -> session.ChangeUserPasswordByUuidRequest
+	21, // 20: session.Users.ChangeUserNameByUuid:input_type -> session.ChangeUserNameByUuidRequest
+	23, // 21: session.Users.ChangeUserAvatarByUuid:input_type -> session.ChangeUserAvatarByUuidRequest
+	4,  // 22: session.Users.CreateUser:output_type -> session.CreateUserResponse
+	6,  // 23: session.Users.RemoveUser:output_type -> session.RemoveUserResponse
+	8,  // 24: session.Users.HasUser:output_type -> session.HasUserResponse
+	10, // 25: session.Users.GetUser:output_type -> session.GetUserResponse
+	12, // 26: session.Users.ChangeUserPassword:output_type -> session.ChangeUserPasswordResponse
+	14, // 27: session.Users.ChangeUserName:output_type -> session.ChangeUserNameResponse
+	16, // 28: session.Users.GetUserDataByUuid:output_type -> session.GetUserDataByUuidResponse
+	18, // 29: session.Users.GetUserPreview:output_type -> session.GetUserPreviewResponse
+	20, // 30: session.Users.ChangeUserPasswordByUuid:output_type -> session.ChangeUserPasswordByUuidResponse
+	22, // 31: session.Users.ChangeUserNameByUuid:output_type -> session.ChangeUserNameByUuidResponse
+	24, // 32: session.Users.ChangeUserAvatarByUuid:output_type -> session.ChangeUserAvatarByUuidResponse
 	22, // [22:33] is the sub-list for method output_type
 	11, // [11:22] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name

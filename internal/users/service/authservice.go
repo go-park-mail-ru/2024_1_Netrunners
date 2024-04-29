@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 <<<<<<< HEAD
+<<<<<<< HEAD
 	"os"
 
 	"go.uber.org/zap"
@@ -11,16 +12,18 @@ import (
 =======
 	"fmt"
 	"net/http"
+=======
+>>>>>>> a2b550a (done)
 	"os"
-	"regexp"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+<<<<<<< HEAD
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+>>>>>>> a2b550a (done)
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
@@ -39,15 +42,20 @@ type usersStorage interface {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 type UsersService struct {
 =======
 type AuthService struct {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+type UsersService struct {
+>>>>>>> a2b550a (done)
 	storage   usersStorage
 	secretKey string
 	logger    *zap.SugaredLogger
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 func NewUsersService(storage usersStorage, logger *zap.SugaredLogger) *UsersService {
 	return &UsersService{
@@ -55,6 +63,10 @@ func NewUsersService(storage usersStorage, logger *zap.SugaredLogger) *UsersServ
 func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthService {
 	return &AuthService{
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func NewUsersService(storage usersStorage, logger *zap.SugaredLogger) *UsersService {
+	return &UsersService{
+>>>>>>> a2b550a (done)
 		storage:   storage,
 		logger:    logger,
 		secretKey: os.Getenv("SECRETKEY"),
@@ -62,10 +74,14 @@ func NewAuthService(storage usersStorage, logger *zap.SugaredLogger) *AuthServic
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) CreateUser(ctx context.Context, user domain.UserSignUp) error {
 =======
 func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSignUp) error {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) CreateUser(ctx context.Context, user domain.UserSignUp) error {
+>>>>>>> a2b550a (done)
 	err := service.storage.CreateUser(user)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to create user: %v", ctx.Value(requestId.ReqIDKey),
@@ -76,10 +92,14 @@ func (service *AuthService) CreateUser(ctx context.Context, user domain.UserSign
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) RemoveUser(ctx context.Context, login string) error {
 =======
 func (service *AuthService) RemoveUser(ctx context.Context, login string) error {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) RemoveUser(ctx context.Context, login string) error {
+>>>>>>> a2b550a (done)
 	err := service.storage.RemoveUser(login)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove user: %v", ctx.Value(requestId.ReqIDKey),
@@ -90,10 +110,14 @@ func (service *AuthService) RemoveUser(ctx context.Context, login string) error 
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) HasUser(ctx context.Context, login, password string) error {
 =======
 func (service *AuthService) HasUser(ctx context.Context, login, password string) error {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) HasUser(ctx context.Context, login, password string) error {
+>>>>>>> a2b550a (done)
 	err := service.storage.HasUser(login, password)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to has user: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -103,10 +127,14 @@ func (service *AuthService) HasUser(ctx context.Context, login, password string)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) GetUser(ctx context.Context, login string) (domain.User, error) {
 =======
 func (service *AuthService) GetUser(ctx context.Context, login string) (domain.User, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) GetUser(ctx context.Context, login string) (domain.User, error) {
+>>>>>>> a2b550a (done)
 	user, err := service.storage.GetUser(login)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -116,10 +144,14 @@ func (service *AuthService) GetUser(ctx context.Context, login string) (domain.U
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) ChangeUserPassword(ctx context.Context, login, newPassword string) (domain.User, error) {
 =======
 func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPassword string) (domain.User, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) ChangeUserPassword(ctx context.Context, login, newPassword string) (domain.User, error) {
+>>>>>>> a2b550a (done)
 	user, err := service.storage.ChangeUserPassword(login, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
@@ -130,10 +162,14 @@ func (service *AuthService) ChangeUserPassword(ctx context.Context, login, newPa
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
 =======
 func (service *AuthService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) ChangeUserName(ctx context.Context, login, newName string) (domain.User, error) {
+>>>>>>> a2b550a (done)
 	user, err := service.storage.ChangeUserName(login, newName)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
@@ -143,6 +179,7 @@ func (service *AuthService) ChangeUserName(ctx context.Context, login, newName s
 	return user, nil
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error) {
 =======
@@ -235,6 +272,9 @@ func (service *AuthService) GenerateTokens(login string, isAdmin bool, version u
 
 func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error) {
+>>>>>>> a2b550a (done)
 	user, err := service.storage.GetUserDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user data: %v",
@@ -245,10 +285,14 @@ func (service *AuthService) GetUserDataByUuid(ctx context.Context, uuid string) 
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
 =======
 func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
+>>>>>>> a2b550a (done)
 	userPreview, err := service.storage.GetUserPreview(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(requestId.ReqIDKey),
@@ -259,10 +303,14 @@ func (service *AuthService) GetUserPreview(ctx context.Context, uuid string) (do
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
 =======
 func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
+>>>>>>> a2b550a (done)
 	error) {
 	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
 	if err != nil {
@@ -274,10 +322,14 @@ func (service *AuthService) ChangeUserPasswordByUuid(ctx context.Context, uuid, 
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 func (service *UsersService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
 =======
 func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+func (service *UsersService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
+>>>>>>> a2b550a (done)
 	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
@@ -287,6 +339,9 @@ func (service *AuthService) ChangeUserNameByUuid(ctx context.Context, uuid, newN
 	return user, nil
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a2b550a (done)
 
 func (service *UsersService) ChangeUserAvatarByUuid(ctx context.Context, uuid, newAvatar string) (domain.User, error) {
 	user, err := service.storage.ChangeUserAvatarByUuid(uuid, newAvatar)
@@ -297,5 +352,8 @@ func (service *UsersService) ChangeUserAvatarByUuid(ctx context.Context, uuid, n
 	}
 	return user, nil
 }
+<<<<<<< HEAD
 =======
 >>>>>>> 6fcd4c8 (everything wrong)
+=======
+>>>>>>> a2b550a (done)

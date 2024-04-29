@@ -13,20 +13,20 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
-	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
 )
 
 type UserPageHandlers struct {
-	usersClient    *session.UsersClient
-	sessionsClient *session.SessionsClient
+	usersService   service.UsersService
+	sessionService SessionService
 	logger         *zap.SugaredLogger
 }
 
-func NewUserPageHandlers(usersClient *session.UsersClient, sessionsClient *session.SessionsClient,
+func NewUserPageHandlers(usersService service.UsersService, sessionService SessionService,
 	logger *zap.SugaredLogger) *UserPageHandlers {
 	return &UserPageHandlers{
-		usersClient:    usersClient,
-		sessionsClient: sessionsClient,
+		usersService:   usersService,
+		sessionService: sessionService,
 		logger:         logger,
 	}
 }
