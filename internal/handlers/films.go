@@ -86,7 +86,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
-
 	req := &session.FilmDataByUuidRequest{
 		Uuid: uuid,
 	}
@@ -98,7 +97,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		}
 		return
 	}
-
 	filmDataRegular := convertFilmDataToRegular(filmData.FilmData)
 	escapeFilmData(&filmDataRegular)
 
@@ -424,6 +422,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 	for _, film := range films.Films {
 		filmConverted := convertFilmPreviewToRegular(film)
 		escapeFilmPreview(&filmConverted)
+		fmt.Println(filmConverted)
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
 

@@ -69,7 +69,6 @@ func (server *FilmsServer) GetFilmDataByUuid(ctx context.Context,
 		return nil, fmt.Errorf("[reqid=%s] failed to get film data: %v\n", requestId, err)
 	}
 	filmConverted := convertFilmDataToProto(&film)
-
 	return &session.FilmDataByUuidResponse{
 		FilmData: filmConverted,
 	}, nil
@@ -266,6 +265,7 @@ func convertFilmDataToProto(film *domain.FilmData) *session.FilmData {
 		AgeLimit:    film.AgeLimit,
 		Date:        convertTimeToProto(film.Date),
 		Data:        film.Data,
+		Genres:      film.Genres,
 	}
 }
 

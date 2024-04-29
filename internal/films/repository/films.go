@@ -177,13 +177,13 @@ const getAllFilmsByGenreUuid = `
 
 const getAllGenres = `
 		SELECT g.external_id, g.name
-		FROM genre g`
+		FROM genre g;`
 
 const getGenresByFilm = `
 		SELECT g.name
 		FROM genre g
-		LEFT JOIN (film_genres fg LEFT JOIN film f ON fg.genre_external_id = f.external_id) fgg ON g.external_id = fgg.genre_external_id
-		WHERE fgg.film_external_id = $1`
+		LEFT JOIN film_genres fg ON fg.genre_external_id = g.external_id
+		WHERE fg.film_external_id = $1;`
 
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData

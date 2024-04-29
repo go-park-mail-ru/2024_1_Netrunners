@@ -143,6 +143,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
+		Genres:       film.Genres,
 	}
 }
 

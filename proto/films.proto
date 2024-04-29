@@ -44,6 +44,7 @@ message FilmData {
   string data = 9;
   uint32 age_limit = 10;
   google.protobuf.Timestamp date = 11;
+  repeated string genres = 12;
 }
 
 message Comment {
@@ -163,7 +164,7 @@ message GetAllFilmsByGenreRequest {
 }
 
 message GetAllFilmsByGenreResponse {
-   repeated FilmPreview films = 1;
+  repeated FilmPreview films = 1;
 }
 
 message GetAllGenresRequest {}
