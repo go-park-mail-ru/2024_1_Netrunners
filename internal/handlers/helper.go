@@ -92,9 +92,11 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
+	var genres []string
 	for _, genre := range filmData.Genres {
-		genre = html.EscapeString(genre)
+		genres = append(genres, html.EscapeString(genre))
 	}
+	filmData.Genres = genres
 }
 
 func escapeActorPreview(actor *domain.ActorPreview) {
