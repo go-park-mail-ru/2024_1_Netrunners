@@ -1,10 +1,14 @@
-FROM golang:1.21.0-alpine AS builder
+FROM golang:1.21.0-alpine
 
-COPY ../go.mod go.sum /github.com/go-park-mail-ru/2024_1_TeaStealers/
-WORKDIR /github.com/go-park-mail-ru/2024_1_TeaStealers/
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
 
-COPY .. .
+WORKDIR /app
+COPY . .
 
 RUN go mod tidy
-RUN go clean --modcache
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -o ./.bin ./cmd/main/main.go
+RUN go build -o app cmd/app/main.go
+
+EXPOSE 8081
+
+CMD ["./app"]
