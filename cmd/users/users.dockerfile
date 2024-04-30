@@ -6,9 +6,9 @@ RUN rm -rf /var/cache/apk/* && \
 WORKDIR /app
 COPY . .
 
-RUN go mod tidy
-RUN go build -o films cmd/sessions/main.go
+RUN go mod download
+RUN go build -o users cmd/users/main.go
 
-EXPOSE 8010
+EXPOSE 8030
 
-CMD ["./sessions"]
+CMD ["./users"]
