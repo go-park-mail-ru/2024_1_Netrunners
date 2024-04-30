@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root1234
     build:
-      dockerfile: ./docker/postgres.dockerfile
+      dockerfile: ./db/migrations/Dockerfile
     ports:
       - 5432:5432
     networks:
@@ -18,7 +18,7 @@ services:
   films:
     container_name: films
     build:
-      dockerfile: ./docker/films.dockerfile
+      dockerfile: ./cmd/films/Dockerfile
     ports:
       - 8020:8020
     networks:
@@ -30,7 +30,7 @@ services:
   users:
     container_name: users
     build:
-      dockerfile: ./docker/users.dockerfile
+      dockerfile: ./cmd/users/Dockerfile
     ports:
       - 8030:8030
     networks:
@@ -44,7 +44,7 @@ services:
     environment:
       SECRETKEY: SECRETKEY
     build:
-      dockerfile: ./docker/sessions.dockerfile
+      dockerfile: ./cmd/sessions/Dockerfile
     ports:
       - 8010:8010
     networks:
@@ -56,7 +56,7 @@ services:
   app:
     container_name: app
     build:
-      dockerfile: ./docker/main.dockerfile
+      dockerfile: ./cmd/app/Dockerfile
     ports:
       - 8081:8081
     networks:
