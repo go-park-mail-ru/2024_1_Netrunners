@@ -38,6 +38,14 @@ message FilmPreview {
   bool is_serial = 9;
 }
 
+message Episode {
+  string link = 1;
+}
+
+message Season {
+  repeated Episode episodes = 1;
+}
+
 message FilmData {
   string uuid = 1;
   string preview = 2;
@@ -51,6 +59,8 @@ message FilmData {
   uint32 age_limit = 10;
   google.protobuf.Timestamp date = 11;
   repeated string genres = 12;
+  bool is_serial = 13;
+  repeated Season seasons = 14;
 }
 
 message Comment {

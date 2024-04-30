@@ -29,6 +29,8 @@ const (
 	Films_PutFavorite_FullMethodName          = "/session.Films/PutFavorite"
 	Films_DeleteFavorite_FullMethodName       = "/session.Films/DeleteFavorite"
 	Films_GetAllFavoriteFilms_FullMethodName  = "/session.Films/GetAllFavoriteFilms"
+	Films_GetAllFilmsByGenre_FullMethodName   = "/session.Films/GetAllFilmsByGenre"
+	Films_GetAllGenres_FullMethodName         = "/session.Films/GetAllGenres"
 	Films_FindFilmsShort_FullMethodName       = "/session.Films/FindFilmsShort"
 	Films_FindFilmsLong_FullMethodName        = "/session.Films/FindFilmsLong"
 	Films_FindSerialsShort_FullMethodName     = "/session.Films/FindSerialsShort"
@@ -50,16 +52,13 @@ type FilmsClient interface {
 	PutFavorite(ctx context.Context, in *PutFavoriteRequest, opts ...grpc.CallOption) (*PutFavoriteResponse, error)
 	DeleteFavorite(ctx context.Context, in *DeleteFavoriteRequest, opts ...grpc.CallOption) (*DeleteFavoriteResponse, error)
 	GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error)
-<<<<<<< HEAD
 	GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error)
-=======
 	FindFilmsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error)
 	FindFilmsLong(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsLongResponse, error)
 	FindSerialsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error)
 	FindSerialsLong(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsLongResponse, error)
 	FindActorsShort(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsShortResponse, error)
->>>>>>> 4f68b5a (feat: search - take 1)
 }
 
 type filmsClient struct {
@@ -160,6 +159,24 @@ func (c *filmsClient) GetAllFavoriteFilms(ctx context.Context, in *GetAllFavorit
 	return out, nil
 }
 
+func (c *filmsClient) GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error) {
+	out := new(GetAllFilmsByGenreResponse)
+	err := c.cc.Invoke(ctx, Films_GetAllFilmsByGenre_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error) {
+	out := new(GetAllGenresResponse)
+	err := c.cc.Invoke(ctx, Films_GetAllGenres_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *filmsClient) FindFilmsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error) {
 	out := new(FindFilmsShortResponse)
 	err := c.cc.Invoke(ctx, Films_FindFilmsShort_FullMethodName, in, out, opts...)
@@ -205,24 +222,6 @@ func (c *filmsClient) FindActorsShort(ctx context.Context, in *FindActorsShortRe
 	return out, nil
 }
 
-func (c *filmsClient) GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error) {
-	out := new(GetAllFilmsByGenreResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetAllFilmsByGenre", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *filmsClient) GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error) {
-	out := new(GetAllGenresResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetAllGenres", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -237,16 +236,13 @@ type FilmsServer interface {
 	PutFavorite(context.Context, *PutFavoriteRequest) (*PutFavoriteResponse, error)
 	DeleteFavorite(context.Context, *DeleteFavoriteRequest) (*DeleteFavoriteResponse, error)
 	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
-<<<<<<< HEAD
 	GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error)
-=======
 	FindFilmsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error)
 	FindFilmsLong(context.Context, *FindFilmsShortRequest) (*FindFilmsLongResponse, error)
 	FindSerialsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error)
 	FindSerialsLong(context.Context, *FindFilmsShortRequest) (*FindFilmsLongResponse, error)
 	FindActorsShort(context.Context, *FindActorsShortRequest) (*FindActorsShortResponse, error)
->>>>>>> 4f68b5a (feat: search - take 1)
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -283,13 +279,12 @@ func (UnimplementedFilmsServer) DeleteFavorite(context.Context, *DeleteFavoriteR
 func (UnimplementedFilmsServer) GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllFavoriteFilms not implemented")
 }
-<<<<<<< HEAD
 func (UnimplementedFilmsServer) GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllFilmsByGenre not implemented")
 }
 func (UnimplementedFilmsServer) GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllGenres not implemented")
-=======
+}
 func (UnimplementedFilmsServer) FindFilmsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindFilmsShort not implemented")
 }
@@ -304,7 +299,6 @@ func (UnimplementedFilmsServer) FindSerialsLong(context.Context, *FindFilmsShort
 }
 func (UnimplementedFilmsServer) FindActorsShort(context.Context, *FindActorsShortRequest) (*FindActorsShortResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindActorsShort not implemented")
->>>>>>> 4f68b5a (feat: search - take 1)
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -499,27 +493,48 @@ func _Films_GetAllFavoriteFilms_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-<<<<<<< HEAD
 func _Films_GetAllFilmsByGenre_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetAllFilmsByGenreRequest)
-=======
-func _Films_FindFilmsShort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindFilmsShortRequest)
->>>>>>> 4f68b5a (feat: search - take 1)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-<<<<<<< HEAD
 		return srv.(FilmsServer).GetAllFilmsByGenre(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/session.Films/GetAllFilmsByGenre",
+		FullMethod: Films_GetAllFilmsByGenre_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FilmsServer).GetAllFilmsByGenre(ctx, req.(*GetAllFilmsByGenreRequest))
-=======
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_GetAllGenres_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllGenresRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).GetAllGenres(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Films_GetAllGenres_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).GetAllGenres(ctx, req.(*GetAllGenresRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_FindFilmsShort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindFilmsShortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
 		return srv.(FilmsServer).FindFilmsShort(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
@@ -528,32 +543,16 @@ func _Films_FindFilmsShort_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FilmsServer).FindFilmsShort(ctx, req.(*FindFilmsShortRequest))
->>>>>>> 4f68b5a (feat: search - take 1)
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-<<<<<<< HEAD
-func _Films_GetAllGenres_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllGenresRequest)
-=======
 func _Films_FindFilmsLong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FindFilmsShortRequest)
->>>>>>> 4f68b5a (feat: search - take 1)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-<<<<<<< HEAD
-		return srv.(FilmsServer).GetAllGenres(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/session.Films/GetAllGenres",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).GetAllGenres(ctx, req.(*GetAllGenresRequest))
-=======
 		return srv.(FilmsServer).FindFilmsLong(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
@@ -616,7 +615,6 @@ func _Films_FindActorsShort_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FilmsServer).FindActorsShort(ctx, req.(*FindActorsShortRequest))
->>>>>>> 4f68b5a (feat: search - take 1)
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -669,14 +667,14 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Films_GetAllFavoriteFilms_Handler,
 		},
 		{
-<<<<<<< HEAD
 			MethodName: "GetAllFilmsByGenre",
 			Handler:    _Films_GetAllFilmsByGenre_Handler,
 		},
 		{
 			MethodName: "GetAllGenres",
 			Handler:    _Films_GetAllGenres_Handler,
-=======
+		},
+		{
 			MethodName: "FindFilmsShort",
 			Handler:    _Films_FindFilmsShort_Handler,
 		},
@@ -695,7 +693,6 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindActorsShort",
 			Handler:    _Films_FindActorsShort_Handler,
->>>>>>> 4f68b5a (feat: search - take 1)
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

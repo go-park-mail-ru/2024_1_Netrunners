@@ -92,8 +92,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 }
 
 type filmDataResponse struct {
-	Status   int             `json:"status"`
-	FilmData domain.FilmData `json:"film"`
+	Status   int         `json:"status"`
+	FilmData interface{} `json:"film"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
@@ -111,12 +111,22 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		}
 		return
 	}
-	filmDataRegular := convertFilmDataToRegular(filmData.FilmData)
-	escapeFilmData(&filmDataRegular)
 
-	response := filmDataResponse{
-		Status:   http.StatusOK,
-		FilmData: filmDataRegular,
+	var response filmDataResponse
+	if !filmData.FilmData.IsSerial {
+		filmDataRegular := convertFilmDataToRegular(filmData.FilmData)
+		escapeFilmData(&filmDataRegular)
+		response = filmDataResponse{
+			Status:   http.StatusOK,
+			FilmData: filmDataRegular,
+		}
+	} else {
+		serialDataRegular := convertSerialDataToRegular(filmData.FilmData)
+		escapeSerialData(&serialDataRegular)
+		response = filmDataResponse{
+			Status:   http.StatusOK,
+			FilmData: serialDataRegular,
+		}
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -415,7 +425,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 	}
 }
 
-<<<<<<< HEAD
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -425,7 +434,46 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 	films, err := (*filmsPageHandlers.client).GetAllFilmsByGenre(ctx, &req)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all genre films: %v\n", requestId, err)
-=======
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	var filmsConverted []domain.FilmPreview
+	for _, film := range films.Films {
+		filmConverted := convertFilmPreviewToRegular(film)
+		escapeFilmPreview(&filmConverted)
+		filmsConverted = append(filmsConverted, filmConverted)
+	}
+	response := filmsPreviewsResponse{
+		Status: http.StatusOK,
+		Films:  filmsConverted,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
 func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -465,7 +513,6 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	films, err := (*filmsPageHandlers.client).FindFilmsShort(ctx, &filmsReq)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestId, err)
->>>>>>> 4f68b5a (feat: search - take 1)
 		err = WriteError(w, err)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -480,11 +527,6 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
 
-<<<<<<< HEAD
-	response := filmsPreviewsResponse{
-		Status: http.StatusOK,
-		Films:  filmsConverted,
-=======
 	serialsReq := session.FindFilmsShortRequest{
 		Key:  params["s"][0],
 		Page: uint32(page),
@@ -530,7 +572,6 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 		Status: http.StatusOK,
 		Films:  filmsConverted,
 		Actors: actorssConverted,
->>>>>>> 4f68b5a (feat: search - take 1)
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -555,7 +596,6 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	}
 }
 
-<<<<<<< HEAD
 type genresResponse struct {
 	Status      int                 `json:"status"`
 	GenresFilms []domain.GenreFilms `json:"genres"`
@@ -570,22 +610,11 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, 
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get genres: %v\n", requestId, err)
 		err = WriteError(w, err)
-=======
-func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
-
-	params := r.URL.Query()
-	if _, ok := params["s"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
-		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
->>>>>>> 4f68b5a (feat: search - take 1)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
 		return
 	}
-<<<<<<< HEAD
 	var genresConverted []domain.GenreFilms
 	for _, genre := range genresFilms.Genres {
 		genreConverted := convertGenreFilmsToRegular(genre)
@@ -602,7 +631,37 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
 		err = WriteError(w, err)
-=======
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	params := r.URL.Query()
+	if _, ok := params["s"]; !ok {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
 	if _, ok := params["p"]; !ok {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
@@ -614,20 +673,12 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 	if _, ok := params["fb"]; !ok {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
->>>>>>> 4f68b5a (feat: search - take 1)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
 		return
 	}
 
-<<<<<<< HEAD
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		err = WriteError(w, err)
-=======
 	page, err := strconv.Atoi(params["p"][0])
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to parse p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
@@ -782,7 +833,6 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 	default:
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
->>>>>>> 4f68b5a (feat: search - take 1)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}

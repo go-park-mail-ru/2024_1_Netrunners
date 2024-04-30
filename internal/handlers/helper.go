@@ -99,6 +99,13 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Genres = genres
 }
 
+func escapeSerialData(filmData *domain.SerialData) {
+	filmData.Title = html.EscapeString(filmData.Title)
+	filmData.Data = html.EscapeString(filmData.Data)
+	filmData.Director = html.EscapeString(filmData.Director)
+	filmData.Preview = html.EscapeString(filmData.Preview)
+}
+
 func escapeActorPreview(actor *domain.ActorPreview) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
@@ -155,6 +162,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		Title:        film.Title,
 		Preview:      film.Preview,
 		Director:     film.Director,
+		IsSerial:     film.IsSerial,
 		Link:         film.Link,
 		Data:         film.Data,
 		Date:         convertProtoToTime(film.Date),
@@ -163,6 +171,35 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
 		Genres:       film.Genres,
+	}
+}
+
+func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
+	seasons := make([]domain.Season, 0, len(film.Seasons))
+	for _, season := range film.Seasons {
+		episodes := make([]domain.Episode, 0, len(season.Episodes))
+		for _, episode := range season.Episodes {
+			episodes = append(episodes, domain.Episode{
+				Link: episode.Link,
+			})
+		}
+		seasons = append(seasons, domain.Season{
+			Series: episodes,
+		})
+	}
+
+	return domain.SerialData{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		IsSerial:     film.IsSerial,
+		Seasons:      seasons,
+		Data:         film.Data,
+		Date:         convertProtoToTime(film.Date),
+		AgeLimit:     film.AgeLimit,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
 	}
 }
 
