@@ -8,11 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root1234
     build:
-<<<<<<< HEAD
       dockerfile: ./db/migrations/Dockerfile
-=======
-      dockerfile: cmd/app/postgres.dockerfile
->>>>>>> ed945f869dcea4edeadb645e222b10658ca51b2a
     ports:
       - 5432:5432
     networks:
@@ -22,11 +18,7 @@ services:
   films:
     container_name: films
     build:
-<<<<<<< HEAD
       dockerfile: ./cmd/films/Dockerfile
-=======
-      dockerfile: ./cmd/films/films.dockerfile
->>>>>>> ed945f869dcea4edeadb645e222b10658ca51b2a
     ports:
       - 8020:8020
     networks:
@@ -38,11 +30,7 @@ services:
   users:
     container_name: users
     build:
-<<<<<<< HEAD
       dockerfile: ./cmd/users/Dockerfile
-=======
-      dockerfile: ./cmd/users/users.dockerfile
->>>>>>> ed945f869dcea4edeadb645e222b10658ca51b2a
     ports:
       - 8030:8030
     networks:
@@ -56,11 +44,7 @@ services:
     environment:
       SECRETKEY: SECRETKEY
     build:
-<<<<<<< HEAD
       dockerfile: ./cmd/sessions/Dockerfile
-=======
-      dockerfile: ./cmd/sessions/sessions.dockerfile
->>>>>>> ed945f869dcea4edeadb645e222b10658ca51b2a
     ports:
       - 8010:8010
     networks:
@@ -72,11 +56,7 @@ services:
   app:
     container_name: app
     build:
-<<<<<<< HEAD
       dockerfile: ./cmd/app/Dockerfile
-=======
-      dockerfile: main.dockerfile
->>>>>>> ed945f869dcea4edeadb645e222b10658ca51b2a
     ports:
       - 8081:8081
     networks:
