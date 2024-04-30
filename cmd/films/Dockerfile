@@ -6,7 +6,7 @@ RUN rm -rf /var/cache/apk/* && \
 WORKDIR /app
 COPY . .
 
-RUN go mod download
+RUN go mod tidy
 RUN go build -o films cmd/films/main.go
 
 EXPOSE 8020
