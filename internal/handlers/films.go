@@ -406,7 +406,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 	requestId := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 
-	fmt.Println(r)
 	req := session.GetAllFilmsByGenreRequest{GenreUuid: uuid}
 	films, err := (*filmsPageHandlers.client).GetAllFilmsByGenre(ctx, &req)
 	if err != nil {
@@ -422,7 +421,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 	for _, film := range films.Films {
 		filmConverted := convertFilmPreviewToRegular(film)
 		escapeFilmPreview(&filmConverted)
-		fmt.Println(filmConverted)
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
 
