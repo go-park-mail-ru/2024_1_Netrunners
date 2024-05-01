@@ -28,4 +28,5 @@ var (
 	ErrNotFound              = errors.New("no rows for given uuid")
 	ErrFavoriteAlreadyExists = errors.New("favorite already exists")
 	ErrNoGenres              = errors.New("no genres found")
+	ErrFilmAlreadyExists     = errors.New("film already exists")
 )

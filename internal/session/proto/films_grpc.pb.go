@@ -175,7 +175,6 @@ type FilmsServer interface {
 	GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error)
 	AddFilm(context.Context, *AddFilmRequest) (*AddFilmResponse, error)
-	mustEmbedUnimplementedFilmsServer()
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.

@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS actor
 	career      TEXT                         DEFAULT ''                          NOT NULL,
 	height      INTEGER CHECK (height < 300) DEFAULT 192                         NOT NULL,
 	birth_place TEXT                         DEFAULT 'Russia, Angarsk'           NOT NULL,
-	genres      TEXT                         DEFAULT 'Riddim'                    NOT NULL,
 	spouse      TEXT                         DEFAULT 'Светлана Ходченкова'       NOT NULL
 );
 

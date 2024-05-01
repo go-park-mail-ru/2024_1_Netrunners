@@ -41,6 +41,9 @@ const getFilmDataByUuid = `
 		WHERE f.external_id = $1
 		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration, f.age_limit;`
 
+const getAmountOfFilmsByName = `
+		SELECT COUNT(title) FROM film WHERE title = $1;`
+
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
 		FROM director
@@ -255,7 +258,18 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 		directorID   int
 		filmID       int
 		filmUuid     string
+		filmFlag     int
 	)
+	err = tx.QueryRow(context.Background(), getAmountOfFilmsByName, film.FilmData.Title).Scan(&filmFlag)
+	if err != nil {
+		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
+	}
+	if filmFlag != 0 {
+		return fmt.Errorf("failed to insert film: %w: %w", err,
+			myerrors.ErrFilmAlreadyExists)
+	}
+
 	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.DirectorToAdd.Name).Scan(&directorFlag)
 	if err != nil {
 		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
@@ -297,7 +311,7 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 			}
 		}
 
-		_, err = tx.Exec(context.Background(), insertFilmGenre, filmUuid, genreFlag)
+		_, err = tx.Exec(context.Background(), insertFilmGenre, filmUuid, genreUuid)
 		if err != nil {
 			return fmt.Errorf("failed to insert film genre: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
