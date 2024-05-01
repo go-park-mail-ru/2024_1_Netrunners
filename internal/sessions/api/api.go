@@ -17,7 +17,6 @@ type SessionService interface {
 	GetVersion(ctx context.Context, login string, token string) (version uint32, err error)
 	HasSession(ctx context.Context, login string, token string) error
 	CheckAllUserSessionTokens(ctx context.Context, login string) error
-	GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string, err error)
 }
 
 type SessionSever struct {
@@ -110,17 +109,4 @@ func (server *SessionSever) CheckAllUserSessionTokens(ctx context.Context,
 		return nil, fmt.Errorf("[reqid=%s] failed to check all user session tokens: %v\n", requestId, err)
 	}
 	return &session.CheckAllUserSessionTokensResponse{}, nil
-}
-
-func (server *SessionSever) GenerateToken(ctx context.Context,
-	req *session.GenerateTokenRequest) (res *session.GenerateTokenResponse, err error) {
-	requestId := ctx.Value(reqid.ReqIDKey)
-	token, err := server.sessionsService.GenerateTokens(req.Login, req.IsAdmin, req.Version)
-	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to generate token: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to generate token: %v\n", requestId, err)
-	}
-	return &session.GenerateTokenResponse{
-		TokenSigned: token,
-	}, nil
 }

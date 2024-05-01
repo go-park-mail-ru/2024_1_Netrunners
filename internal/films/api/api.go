@@ -25,6 +25,8 @@ type FilmsService interface {
 	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
 	RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
 	GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error)
+	GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error)
+	GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error)
 }
 
 type FilmsServer struct {
@@ -67,7 +69,6 @@ func (server *FilmsServer) GetFilmDataByUuid(ctx context.Context,
 		return nil, fmt.Errorf("[reqid=%s] failed to get film data: %v\n", requestId, err)
 	}
 	filmConverted := convertFilmDataToProto(&film)
-
 	return &session.FilmDataByUuidResponse{
 		FilmData: filmConverted,
 	}, nil
@@ -200,6 +201,44 @@ func (server *FilmsServer) GetAllFavoriteFilms(ctx context.Context,
 	}, nil
 }
 
+func (server *FilmsServer) GetAllFilmsByGenre(ctx context.Context,
+	req *session.GetAllFilmsByGenreRequest) (res *session.GetAllFilmsByGenreResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.GetAllFilmsByGenre(ctx, req.GenreUuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get genre films: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get genre films: %v\n", requestId, err)
+	}
+
+	var filmsConverted []*session.FilmPreview
+	for _, film := range films {
+		filmsConverted = append(filmsConverted, convertFilmPreviewToProto(&film))
+	}
+
+	return &session.GetAllFilmsByGenreResponse{
+		Films: filmsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) GetAllGenres(ctx context.Context,
+	req *session.GetAllGenresRequest) (res *session.GetAllGenresResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	genres, err := server.filmsService.GetAllGenres(ctx)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get genres: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get genres: %v\n", requestId, err)
+	}
+
+	var genresConverted []*session.GenreFilms
+	for _, genre := range genres {
+		genreConverted := convertGenreFilmsToProto(genre)
+		genresConverted = append(genresConverted, genreConverted)
+	}
+	return &session.GetAllGenresResponse{
+		Genres: genresConverted,
+	}, nil
+}
+
 func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 	return &session.FilmPreview{
 		Uuid:        film.Uuid,
@@ -226,6 +265,7 @@ func convertFilmDataToProto(film *domain.FilmData) *session.FilmData {
 		AgeLimit:    film.AgeLimit,
 		Date:        convertTimeToProto(film.Date),
 		Data:        film.Data,
+		Genres:      film.Genres,
 	}
 }
 
@@ -256,7 +296,6 @@ func convertActorDataToProto(actor domain.ActorData) *session.ActorData {
 		Birthday: convertTimeToProto(actor.Birthday),
 		Career:   actor.Career,
 		Spouse:   actor.Spouse,
-		Genres:   actor.Genres,
 	}
 }
 
@@ -264,5 +303,18 @@ func convertTimeToProto(time time.Time) *timestamppb.Timestamp {
 	return &timestamppb.Timestamp{
 		Seconds: time.Unix(),
 		Nanos:   int32(time.Nanosecond()),
+	}
+}
+
+func convertGenreFilmsToProto(genreFilms domain.GenreFilms) *session.GenreFilms {
+	var filmsConverted []*session.FilmPreview
+	for _, film := range genreFilms.Films {
+		filmConverted := convertFilmPreviewToProto(&film)
+		filmsConverted = append(filmsConverted, filmConverted)
+	}
+	return &session.GenreFilms{
+		Genre:     genreFilms.Name,
+		GenreUuid: genreFilms.Uuid,
+		Films:     filmsConverted,
 	}
 }

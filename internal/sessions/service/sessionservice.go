@@ -2,11 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
@@ -25,14 +20,12 @@ type sessionStorage interface {
 type SessionService struct {
 	sessionStorage sessionStorage
 	logger         *zap.SugaredLogger
-	secretKey      string
 }
 
 func NewSessionService(sessionStorage sessionStorage, logger *zap.SugaredLogger) *SessionService {
 	return &SessionService{
 		sessionStorage: sessionStorage,
 		logger:         logger,
-		secretKey:      os.Getenv("SECRETKEY"),
 	}
 }
 
@@ -100,33 +93,4 @@ func (service *SessionService) CheckAllUserSessionTokens(ctx context.Context, lo
 		return err
 	}
 	return nil
-}
-
-type customClaims struct {
-	jwt.StandardClaims
-	Login   string
-	IsAdmin bool
-	Version uint32
-}
-
-func (service *SessionService) GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string,
-	err error) {
-	tokenCustomClaims := customClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
-			Issuer:    "NETrunnerFLIX",
-		},
-		Login:   login,
-		IsAdmin: isAdmin,
-		Version: version,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
-
-	tokenSigned, err = token.SignedString([]byte(service.secretKey))
-	if err != nil {
-		return "", fmt.Errorf("%v", err)
-	}
-
-	return tokenSigned, nil
 }

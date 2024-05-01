@@ -2,9 +2,8 @@ package service
 
 import (
 	"context"
-	"os"
-
 	"go.uber.org/zap"
+	"os"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"

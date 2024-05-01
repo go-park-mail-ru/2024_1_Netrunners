@@ -17,6 +17,7 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrFailInQueryRow),
 		errors.Is(err, ErrFailInQuery),
 		errors.Is(err, ErrNoSuchActor),
+		errors.Is(err, ErrNoGenres),
 		errors.Is(err, ErrFailInExec):
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),

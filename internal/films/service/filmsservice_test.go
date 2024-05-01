@@ -335,7 +335,6 @@ func TestActorsService_GetActorByUuid(t *testing.T) {
 		Career:     "career",
 		Height:     192,
 		BirthPlace: "Angarsk",
-		Genres:     "Riddim",
 		Spouse:     "Дабстеп",
 		Films:      mocks.NewMockActor().Films,
 	}

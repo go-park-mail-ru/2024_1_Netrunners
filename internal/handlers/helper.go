@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -82,7 +83,6 @@ func escapeActorData(actor *domain.ActorData) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
 	actor.Spouse = html.EscapeString(actor.Spouse)
-	actor.Genres = html.EscapeString(actor.Genres)
 	actor.BirthPlace = html.EscapeString(actor.BirthPlace)
 	actor.Career = html.EscapeString(actor.Career)
 }
@@ -92,6 +92,11 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
+	var genres []string
+	for _, genre := range filmData.Genres {
+		genres = append(genres, html.EscapeString(genre))
+	}
+	filmData.Genres = genres
 }
 
 func escapeActorPreview(actor *domain.ActorPreview) {
@@ -108,6 +113,10 @@ func escapeFilmPreview(film *domain.FilmPreview) {
 func escapeComment(comment *domain.Comment) {
 	comment.Text = html.EscapeString(comment.Text)
 	comment.Author = html.EscapeString(comment.Author)
+}
+
+func escapeGenreFilms(genreFilms *domain.GenreFilms) {
+	genreFilms.Name = html.EscapeString(genreFilms.Name)
 }
 
 func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
@@ -137,6 +146,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
+		Genres:       film.Genres,
 	}
 }
 
@@ -173,7 +183,6 @@ func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 		Birthday: convertProtoToTime(actor.Birthday),
 		Career:   actor.Career,
 		Spouse:   actor.Spouse,
-		Genres:   actor.Genres,
 		Films:    filmsPreview,
 	}
 }
@@ -209,6 +218,18 @@ func convertUserPreviewToRegular(user *session.UserPreview) domain.UserPreview {
 		Uuid:   user.Uuid,
 		Name:   user.Username,
 		Avatar: user.Avatar,
+	}
+}
+
+func convertGenreFilmsToRegular(genreFilms *session.GenreFilms) domain.GenreFilms {
+	var filmsConverted []domain.FilmPreview
+	for _, film := range genreFilms.Films {
+		filmsConverted = append(filmsConverted, convertFilmPreviewToRegular(film))
+	}
+	return domain.GenreFilms{
+		Name:  genreFilms.Genre,
+		Uuid:  genreFilms.GenreUuid,
+		Films: filmsConverted,
 	}
 }
 
@@ -268,4 +289,33 @@ func ValidatePassword(password string) error {
 		return nil
 	}
 	return myerrors.ErrPasswordIsToShort
+}
+
+type customClaims struct {
+	jwt.StandardClaims
+	Login   string
+	IsAdmin bool
+	Version uint32
+}
+
+func GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned string,
+	err error) {
+	tokenCustomClaims := customClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+			Issuer:    "NETrunnerFLIX",
+		},
+		Login:   login,
+		IsAdmin: isAdmin,
+		Version: version,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenCustomClaims)
+
+	tokenSigned, err = token.SignedString([]byte(os.Getenv("SECRETKEY")))
+	if err != nil {
+		return "", fmt.Errorf("%v", err)
+	}
+
+	return tokenSigned, nil
 }

@@ -82,3 +82,19 @@ CREATE TABLE IF NOT EXISTS favorite_film
 	FOREIGN KEY (user_external_id) REFERENCES users (external_id) ON DELETE CASCADE,
 	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS genre
+(
+	id          INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	external_id UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
+	name        TEXT                                  NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS film_genres
+(
+	id                INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	film_external_id  UUID NOT NULL,
+	genre_external_id UUID NOT NULL,
+	FOREIGN KEY (genre_external_id) REFERENCES genre (external_id) ON DELETE CASCADE,
+	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
+);

@@ -243,8 +243,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	version := currUserProto.Version + 1
 
-	reqGen := session.GenerateTokenRequest{Login: currUserProto.Email, IsAdmin: false, Version: version}
-	tokenSigned, err := (*UserPageHandlers.sessionsClient).GenerateToken(ctx, &reqGen)
+	tokenSigned, err := GenerateTokens(currUserProto.Email, false, version)
 	if err != nil {
 		err = WriteError(w, err)
 		if err != nil {
@@ -253,7 +252,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		return
 	}
 
-	reqAdd := session.AddRequest{Login: currUserProto.Email, Token: tokenSigned.TokenSigned, Version: version}
+	reqAdd := session.AddRequest{Login: currUserProto.Email, Token: tokenSigned, Version: version}
 	_, err = (*UserPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
 		err = WriteError(w, err)
@@ -265,7 +264,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	tokenCookie := &http.Cookie{
 		Name:     "access",
-		Value:    tokenSigned.TokenSigned,
+		Value:    tokenSigned,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,

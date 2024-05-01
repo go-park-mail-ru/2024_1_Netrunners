@@ -113,6 +113,21 @@ func (mr *MockFilmsStorageMockRecorder) GetAllFilmComments(uuid any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmComments), uuid)
 }
 
+// GetAllFilmsByGenre mocks base method.
+func (m *MockFilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllFilmsByGenre", genreUuid)
+	ret0, _ := ret[0].([]domain.FilmPreview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllFilmsByGenre indicates an expected call of GetAllFilmsByGenre.
+func (mr *MockFilmsStorageMockRecorder) GetAllFilmsByGenre(genreUuid any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsByGenre", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmsByGenre), genreUuid)
+}
+
 // GetAllFilmsPreviews mocks base method.
 func (m *MockFilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	m.ctrl.T.Helper()
@@ -126,6 +141,21 @@ func (m *MockFilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 func (mr *MockFilmsStorageMockRecorder) GetAllFilmsPreviews() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmsPreviews))
+}
+
+// GetAllGenres mocks base method.
+func (m *MockFilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllGenres")
+	ret0, _ := ret[0].([]domain.GenreFilms)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllGenres indicates an expected call of GetAllGenres.
+func (mr *MockFilmsStorageMockRecorder) GetAllGenres() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllGenres", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllGenres))
 }
 
 // GetFilmDataByUuid mocks base method.

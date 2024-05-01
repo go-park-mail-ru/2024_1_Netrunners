@@ -15,7 +15,6 @@ type ActorData struct {
 	Career     string        `json:"career"`
 	Height     uint8         `json:"height"`
 	BirthPlace string        `json:"birthPlace"`
-	Genres     string        `json:"genres"`
 	Spouse     string        `json:"spouse"`
 	Films      []FilmPreview `json:"films"`
 }

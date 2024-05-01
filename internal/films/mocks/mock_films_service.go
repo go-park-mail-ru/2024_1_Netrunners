@@ -114,6 +114,21 @@ func (mr *MockFilmsServiceMockRecorder) GetAllFilmComments(ctx, uuid any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmComments), ctx, uuid)
 }
 
+// GetAllFilmsByGenre mocks base method.
+func (m *MockFilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllFilmsByGenre", ctx, genreUuid)
+	ret0, _ := ret[0].([]domain.FilmPreview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllFilmsByGenre indicates an expected call of GetAllFilmsByGenre.
+func (mr *MockFilmsServiceMockRecorder) GetAllFilmsByGenre(ctx, genreUuid any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsByGenre", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmsByGenre), ctx, genreUuid)
+}
+
 // GetAllFilmsPreviews mocks base method.
 func (m *MockFilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error) {
 	m.ctrl.T.Helper()
@@ -127,6 +142,21 @@ func (m *MockFilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.Fi
 func (mr *MockFilmsServiceMockRecorder) GetAllFilmsPreviews(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmsPreviews", reflect.TypeOf((*MockFilmsService)(nil).GetAllFilmsPreviews), ctx)
+}
+
+// GetAllGenres mocks base method.
+func (m *MockFilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllGenres", ctx)
+	ret0, _ := ret[0].([]domain.GenreFilms)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllGenres indicates an expected call of GetAllGenres.
+func (mr *MockFilmsServiceMockRecorder) GetAllGenres(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllGenres", reflect.TypeOf((*MockFilmsService)(nil).GetAllGenres), ctx)
 }
 
 // GetFilmDataByUuid mocks base method.

@@ -25,7 +25,6 @@ type SessionsClient interface {
 	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error)
 	HasSession(ctx context.Context, in *HasSessionRequest, opts ...grpc.CallOption) (*HasSessionResponse, error)
 	CheckAllUserSessionTokens(ctx context.Context, in *CheckAllUserSessionTokensRequest, opts ...grpc.CallOption) (*CheckAllUserSessionTokensResponse, error)
-	GenerateToken(ctx context.Context, in *GenerateTokenRequest, opts ...grpc.CallOption) (*GenerateTokenResponse, error)
 }
 
 type sessionsClient struct {
@@ -99,15 +98,6 @@ func (c *sessionsClient) CheckAllUserSessionTokens(ctx context.Context, in *Chec
 	return out, nil
 }
 
-func (c *sessionsClient) GenerateToken(ctx context.Context, in *GenerateTokenRequest, opts ...grpc.CallOption) (*GenerateTokenResponse, error) {
-	out := new(GenerateTokenResponse)
-	err := c.cc.Invoke(ctx, "/session.Sessions/GenerateToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // SessionsServer is the server API for Sessions service.
 // All implementations must embed UnimplementedSessionsServer
 // for forward compatibility
@@ -119,7 +109,6 @@ type SessionsServer interface {
 	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
 	HasSession(context.Context, *HasSessionRequest) (*HasSessionResponse, error)
 	CheckAllUserSessionTokens(context.Context, *CheckAllUserSessionTokensRequest) (*CheckAllUserSessionTokensResponse, error)
-	GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error)
 }
 
 // UnimplementedSessionsServer must be embedded to have forward compatible implementations.
@@ -146,9 +135,6 @@ func (UnimplementedSessionsServer) HasSession(context.Context, *HasSessionReques
 }
 func (UnimplementedSessionsServer) CheckAllUserSessionTokens(context.Context, *CheckAllUserSessionTokensRequest) (*CheckAllUserSessionTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckAllUserSessionTokens not implemented")
-}
-func (UnimplementedSessionsServer) GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateToken not implemented")
 }
 func (UnimplementedSessionsServer) mustEmbedUnimplementedSessionsServer() {}
 
@@ -289,24 +275,6 @@ func _Sessions_CheckAllUserSessionTokens_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Sessions_GenerateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateTokenRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SessionsServer).GenerateToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/session.Sessions/GenerateToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionsServer).GenerateToken(ctx, req.(*GenerateTokenRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Sessions_ServiceDesc is the grpc.ServiceDesc for Sessions service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -341,10 +309,6 @@ var Sessions_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckAllUserSessionTokens",
 			Handler:    _Sessions_CheckAllUserSessionTokens_Handler,
-		},
-		{
-			MethodName: "GenerateToken",
-			Handler:    _Sessions_GenerateToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

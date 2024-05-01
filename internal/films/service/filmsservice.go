@@ -22,6 +22,8 @@ type FilmsStorage interface {
 	PutFavoriteFilm(filmUuid string, userUuid string) error
 	RemoveFavoriteFilm(filmUuid string, userUuid string) error
 	GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error)
+	GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error)
+	GetAllGenres() ([]domain.GenreFilms, error)
 }
 
 type FilmsService struct {
@@ -145,4 +147,24 @@ func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid s
 		return nil, err
 	}
 	return films, nil
+}
+
+func (service *FilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error) {
+	films, err := service.storage.GetAllFilmsByGenre(genreUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get genre films: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
+}
+
+func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error) {
+	genres, err := service.storage.GetAllGenres()
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get genres: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return genres, nil
 }
