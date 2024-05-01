@@ -30,6 +30,7 @@ type FilmsClient interface {
 	GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error)
 	GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error)
+	AddFilm(ctx context.Context, in *AddFilmRequest, opts ...grpc.CallOption) (*AddFilmResponse, error)
 }
 
 type filmsClient struct {
@@ -148,6 +149,15 @@ func (c *filmsClient) GetAllGenres(ctx context.Context, in *GetAllGenresRequest,
 	return out, nil
 }
 
+func (c *filmsClient) AddFilm(ctx context.Context, in *AddFilmRequest, opts ...grpc.CallOption) (*AddFilmResponse, error) {
+	out := new(AddFilmResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/AddFilm", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -164,6 +174,8 @@ type FilmsServer interface {
 	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
 	GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error)
+	AddFilm(context.Context, *AddFilmRequest) (*AddFilmResponse, error)
+	mustEmbedUnimplementedFilmsServer()
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -205,6 +217,9 @@ func (UnimplementedFilmsServer) GetAllFilmsByGenre(context.Context, *GetAllFilms
 }
 func (UnimplementedFilmsServer) GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllGenres not implemented")
+}
+func (UnimplementedFilmsServer) AddFilm(context.Context, *AddFilmRequest) (*AddFilmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddFilm not implemented")
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -435,6 +450,24 @@ func _Films_GetAllGenres_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_AddFilm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddFilmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).AddFilm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/AddFilm",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).AddFilm(ctx, req.(*AddFilmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Films_ServiceDesc is the grpc.ServiceDesc for Films service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -489,6 +522,10 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllGenres",
 			Handler:    _Films_GetAllGenres_Handler,
+		},
+		{
+			MethodName: "AddFilm",
+			Handler:    _Films_AddFilm_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

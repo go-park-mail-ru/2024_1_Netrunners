@@ -503,3 +503,34 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, 
 		return
 	}
 }
+
+func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+	var filmAddData domain.FilmToAdd
+	err := json.NewDecoder(r.Body).Decode(&filmAddData)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode film data to add: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	req := session.AddFilmRequest{FilmData: convertFilmToAdd(filmAddData)}
+	_, err = (*filmsPageHandlers.client).AddFilm(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to add film: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	err = WriteSuccess(w)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+}

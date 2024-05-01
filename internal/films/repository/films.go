@@ -47,21 +47,11 @@ const getAmountOfDirectorsByName = `
 		WHERE name = $1;`
 
 const insertDirector = `
-		INSERT INTO director (name) VALUES ($1);`
-
-const getDirectorsIdByName = `
-		SELECT id
-		FROM director
-		WHERE name = $1;`
+		INSERT INTO director (name, avatar, birthday) VALUES ($1, $2, $3) RETURNING id;`
 
 const insertFilm = `
-		INSERT INTO film (title, banner, director, data, age_limit, duration, published_at) 
-    	VALUES ($1, $2, $3, $4, $5, $6, $7);`
-
-const getFilmIdByTitle = `
-		SELECT id
-		FROM film
-		WHERE title = $1;`
+		INSERT INTO film (title, banner, director, data, age_limit, duration, published_at, s3_link) 
+    	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, external_id;`
 
 const getAmountOfActorsByName = `
 		SELECT COUNT(*)
@@ -69,7 +59,8 @@ const getAmountOfActorsByName = `
 		WHERE actor.name = $1;`
 
 const insertActor = `
-		INSERT INTO actor (name) VALUES ($1);`
+		INSERT INTO actor (name, avatar, career, birthday, birth_place, height, spouse) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
 
 const getActorId = `
 		SELECT id
@@ -187,6 +178,20 @@ const getGenresByFilm = `
 		LEFT JOIN film_genres fg ON fg.genre_external_id = g.external_id
 		WHERE fg.film_external_id = $1;`
 
+const getAmountOfGenresByName = `
+		SELECT COUNT(name) 
+		FROM genre 
+		WHERE name = $1`
+
+const insertGenre = `
+		INSERT INTO genre (name) VALUES ($1) RETURNING external_id;`
+
+const getGenreUuidByName = `
+		SELECT external_id FROM genre WHERE name = $1;`
+
+const insertFilmGenre = `
+		INSERT INTO film_genres (film_external_id, genre_external_id) VALUES ($1, $2)`
+
 func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, error) {
 	var film domain.FilmData
 	err := storage.pool.QueryRow(context.Background(), getFilmDataByUuid, uuid).Scan(
@@ -232,7 +237,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 	return film, nil
 }
 
-func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
+func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction to add film: %w: %w", err,
@@ -245,39 +250,58 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 		}
 	}()
 
-	var directorFlag int
-	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
+	var (
+		directorFlag int
+		directorID   int
+		filmID       int
+		filmUuid     string
+	)
+	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.DirectorToAdd.Name).Scan(&directorFlag)
 	if err != nil {
 		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
 			myerrors.ErrFailInQueryRow)
 	}
 	if directorFlag == 0 {
-		_, err = tx.Exec(context.Background(), insertDirector, film.Director)
+		err = tx.QueryRow(context.Background(), insertDirector,
+			film.DirectorToAdd.Name, film.DirectorToAdd.Avatar, film.DirectorToAdd.Birthday).Scan(&directorID)
 		if err != nil {
 			return fmt.Errorf("failed to insert director: %w: %w", err,
 				myerrors.ErrFailInExec)
 		}
 	}
 
-	var directorID int
-	err = tx.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
-	if err != nil {
-		return fmt.Errorf("failed to get directors id: %w: %w", err,
-			myerrors.ErrFailInQueryRow)
-	}
-
-	_, err = tx.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
-		film.AgeLimit, film.Duration, film.PublishedAt)
+	err = tx.QueryRow(context.Background(), insertFilm, film.FilmData.Title, film.FilmData.Preview, directorID,
+		film.FilmData.Data, film.FilmData.AgeLimit, film.FilmData.Duration,
+		film.FilmData.PublishedAt, film.FilmData.Link).Scan(&filmID, &filmUuid)
 	if err != nil {
 		return fmt.Errorf("failed to insert film: %w: %w", err,
 			myerrors.ErrFailInExec)
 	}
+	for _, genre := range film.FilmData.Genres {
+		var (
+			genreFlag int
+			genreUuid string
+		)
+		err = tx.QueryRow(context.Background(), getAmountOfGenresByName, film.DirectorToAdd.Name).Scan(&genreFlag)
+		if genreFlag == 0 {
+			err = tx.QueryRow(context.Background(), insertGenre, genre).Scan(&genreUuid)
+			if err != nil {
+				return fmt.Errorf("failed to insert genre: %w: %w", err,
+					myerrors.ErrFailInExec)
+			}
+		} else {
+			err = tx.QueryRow(context.Background(), getGenreUuidByName, genre).Scan(&genreUuid)
+			if err != nil {
+				return fmt.Errorf("failed to get genre uuid: %w: %w", err,
+					myerrors.ErrFailInQueryRow)
+			}
+		}
 
-	var filmID int
-	err = tx.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
-	if err != nil {
-		return fmt.Errorf("failed to get film id: %w: %w", err,
-			myerrors.ErrFailInQueryRow)
+		_, err = tx.Exec(context.Background(), insertFilmGenre, filmUuid, genreFlag)
+		if err != nil {
+			return fmt.Errorf("failed to insert film genre: %w: %w", err,
+				myerrors.ErrFailInQueryRow)
+		}
 	}
 
 	ActorsCast := film.Actors
@@ -288,19 +312,20 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 			return fmt.Errorf("failed to get amount of actors: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
 		}
+		var actorID int
 		if actorFlag == 0 {
-			_, err = tx.Exec(context.Background(), insertActor, actor.Name)
+			err = tx.QueryRow(context.Background(), insertActor, actor.Name, actor.Avatar, actor.Career, actor.Birthday,
+				actor.BirthPlace, actor.Height, actor.Spouse).Scan(&actorID)
 			if err != nil {
 				return fmt.Errorf("failed to insert actor: %w: %w", err,
 					myerrors.ErrFailInExec)
 			}
-		}
-
-		var actorID int
-		err = tx.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
-		if err != nil {
-			return fmt.Errorf("failed to get actor id: %w: %w", err,
-				myerrors.ErrFailInQueryRow)
+		} else {
+			err = tx.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
+			if err != nil {
+				return fmt.Errorf("failed to get actor id: %w: %w", err,
+					myerrors.ErrFailInQueryRow)
+			}
 		}
 
 		_, err = tx.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)

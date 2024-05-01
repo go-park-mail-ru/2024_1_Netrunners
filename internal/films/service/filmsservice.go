@@ -12,7 +12,7 @@ import (
 
 type FilmsStorage interface {
 	GetFilmDataByUuid(uuid string) (domain.FilmData, error)
-	AddFilm(film domain.FilmDataToAdd) error
+	AddFilm(film domain.FilmToAdd) error
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
@@ -50,7 +50,7 @@ func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string)
 	return film, nil
 }
 
-func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAdd) error {
+func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd) error {
 	err := service.storage.AddFilm(film)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to add film: %v", ctx.Value(requestId.ReqIDKey), err)

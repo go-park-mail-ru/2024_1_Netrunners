@@ -153,6 +153,7 @@ type UsersServer interface {
 	ChangeUserPasswordByUuid(context.Context, *ChangeUserPasswordByUuidRequest) (*ChangeUserPasswordByUuidResponse, error)
 	ChangeUserNameByUuid(context.Context, *ChangeUserNameByUuidRequest) (*ChangeUserNameByUuidResponse, error)
 	ChangeUserAvatarByUuid(context.Context, *ChangeUserAvatarByUuidRequest) (*ChangeUserAvatarByUuidResponse, error)
+	mustEmbedUnimplementedUsersServer()
 }
 
 // UnimplementedUsersServer must be embedded to have forward compatible implementations.

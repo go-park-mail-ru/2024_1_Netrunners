@@ -1815,6 +1815,423 @@ func (x *GetAllGenresResponse) GetGenres() []*GenreFilms {
 	return nil
 }
 
+type FilmDataToAdd struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Title       string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Preview     string                 `protobuf:"bytes,2,opt,name=preview,proto3" json:"preview,omitempty"`
+	Director    string                 `protobuf:"bytes,3,opt,name=director,proto3" json:"director,omitempty"`
+	Data        string                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	AgeLimit    uint32                 `protobuf:"varint,5,opt,name=ageLimit,proto3" json:"ageLimit,omitempty"`
+	PublishedAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=publishedAt,proto3" json:"publishedAt,omitempty"`
+	Genres      []string               `protobuf:"bytes,7,rep,name=genres,proto3" json:"genres,omitempty"`
+	Duration    uint32                 `protobuf:"varint,8,opt,name=duration,proto3" json:"duration,omitempty"`
+	Link        string                 `protobuf:"bytes,9,opt,name=link,proto3" json:"link,omitempty"`
+}
+
+func (x *FilmDataToAdd) Reset() {
+	*x = FilmDataToAdd{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[33]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FilmDataToAdd) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FilmDataToAdd) ProtoMessage() {}
+
+func (x *FilmDataToAdd) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[33]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FilmDataToAdd.ProtoReflect.Descriptor instead.
+func (*FilmDataToAdd) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *FilmDataToAdd) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *FilmDataToAdd) GetPreview() string {
+	if x != nil {
+		return x.Preview
+	}
+	return ""
+}
+
+func (x *FilmDataToAdd) GetDirector() string {
+	if x != nil {
+		return x.Director
+	}
+	return ""
+}
+
+func (x *FilmDataToAdd) GetData() string {
+	if x != nil {
+		return x.Data
+	}
+	return ""
+}
+
+func (x *FilmDataToAdd) GetAgeLimit() uint32 {
+	if x != nil {
+		return x.AgeLimit
+	}
+	return 0
+}
+
+func (x *FilmDataToAdd) GetPublishedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.PublishedAt
+	}
+	return nil
+}
+
+func (x *FilmDataToAdd) GetGenres() []string {
+	if x != nil {
+		return x.Genres
+	}
+	return nil
+}
+
+func (x *FilmDataToAdd) GetDuration() uint32 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+func (x *FilmDataToAdd) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
+type ActorDataToAdd struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name       string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Avatar     string                 `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	BirthdayAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=birthdayAt,proto3" json:"birthdayAt,omitempty"`
+	Career     string                 `protobuf:"bytes,4,opt,name=career,proto3" json:"career,omitempty"`
+	Height     uint32                 `protobuf:"varint,5,opt,name=height,proto3" json:"height,omitempty"`
+	BirthPlace string                 `protobuf:"bytes,6,opt,name=birthPlace,proto3" json:"birthPlace,omitempty"`
+	Spouse     string                 `protobuf:"bytes,7,opt,name=spouse,proto3" json:"spouse,omitempty"`
+}
+
+func (x *ActorDataToAdd) Reset() {
+	*x = ActorDataToAdd{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[34]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ActorDataToAdd) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActorDataToAdd) ProtoMessage() {}
+
+func (x *ActorDataToAdd) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[34]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActorDataToAdd.ProtoReflect.Descriptor instead.
+func (*ActorDataToAdd) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *ActorDataToAdd) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ActorDataToAdd) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *ActorDataToAdd) GetBirthdayAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.BirthdayAt
+	}
+	return nil
+}
+
+func (x *ActorDataToAdd) GetCareer() string {
+	if x != nil {
+		return x.Career
+	}
+	return ""
+}
+
+func (x *ActorDataToAdd) GetHeight() uint32 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *ActorDataToAdd) GetBirthPlace() string {
+	if x != nil {
+		return x.BirthPlace
+	}
+	return ""
+}
+
+func (x *ActorDataToAdd) GetSpouse() string {
+	if x != nil {
+		return x.Spouse
+	}
+	return ""
+}
+
+type DirectorDataToAdd struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name     string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Avatar   string                 `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Birthday *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=birthday,proto3" json:"birthday,omitempty"`
+}
+
+func (x *DirectorDataToAdd) Reset() {
+	*x = DirectorDataToAdd{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[35]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DirectorDataToAdd) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DirectorDataToAdd) ProtoMessage() {}
+
+func (x *DirectorDataToAdd) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[35]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DirectorDataToAdd.ProtoReflect.Descriptor instead.
+func (*DirectorDataToAdd) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *DirectorDataToAdd) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DirectorDataToAdd) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *DirectorDataToAdd) GetBirthday() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Birthday
+	}
+	return nil
+}
+
+type FilmToAdd struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	FilmData *FilmDataToAdd     `protobuf:"bytes,1,opt,name=filmData,proto3" json:"filmData,omitempty"`
+	Actors   []*ActorDataToAdd  `protobuf:"bytes,2,rep,name=actors,proto3" json:"actors,omitempty"`
+	Director *DirectorDataToAdd `protobuf:"bytes,3,opt,name=director,proto3" json:"director,omitempty"`
+}
+
+func (x *FilmToAdd) Reset() {
+	*x = FilmToAdd{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[36]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FilmToAdd) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FilmToAdd) ProtoMessage() {}
+
+func (x *FilmToAdd) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[36]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FilmToAdd.ProtoReflect.Descriptor instead.
+func (*FilmToAdd) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *FilmToAdd) GetFilmData() *FilmDataToAdd {
+	if x != nil {
+		return x.FilmData
+	}
+	return nil
+}
+
+func (x *FilmToAdd) GetActors() []*ActorDataToAdd {
+	if x != nil {
+		return x.Actors
+	}
+	return nil
+}
+
+func (x *FilmToAdd) GetDirector() *DirectorDataToAdd {
+	if x != nil {
+		return x.Director
+	}
+	return nil
+}
+
+type AddFilmRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	FilmData *FilmToAdd `protobuf:"bytes,1,opt,name=filmData,proto3" json:"filmData,omitempty"`
+}
+
+func (x *AddFilmRequest) Reset() {
+	*x = AddFilmRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[37]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AddFilmRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddFilmRequest) ProtoMessage() {}
+
+func (x *AddFilmRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[37]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddFilmRequest.ProtoReflect.Descriptor instead.
+func (*AddFilmRequest) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *AddFilmRequest) GetFilmData() *FilmToAdd {
+	if x != nil {
+		return x.FilmData
+	}
+	return nil
+}
+
+type AddFilmResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AddFilmResponse) Reset() {
+	*x = AddFilmResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_films_proto_msgTypes[38]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AddFilmResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddFilmResponse) ProtoMessage() {}
+
+func (x *AddFilmResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_films_proto_msgTypes[38]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddFilmResponse.ProtoReflect.Descriptor instead.
+func (*AddFilmResponse) Descriptor() ([]byte, []int) {
+	return file_proto_films_proto_rawDescGZIP(), []int{38}
+}
+
 var File_proto_films_proto protoreflect.FileDescriptor
 
 var file_proto_films_proto_rawDesc = []byte{
@@ -1992,7 +2409,62 @@ var file_proto_films_proto_rawDesc = []byte{
 	0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2b, 0x0a, 0x06, 0x67, 0x65,
 	0x6e, 0x72, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x73, 0x65, 0x73,
 	0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x47, 0x65, 0x6e, 0x72, 0x65, 0x46, 0x69, 0x6c, 0x6d, 0x73, 0x52,
-	0x06, 0x67, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x32, 0xb6, 0x08, 0x0a, 0x05, 0x46, 0x69, 0x6c, 0x6d,
+	0x06, 0x67, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x22, 0x91, 0x02, 0x0a, 0x0d, 0x46, 0x69, 0x6c, 0x6d,
+	0x44, 0x61, 0x74, 0x61, 0x54, 0x6f, 0x41, 0x64, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74,
+	0x6c, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12,
+	0x18, 0x0a, 0x07, 0x70, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x70, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x69, 0x72,
+	0x65, 0x63, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x69, 0x72,
+	0x65, 0x63, 0x74, 0x6f, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x12, 0x1a, 0x0a, 0x08, 0x61, 0x67, 0x65,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x61, 0x67, 0x65,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x3c, 0x0a, 0x0b, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68,
+	0x65, 0x64, 0x41, 0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f,
+	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d,
+	0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x0b, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x73, 0x68, 0x65,
+	0x64, 0x41, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x67, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x18, 0x07, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x06, 0x67, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x64,
+	0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x64,
+	0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6c, 0x69, 0x6e, 0x6b, 0x18,
+	0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6c, 0x69, 0x6e, 0x6b, 0x22, 0xe0, 0x01, 0x0a, 0x0e,
+	0x41, 0x63, 0x74, 0x6f, 0x72, 0x44, 0x61, 0x74, 0x61, 0x54, 0x6f, 0x41, 0x64, 0x64, 0x12, 0x12,
+	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x12, 0x3a, 0x0a, 0x0a, 0x62, 0x69,
+	0x72, 0x74, 0x68, 0x64, 0x61, 0x79, 0x41, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x0a, 0x62, 0x69, 0x72, 0x74,
+	0x68, 0x64, 0x61, 0x79, 0x41, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x61, 0x72, 0x65, 0x65, 0x72,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x63, 0x61, 0x72, 0x65, 0x65, 0x72, 0x12, 0x16,
+	0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06,
+	0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x62, 0x69, 0x72, 0x74, 0x68, 0x50,
+	0x6c, 0x61, 0x63, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x62, 0x69, 0x72, 0x74,
+	0x68, 0x50, 0x6c, 0x61, 0x63, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x70, 0x6f, 0x75, 0x73, 0x65,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x70, 0x6f, 0x75, 0x73, 0x65, 0x22, 0x77,
+	0x0a, 0x11, 0x44, 0x69, 0x72, 0x65, 0x63, 0x74, 0x6f, 0x72, 0x44, 0x61, 0x74, 0x61, 0x54, 0x6f,
+	0x41, 0x64, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61,
+	0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x12,
+	0x36, 0x0a, 0x08, 0x62, 0x69, 0x72, 0x74, 0x68, 0x64, 0x61, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x08, 0x62,
+	0x69, 0x72, 0x74, 0x68, 0x64, 0x61, 0x79, 0x22, 0xa8, 0x01, 0x0a, 0x09, 0x46, 0x69, 0x6c, 0x6d,
+	0x54, 0x6f, 0x41, 0x64, 0x64, 0x12, 0x32, 0x0a, 0x08, 0x66, 0x69, 0x6c, 0x6d, 0x44, 0x61, 0x74,
+	0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f,
+	0x6e, 0x2e, 0x46, 0x69, 0x6c, 0x6d, 0x44, 0x61, 0x74, 0x61, 0x54, 0x6f, 0x41, 0x64, 0x64, 0x52,
+	0x08, 0x66, 0x69, 0x6c, 0x6d, 0x44, 0x61, 0x74, 0x61, 0x12, 0x2f, 0x0a, 0x06, 0x61, 0x63, 0x74,
+	0x6f, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x73, 0x65, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x2e, 0x41, 0x63, 0x74, 0x6f, 0x72, 0x44, 0x61, 0x74, 0x61, 0x54, 0x6f, 0x41,
+	0x64, 0x64, 0x52, 0x06, 0x61, 0x63, 0x74, 0x6f, 0x72, 0x73, 0x12, 0x36, 0x0a, 0x08, 0x64, 0x69,
+	0x72, 0x65, 0x63, 0x74, 0x6f, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x73,
+	0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x44, 0x69, 0x72, 0x65, 0x63, 0x74, 0x6f, 0x72, 0x44,
+	0x61, 0x74, 0x61, 0x54, 0x6f, 0x41, 0x64, 0x64, 0x52, 0x08, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74,
+	0x6f, 0x72, 0x22, 0x40, 0x0a, 0x0e, 0x41, 0x64, 0x64, 0x46, 0x69, 0x6c, 0x6d, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x2e, 0x0a, 0x08, 0x66, 0x69, 0x6c, 0x6d, 0x44, 0x61, 0x74, 0x61,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x2e, 0x46, 0x69, 0x6c, 0x6d, 0x54, 0x6f, 0x41, 0x64, 0x64, 0x52, 0x08, 0x66, 0x69, 0x6c, 0x6d,
+	0x44, 0x61, 0x74, 0x61, 0x22, 0x11, 0x0a, 0x0f, 0x41, 0x64, 0x64, 0x46, 0x69, 0x6c, 0x6d, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xf6, 0x08, 0x0a, 0x05, 0x46, 0x69, 0x6c, 0x6d,
 	0x73, 0x12, 0x5c, 0x0a, 0x13, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x46, 0x69, 0x6c, 0x6d, 0x73,
 	0x50, 0x72, 0x65, 0x76, 0x69, 0x65, 0x77, 0x73, 0x12, 0x20, 0x2e, 0x73, 0x65, 0x73, 0x73, 0x69,
 	0x6f, 0x6e, 0x2e, 0x41, 0x6c, 0x6c, 0x46, 0x69, 0x6c, 0x6d, 0x73, 0x50, 0x72, 0x65, 0x76, 0x69,
@@ -2060,6 +2532,10 @@ var file_proto_films_proto_rawDesc = []byte{
 	0x6c, 0x6c, 0x47, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
 	0x1d, 0x2e, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c,
 	0x47, 0x65, 0x6e, 0x72, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x12, 0x3e, 0x0a, 0x07, 0x41, 0x64, 0x64, 0x46, 0x69, 0x6c, 0x6d, 0x12, 0x17, 0x2e, 0x73, 0x65,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x41, 0x64, 0x64, 0x46, 0x69, 0x6c, 0x6d, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x41,
+	0x64, 0x64, 0x46, 0x69, 0x6c, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
 	0x42, 0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x62, 0x06, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
@@ -2076,7 +2552,7 @@ func file_proto_films_proto_rawDescGZIP() []byte {
 	return file_proto_films_proto_rawDescData
 }
 
-var file_proto_films_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_proto_films_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_proto_films_proto_goTypes = []interface{}{
 	(*FilmPreview)(nil),                 // 0: session.FilmPreview
 	(*FilmData)(nil),                    // 1: session.FilmData
@@ -2111,12 +2587,18 @@ var file_proto_films_proto_goTypes = []interface{}{
 	(*GetAllGenresRequest)(nil),         // 30: session.GetAllGenresRequest
 	(*GenreFilms)(nil),                  // 31: session.GenreFilms
 	(*GetAllGenresResponse)(nil),        // 32: session.GetAllGenresResponse
-	(*timestamppb.Timestamp)(nil),       // 33: google.protobuf.Timestamp
+	(*FilmDataToAdd)(nil),               // 33: session.FilmDataToAdd
+	(*ActorDataToAdd)(nil),              // 34: session.ActorDataToAdd
+	(*DirectorDataToAdd)(nil),           // 35: session.DirectorDataToAdd
+	(*FilmToAdd)(nil),                   // 36: session.FilmToAdd
+	(*AddFilmRequest)(nil),              // 37: session.AddFilmRequest
+	(*AddFilmResponse)(nil),             // 38: session.AddFilmResponse
+	(*timestamppb.Timestamp)(nil),       // 39: google.protobuf.Timestamp
 }
 var file_proto_films_proto_depIdxs = []int32{
-	33, // 0: session.FilmData.date:type_name -> google.protobuf.Timestamp
-	33, // 1: session.Comment.added_at:type_name -> google.protobuf.Timestamp
-	33, // 2: session.ActorData.birthday:type_name -> google.protobuf.Timestamp
+	39, // 0: session.FilmData.date:type_name -> google.protobuf.Timestamp
+	39, // 1: session.Comment.added_at:type_name -> google.protobuf.Timestamp
+	39, // 2: session.ActorData.birthday:type_name -> google.protobuf.Timestamp
 	0,  // 3: session.ActorData.films_previews:type_name -> session.FilmPreview
 	0,  // 4: session.AllFilmsPreviewsResponse.films:type_name -> session.FilmPreview
 	1,  // 5: session.FilmDataByUuidResponse.film_data:type_name -> session.FilmData
@@ -2129,35 +2611,44 @@ var file_proto_films_proto_depIdxs = []int32{
 	0,  // 12: session.GetAllFilmsByGenreResponse.films:type_name -> session.FilmPreview
 	0,  // 13: session.GenreFilms.films:type_name -> session.FilmPreview
 	31, // 14: session.GetAllGenresResponse.genres:type_name -> session.GenreFilms
-	6,  // 15: session.Films.GetAllFilmsPreviews:input_type -> session.AllFilmsPreviewsRequest
-	8,  // 16: session.Films.GetFilmDataByUuid:input_type -> session.FilmDataByUuidRequest
-	10, // 17: session.Films.GetFilmPreviewByUuid:input_type -> session.FilmPreviewByUuidRequest
-	12, // 18: session.Films.GetAllFilmComments:input_type -> session.AllFilmCommentsRequest
-	16, // 19: session.Films.RemoveFilmByUuid:input_type -> session.RemoveFilmByUuidRequest
-	18, // 20: session.Films.GetActorDataByUuid:input_type -> session.ActorDataByUuidRequest
-	20, // 21: session.Films.GetActorsByFilm:input_type -> session.ActorsByFilmRequest
-	22, // 22: session.Films.PutFavorite:input_type -> session.PutFavoriteRequest
-	24, // 23: session.Films.DeleteFavorite:input_type -> session.DeleteFavoriteRequest
-	26, // 24: session.Films.GetAllFavoriteFilms:input_type -> session.GetAllFavoriteFilmsRequest
-	28, // 25: session.Films.GetAllFilmsByGenre:input_type -> session.GetAllFilmsByGenreRequest
-	30, // 26: session.Films.GetAllGenres:input_type -> session.GetAllGenresRequest
-	7,  // 27: session.Films.GetAllFilmsPreviews:output_type -> session.AllFilmsPreviewsResponse
-	9,  // 28: session.Films.GetFilmDataByUuid:output_type -> session.FilmDataByUuidResponse
-	11, // 29: session.Films.GetFilmPreviewByUuid:output_type -> session.FilmPreviewByUuidResponse
-	13, // 30: session.Films.GetAllFilmComments:output_type -> session.AllFilmCommentsResponse
-	17, // 31: session.Films.RemoveFilmByUuid:output_type -> session.RemoveFilmByUuidResponse
-	19, // 32: session.Films.GetActorDataByUuid:output_type -> session.ActorDataByUuidResponse
-	21, // 33: session.Films.GetActorsByFilm:output_type -> session.ActorsByFilmResponse
-	23, // 34: session.Films.PutFavorite:output_type -> session.PutFavoriteResponse
-	25, // 35: session.Films.DeleteFavorite:output_type -> session.DeleteFavoriteResponse
-	27, // 36: session.Films.GetAllFavoriteFilms:output_type -> session.GetAllFavoriteFilmsResponse
-	29, // 37: session.Films.GetAllFilmsByGenre:output_type -> session.GetAllFilmsByGenreResponse
-	32, // 38: session.Films.GetAllGenres:output_type -> session.GetAllGenresResponse
-	27, // [27:39] is the sub-list for method output_type
-	15, // [15:27] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	39, // 15: session.FilmDataToAdd.publishedAt:type_name -> google.protobuf.Timestamp
+	39, // 16: session.ActorDataToAdd.birthdayAt:type_name -> google.protobuf.Timestamp
+	39, // 17: session.DirectorDataToAdd.birthday:type_name -> google.protobuf.Timestamp
+	33, // 18: session.FilmToAdd.filmData:type_name -> session.FilmDataToAdd
+	34, // 19: session.FilmToAdd.actors:type_name -> session.ActorDataToAdd
+	35, // 20: session.FilmToAdd.director:type_name -> session.DirectorDataToAdd
+	36, // 21: session.AddFilmRequest.filmData:type_name -> session.FilmToAdd
+	6,  // 22: session.Films.GetAllFilmsPreviews:input_type -> session.AllFilmsPreviewsRequest
+	8,  // 23: session.Films.GetFilmDataByUuid:input_type -> session.FilmDataByUuidRequest
+	10, // 24: session.Films.GetFilmPreviewByUuid:input_type -> session.FilmPreviewByUuidRequest
+	12, // 25: session.Films.GetAllFilmComments:input_type -> session.AllFilmCommentsRequest
+	16, // 26: session.Films.RemoveFilmByUuid:input_type -> session.RemoveFilmByUuidRequest
+	18, // 27: session.Films.GetActorDataByUuid:input_type -> session.ActorDataByUuidRequest
+	20, // 28: session.Films.GetActorsByFilm:input_type -> session.ActorsByFilmRequest
+	22, // 29: session.Films.PutFavorite:input_type -> session.PutFavoriteRequest
+	24, // 30: session.Films.DeleteFavorite:input_type -> session.DeleteFavoriteRequest
+	26, // 31: session.Films.GetAllFavoriteFilms:input_type -> session.GetAllFavoriteFilmsRequest
+	28, // 32: session.Films.GetAllFilmsByGenre:input_type -> session.GetAllFilmsByGenreRequest
+	30, // 33: session.Films.GetAllGenres:input_type -> session.GetAllGenresRequest
+	37, // 34: session.Films.AddFilm:input_type -> session.AddFilmRequest
+	7,  // 35: session.Films.GetAllFilmsPreviews:output_type -> session.AllFilmsPreviewsResponse
+	9,  // 36: session.Films.GetFilmDataByUuid:output_type -> session.FilmDataByUuidResponse
+	11, // 37: session.Films.GetFilmPreviewByUuid:output_type -> session.FilmPreviewByUuidResponse
+	13, // 38: session.Films.GetAllFilmComments:output_type -> session.AllFilmCommentsResponse
+	17, // 39: session.Films.RemoveFilmByUuid:output_type -> session.RemoveFilmByUuidResponse
+	19, // 40: session.Films.GetActorDataByUuid:output_type -> session.ActorDataByUuidResponse
+	21, // 41: session.Films.GetActorsByFilm:output_type -> session.ActorsByFilmResponse
+	23, // 42: session.Films.PutFavorite:output_type -> session.PutFavoriteResponse
+	25, // 43: session.Films.DeleteFavorite:output_type -> session.DeleteFavoriteResponse
+	27, // 44: session.Films.GetAllFavoriteFilms:output_type -> session.GetAllFavoriteFilmsResponse
+	29, // 45: session.Films.GetAllFilmsByGenre:output_type -> session.GetAllFilmsByGenreResponse
+	32, // 46: session.Films.GetAllGenres:output_type -> session.GetAllGenresResponse
+	38, // 47: session.Films.AddFilm:output_type -> session.AddFilmResponse
+	35, // [35:48] is the sub-list for method output_type
+	22, // [22:35] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_proto_films_proto_init() }
@@ -2562,6 +3053,78 @@ func file_proto_films_proto_init() {
 				return nil
 			}
 		}
+		file_proto_films_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FilmDataToAdd); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_films_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ActorDataToAdd); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_films_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DirectorDataToAdd); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_films_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FilmToAdd); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_films_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AddFilmRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_films_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AddFilmResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2569,7 +3132,7 @@ func file_proto_films_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_films_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   33,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -19,6 +19,7 @@ service Films {
   rpc GetAllFavoriteFilms(GetAllFavoriteFilmsRequest) returns (GetAllFavoriteFilmsResponse) {}
   rpc GetAllFilmsByGenre(GetAllFilmsByGenreRequest) returns (GetAllFilmsByGenreResponse) {}
   rpc GetAllGenres(GetAllGenresRequest) returns (GetAllGenresResponse) {}
+  rpc AddFilm(AddFilmRequest) returns (AddFilmResponse) {}
 }
 
 message FilmPreview {
@@ -178,3 +179,43 @@ message GenreFilms {
 message GetAllGenresResponse {
   repeated GenreFilms genres = 1;
 }
+
+message FilmDataToAdd {
+  string title = 1;
+  string preview = 2;
+  string director = 3;
+  string data = 4;
+  uint32 ageLimit = 5;
+  google.protobuf.Timestamp publishedAt = 6;
+  repeated string genres = 7;
+  uint32 duration = 8;
+  string link = 9;
+}
+
+message ActorDataToAdd {
+  string name = 1;
+  string avatar = 2;
+  google.protobuf.Timestamp birthdayAt = 3;
+  string career = 4;
+  uint32 height = 5;
+  string birthPlace = 6;
+  string spouse = 7;
+}
+
+message DirectorDataToAdd {
+  string name = 1;
+  string avatar = 2;
+  google.protobuf.Timestamp birthday = 3;
+}
+
+message FilmToAdd {
+  FilmDataToAdd filmData = 1;
+  repeated ActorDataToAdd actors = 2;
+  DirectorDataToAdd director = 3;
+}
+
+message AddFilmRequest {
+    FilmToAdd filmData = 1;
+}
+
+message AddFilmResponse {}

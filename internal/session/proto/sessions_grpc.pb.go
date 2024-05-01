@@ -109,6 +109,7 @@ type SessionsServer interface {
 	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
 	HasSession(context.Context, *HasSessionRequest) (*HasSessionResponse, error)
 	CheckAllUserSessionTokens(context.Context, *CheckAllUserSessionTokensRequest) (*CheckAllUserSessionTokensResponse, error)
+	mustEmbedUnimplementedSessionsServer()
 }
 
 // UnimplementedSessionsServer must be embedded to have forward compatible implementations.
