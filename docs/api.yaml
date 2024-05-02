@@ -1492,6 +1492,7 @@ components:
               - uuid
               - name
               - avatar
+              - birthday
             properties:
               uuid:
                 type: string
@@ -1501,6 +1502,9 @@ components:
                 example: 'Evgenij Gennadjevich'
               avatar:
                 type: string
+              birthday:
+                type: string
+                example: '2011-04-11T10:20:30'
 
     NewCommentRequest:
       required:
