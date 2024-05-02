@@ -32,6 +32,7 @@ type CommonFilmData struct {
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
 	Seasons      []Season  `json:"seasons"`
+	Genres       []string  `json:"genres"`
 }
 
 type Episode struct {

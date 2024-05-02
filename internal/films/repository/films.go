@@ -301,10 +301,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 
 	genresRows, err := storage.pool.Query(context.Background(), getGenresByFilm, uuid)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return domain.FilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
+		return domain.CommonFilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
 	if err != nil {
-		return domain.FilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
+		return domain.CommonFilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 			myerrors.ErrFailInQueryRow)
 	}
 	var genres []string
@@ -312,7 +312,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 		var genre string
 		err = genresRows.Scan(&genre)
 		if err != nil {
-			return domain.FilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
+			return domain.CommonFilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
 		}
 		genres = append(genres, genre)
