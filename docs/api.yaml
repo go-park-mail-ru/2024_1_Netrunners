@@ -564,6 +564,15 @@ paths:
       security:
         - AccessCookie: []
       parameters:
+        - name: p
+          in: query
+          description: Search page
+          required: true
+          content:
+            application/form:
+              schema:
+                type: integer
+                example: 1
         - name: s
           in: query
           description: Film's/serial's title or actor's name
@@ -579,7 +588,7 @@ paths:
           content:
             application/form:
               schema:
-                $ref: '#/components/schemas/FindResponse'
+                $ref: '#/components/schemas/ShortFindResponse'
         '400':
           description: Incorrect actor uuid
           content:
@@ -603,6 +612,15 @@ paths:
       security:
         - AccessCookie: []
       parameters:
+        - name: p
+          in: query
+          description: Search page
+          required: true
+          content:
+            application/form:
+              schema:
+                type: integer
+                example: 1
         - name: s
           in: query
           description: Film's/serial's title or actor's name
@@ -627,7 +645,7 @@ paths:
           content:
             application/form:
               schema:
-                $ref: '#/components/schemas/FindResponse'
+                $ref: '#/components/schemas/LongFindResponse'
         '400':
           description: Incorrect actor uuid
           content:
@@ -1139,7 +1157,7 @@ components:
       required:
         - title
         - director
-        - preview_data
+        - preview
         - duration
         - release_date
         - film_data
@@ -1150,7 +1168,7 @@ components:
         director:
           type: string
           example: 'Transformers'
-        preview_data:
+        preview:
           type: string
         duration:
           type: integer
@@ -1174,18 +1192,18 @@ components:
           items:
             type: object
             required:
-              - type
-              - preview_data
+              - isSerial
+              - preview
               - title
               - director
-              - average_score
-              - scores_count
+              - averageScore
+              - scoresCount
               - duration
             properties:
-              type:
-                type: string
-                example: 'serial'
-              preview_data:
+              isSerial:
+                type: boolean
+                example: false
+              preview:
                 type: string
               title:
                 type: string
@@ -1193,11 +1211,11 @@ components:
               director:
                 type: string
                 example: 'Michael Bell'
-              average_score:
+              averageScore:
                 type: integer
                 example: 4
                 pattern: '[0-5]'
-              scores_count:
+              scoresCount:
                 type: integer
                 example: 20324
               duration:
@@ -1215,20 +1233,20 @@ components:
         film:
           type: object
           required:
-            - type
-            - preview_data
+            - isSerial
+            - preview
             - title
             - director
-            - average_score
-            - scores_count
+            - averageScore
+            - scoresCount
             - duration
-            - release_date
-            - genre
+            - releaseDate
+            - genres
           properties:
-            type:
-              type: string
-              example: 'serial'
-            preview_data:
+            isSerial:
+              type: boolean
+              example: false
+            preview:
               type: string
             title:
               type: string
@@ -1236,22 +1254,23 @@ components:
             director:
               type: string
               example: 'Michael Bell'
-            average_score:
+            averageScore:
               type: integer
               example: 4
               pattern: '[0-5]'
-            scores_count:
+            scoresCount:
               type: integer
               example: 20324
             duration:
               type: integer
               example: 7560
-            release_date:
+            releaseDate:
               type: string
               example: '2011-04-11T10:20:30'
-            genre:
-              type: string
-              example: 'fantasy'
+            genres:
+              type: array
+              items:
+                type: string
             film_data:
               type: string
             series:
@@ -1283,9 +1302,9 @@ components:
                 items:
                   type: object
                   required:
-                    - preview_data
+                    - preview
                   properties:
-                    preview_data:
+                    preview:
                       type: string
 
 
@@ -1302,18 +1321,18 @@ components:
           items:
             type: object
             required:
-              - type
-              - preview_data
+              - isSerial
+              - preview
               - title
               - director
-              - average_score
-              - scores_count
+              - averageScore
+              - scoresCount
               - duration
             properties:
-              type:
-                type: string
-                example: 'serial'
-              preview_data:
+              isSerial:
+                type: boolean
+                example: false
+              preview:
                 type: string
               title:
                 type: string
@@ -1321,11 +1340,11 @@ components:
               director:
                 type: string
                 example: 'Michael Bell'
-              average_score:
+              averageScore:
                 type: integer
                 example: 4
                 pattern: '[0-5]'
-              scores_count:
+              scoresCount:
                 type: integer
                 example: 20324
               duration:
@@ -1348,7 +1367,7 @@ components:
               - score
               - text
               - author
-              - release_date
+              - releaseDate
             properties:
               score:
                 type: integer
@@ -1360,11 +1379,11 @@ components:
               author:
                 type: string
                 example: 'Arnold Hendrikson'
-              release_date:
+              releaseDate:
                 type: string
                 example: '2011-04-11T10:20:30'
                 
-    FindResponse:
+    ShortFindResponse:
       required:
         - status
       properties:
@@ -1376,18 +1395,17 @@ components:
           items:
             type: object
             required:
-              - type
-              - preview_data
+              - preview
               - title
               - director
-              - average_score
-              - scores_count
+              - averageScore
               - duration
+              - isSerial
             properties:
-              type:
-                type: string
-                example: 'serial'
-              preview_data:
+              isSerial:
+                type: boolean
+                example: false
+              preview:
                 type: string
               title:
                 type: string
@@ -1395,16 +1413,77 @@ components:
               director:
                 type: string
                 example: 'Michael Bell'
-              average_score:
+              averageScore:
                 type: integer
                 example: 4
                 pattern: '[0-5]'
-              scores_count:
+              duration:
+                type: integer
+                example: 7560
+        actors:
+          type: array
+          items:
+            type: object
+            required:
+              - uuid
+              - name
+              - avatar
+            properties:
+              uuid:
+                type: string
+                example: 'frfdF48AfJ1MAFfKF13KFAOS'
+              name:
+                type: string
+                example: 'Evgenij Gennadjevich'
+              avatar:
+                type: string
+
+    LongFindResponse:
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          example: 200
+        films:
+          type: array
+          items:
+            type: object
+            required:
+              - preview
+              - title
+              - director
+              - averageScore
+              - scoresCount
+              - duration
+              - isSerial
+              - genres
+            properties:
+              isSerial:
+                type: boolean
+                example: false
+              preview:
+                type: string
+              title:
+                type: string
+                example: 'Transformers'
+              director:
+                type: string
+                example: 'Michael Bell'
+              averageScore:
+                type: integer
+                example: 4
+                pattern: '[0-5]'
+              scoresCount:
                 type: integer
                 example: 20324
               duration:
                 type: integer
                 example: 7560
+              genres:
+                type: array
+                items:
+                  type: string
         actors:
           type: array
           items:
@@ -1458,7 +1537,7 @@ components:
             - name
             - email
             - signup_at
-            - is_admin
+            - isAdmin
             - avatar
           properties:
             name:
@@ -1470,7 +1549,7 @@ components:
             signup_at:
               type: string
               example: '2011-04-11T10:20:30'
-            is_admin:
+            isAdmin:
               type: boolean
               example: false
             avatar:
@@ -1518,7 +1597,7 @@ components:
         - birthday
         - career
         - height
-        - birth_place
+        - birthPlace
         - genres
         - spouse
       properties:
@@ -1535,7 +1614,7 @@ components:
         height:
           type: integer
           example: 135
-        birth_place:
+        birthPlace:
           type: string
           example: 'New Jersey'
         genres:
@@ -1582,7 +1661,7 @@ components:
             - birthday
             - career
             - height
-            - birth_place
+            - birthPlace
             - genres
             - spouse
             - films
@@ -1603,7 +1682,7 @@ components:
             height:
               type: integer
               example: 135
-            birth_place:
+            birthPlace:
               type: string
               example: 'New Jersey'
             genres:
