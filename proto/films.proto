@@ -33,6 +33,11 @@ message FilmPreview {
   uint32 age_limit = 8;
 }
 
+message Genre {
+  string name = 1;
+  string uuid = 2;
+}
+
 message FilmData {
   string uuid = 1;
   string preview = 2;
@@ -45,7 +50,7 @@ message FilmData {
   string data = 9;
   uint32 age_limit = 10;
   google.protobuf.Timestamp date = 11;
-  repeated string genres = 12;
+  repeated Genre genres = 12;
 }
 
 message Comment {

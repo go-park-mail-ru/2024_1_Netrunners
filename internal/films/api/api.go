@@ -311,6 +311,10 @@ func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 }
 
 func convertFilmDataToProto(film *domain.FilmData) *session.FilmData {
+	var genres []*session.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, &session.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
 	return &session.FilmData{
 		Uuid:        film.Uuid,
 		Preview:     film.Preview,
@@ -323,7 +327,7 @@ func convertFilmDataToProto(film *domain.FilmData) *session.FilmData {
 		AgeLimit:    film.AgeLimit,
 		Date:        convertTimeToProto(film.Date),
 		Data:        film.Data,
-		Genres:      film.Genres,
+		Genres:      genres,
 	}
 }
 

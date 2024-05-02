@@ -92,9 +92,10 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
-	var genres []string
+	var genres []domain.Genre
 	for _, genre := range filmData.Genres {
-		genres = append(genres, html.EscapeString(genre))
+		genre.Name = html.EscapeString(genre.Name)
+		genres = append(genres, genre)
 	}
 	filmData.Genres = genres
 }
@@ -134,6 +135,11 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 }
 
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: film.Uuid})
+	}
+
 	return domain.FilmData{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
@@ -146,7 +152,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
-		Genres:       film.Genres,
+		Genres:       genres,
 	}
 }
 

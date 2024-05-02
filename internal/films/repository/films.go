@@ -49,6 +49,9 @@ const getAmountOfDirectorsByName = `
 		FROM director
 		WHERE name = $1;`
 
+const getDirectorIDByName = `
+		SELECT id FROM director WHERE name = $1;`
+
 const insertDirector = `
 		INSERT INTO director (name, avatar, birthday) VALUES ($1, $2, $3) RETURNING id;`
 
@@ -176,13 +179,13 @@ const getAllGenres = `
 		FROM genre g;`
 
 const getGenresByFilm = `
-		SELECT g.name
+		SELECT g.name, g.external_id
 		FROM genre g
 		LEFT JOIN film_genres fg ON fg.genre_external_id = g.external_id
 		WHERE fg.film_external_id = $1;`
 
 const getAmountOfGenresByName = `
-		SELECT COUNT(name) 
+		SELECT COUNT(id) 
 		FROM genre 
 		WHERE name = $1`
 
@@ -225,10 +228,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.FilmData, er
 		return domain.FilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 			myerrors.ErrFailInQueryRow)
 	}
-	var genres []string
+	var genres []domain.Genre
 	for genresRows.Next() {
-		var genre string
-		err = genresRows.Scan(&genre)
+		var genre domain.Genre
+		err = genresRows.Scan(&genre.Name, &genre.Uuid)
 		if err != nil {
 			return domain.FilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
@@ -282,6 +285,13 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 			return fmt.Errorf("failed to insert director: %w: %w", err,
 				myerrors.ErrFailInExec)
 		}
+	} else {
+		err = tx.QueryRow(context.Background(), getDirectorIDByName,
+			film.DirectorToAdd.Name).Scan(&directorID)
+		if err != nil {
+			return fmt.Errorf("failed to get director id by name: %w: %w", err,
+				myerrors.ErrFailInExec)
+		}
 	}
 
 	err = tx.QueryRow(context.Background(), insertFilm, film.FilmData.Title, film.FilmData.Preview, directorID,
@@ -296,7 +306,8 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 			genreFlag int
 			genreUuid string
 		)
-		err = tx.QueryRow(context.Background(), getAmountOfGenresByName, film.DirectorToAdd.Name).Scan(&genreFlag)
+		err = tx.QueryRow(context.Background(), getAmountOfGenresByName, genre).Scan(&genreFlag)
+		fmt.Println(genreFlag)
 		if genreFlag == 0 {
 			err = tx.QueryRow(context.Background(), insertGenre, genre).Scan(&genreUuid)
 			if err != nil {

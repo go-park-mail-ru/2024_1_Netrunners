@@ -14,7 +14,7 @@ type FilmData struct {
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
-	Genres       []string  `json:"genres"`
+	Genres       []Genre   `json:"genres"`
 }
 
 type FilmDataToAdd struct {
