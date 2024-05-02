@@ -151,7 +151,8 @@ const getAmountOfFilmByUuid = `
 		WHERE film.external_id = $1;`
 
 const getAllFavoriteFilms = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id), f.age_limit
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, 
+		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		INNER JOIN favorite_film fav ON f.external_id = fav.film_external_id
 		LEFT JOIN comment c ON f.id = c.film
@@ -809,7 +810,8 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			FilmRating   uint64
 			FilmAgeLimit uint32
 		)
-		for filmsRows.Next() {
+		i := 0
+		for filmsRows.Next() && i < 4 {
 			var film domain.FilmPreview
 			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
 				&FilmRating, &FilmAgeLimit)
@@ -827,6 +829,7 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			film.AgeLimit = FilmAgeLimit
 
 			films = append(films, film)
+			i++
 		}
 		genreFilms.Films = films
 		genresFilms = append(genresFilms, genreFilms)

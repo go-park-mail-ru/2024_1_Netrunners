@@ -137,7 +137,7 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 	var genres []domain.Genre
 	for _, genre := range film.Genres {
-		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: film.Uuid})
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
 	}
 
 	return domain.FilmData{
@@ -268,6 +268,7 @@ func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
 		PublishedAt: convertTimeToProto(filmToAdd.FilmData.PublishedAt),
 		Genres:      filmToAdd.FilmData.Genres,
 		Duration:    filmToAdd.FilmData.Duration,
+		Link:        filmToAdd.FilmData.Link,
 	}
 
 	var actors []*session.ActorDataToAdd

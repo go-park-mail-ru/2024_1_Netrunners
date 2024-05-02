@@ -27,7 +27,7 @@ func NewMiddleware(logger *zap.SugaredLogger, serverIP string) *Middleware {
 
 func (middlewareHandlers *Middleware) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("http://%s", middlewareHandlers.serverIP))
+		w.Header().Set("Access-Control-Allow-Origin", fmt.Sprintf("http://%s:8080", middlewareHandlers.serverIP))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, "+
