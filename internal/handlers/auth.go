@@ -211,7 +211,6 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		}
 		return
 	}
-
 	tokenCookie := &http.Cookie{
 		Name:     "access",
 		Value:    "",

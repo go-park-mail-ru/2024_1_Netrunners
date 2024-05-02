@@ -44,6 +44,7 @@ func (server *SessionSever) Add(ctx context.Context, req *session.AddRequest) (r
 func (server *SessionSever) DeleteSession(ctx context.Context,
 	req *session.DeleteSessionRequest) (res *session.DeleteSessionResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
+	fmt.Println("0O0O0O0O0O0OO0O0O0O0O0O0O0O0O0O0OO0O0O0O0O0O0O0O0O0O0OO0O0O0O0O0O0O0O0O0O0O0O0O0O0O0O0O0O0OO0O0O0O0O0O0O0O0O0O0O0O0O")
 	err = server.sessionsService.DeleteSession(ctx, req.Login, req.Token)
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to delete session: %v\n", requestId, err)
