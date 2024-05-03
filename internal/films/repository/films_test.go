@@ -21,9 +21,9 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 	newFilmData := mocks.NewMockCommonFilmData()
 	uuid := "1"
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "is_serial", "banner", "link", "name", "data", "duration", "published_at",
+	mockRows := pgxmock.NewRows([]string{"uuid", "is_serial", "title", "banner", "link", "name", "data", "duration", "published_at",
 		"avg_score", "scores", "age_limit"}).
-		AddRow(newFilmData.Uuid, newFilmData.Title, newFilmData.IsSerial, newFilmData.Preview, newFilmData.Link, newFilmData.Director,
+		AddRow(newFilmData.Uuid, newFilmData.IsSerial, newFilmData.Title, newFilmData.Preview, newFilmData.Link, newFilmData.Director,
 			newFilmData.Data, newFilmData.Duration, newFilmData.Date, newFilmData.AverageScore,
 			newFilmData.ScoresCount, newFilmData.AgeLimit)
 
