@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS film
 (
 	id           INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	external_id  UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
+	is_serial    BOOLEAN                                                                                 NOT NULL,
 	title        TEXT                                                                                    NOT NULL,
 	data         TEXT                                                DEFAULT ''                          NOT NULL,
 	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
@@ -48,6 +49,22 @@ CREATE TABLE IF NOT EXISTS film
 	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                         NOT NULL,
 	published_at TIMESTAMPTZ                                         DEFAULT NOW()                       NOT NULL,
 	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS episode
+(
+	id      INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	number  INTEGER                                  NOT NULL,
+	s3_link TEXT DEFAULT 'https://shorturl.at/jHIMO' NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS season
+(
+	film_id    INTEGER NOT NULL,
+	number     INTEGER NOT NULL,
+	episode_id INTEGER NOT NULL,
+	FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE SET NULL,
+	FOREIGN KEY (episode_id) REFERENCES episode (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS comment

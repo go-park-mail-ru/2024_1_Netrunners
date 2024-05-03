@@ -23,7 +23,7 @@ func TestGetFilmDataByUuid(t *testing.T) {
 	service := NewFilmsService(mockStorage, mockLogger, "")
 
 	uuid := "123"
-	mockFilmData := domain.FilmData{
+	mockFilmData := domain.CommonFilmData{
 		Uuid:     uuid,
 		Title:    "Mock Title",
 		Preview:  "Mock Preview",
@@ -53,7 +53,7 @@ func TestGetFilmDataByUuid_Error(t *testing.T) {
 	uuid := "1"
 	mockError := errors.New("mock error")
 
-	mockStorage.EXPECT().GetFilmDataByUuid(uuid).Return(domain.FilmData{}, mockError)
+	mockStorage.EXPECT().GetFilmDataByUuid(uuid).Return(domain.CommonFilmData{}, mockError)
 
 	_, err := service.GetFilmDataByUuid(context.Background(), uuid)
 

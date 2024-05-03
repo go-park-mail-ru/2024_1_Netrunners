@@ -43,7 +43,7 @@ func TestFilmsServer_GetFilmDataByUuid(t *testing.T) {
 	server := NewFilmsServer(mockService, nil)
 
 	ctx := context.Background()
-	expectedFilm := domain.FilmData{
+	expectedFilm := domain.CommonFilmData{
 		Uuid:         "1",
 		Title:        "Film 1",
 		Preview:      "Preview 1",
