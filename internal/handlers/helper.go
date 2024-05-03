@@ -92,9 +92,10 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Data = html.EscapeString(filmData.Data)
 	filmData.Director = html.EscapeString(filmData.Director)
 	filmData.Preview = html.EscapeString(filmData.Preview)
-	var genres []string
+	var genres []domain.Genre
 	for _, genre := range filmData.Genres {
-		genres = append(genres, html.EscapeString(genre))
+		genre.Name = html.EscapeString(genre.Name)
+		genres = append(genres, genre)
 	}
 	filmData.Genres = genres
 }
@@ -134,6 +135,11 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 }
 
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	return domain.FilmData{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
@@ -146,7 +152,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
-		Genres:       film.Genres,
+		Genres:       genres,
 	}
 }
 
@@ -230,6 +236,56 @@ func convertGenreFilmsToRegular(genreFilms *session.GenreFilms) domain.GenreFilm
 		Name:  genreFilms.Genre,
 		Uuid:  genreFilms.GenreUuid,
 		Films: filmsConverted,
+	}
+}
+
+func convertTimeToProto(time time.Time) *timestamppb.Timestamp {
+	return &timestamppb.Timestamp{
+		Seconds: time.Unix(),
+		Nanos:   int32(time.Nanosecond()),
+	}
+}
+
+func convertActorToAddToRegular(actor domain.ActorToAdd) *session.ActorDataToAdd {
+	return &session.ActorDataToAdd{
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		BirthPlace: actor.BirthPlace,
+		BirthdayAt: convertTimeToProto(actor.Birthday),
+		Career:     actor.Career,
+		Spouse:     actor.Spouse,
+		Height:     actor.Height,
+	}
+}
+
+func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
+	filmData := session.FilmDataToAdd{
+		Title:       filmToAdd.FilmData.Title,
+		Preview:     filmToAdd.FilmData.Preview,
+		Director:    filmToAdd.FilmData.Director,
+		Data:        filmToAdd.FilmData.Data,
+		AgeLimit:    filmToAdd.FilmData.AgeLimit,
+		PublishedAt: convertTimeToProto(filmToAdd.FilmData.PublishedAt),
+		Genres:      filmToAdd.FilmData.Genres,
+		Duration:    filmToAdd.FilmData.Duration,
+		Link:        filmToAdd.FilmData.Link,
+	}
+
+	var actors []*session.ActorDataToAdd
+	for _, act := range filmToAdd.Actors {
+		actors = append(actors, convertActorToAddToRegular(act))
+	}
+
+	directorData := session.DirectorDataToAdd{
+		Name:     filmToAdd.DirectorToAdd.Name,
+		Birthday: convertTimeToProto(filmToAdd.DirectorToAdd.Birthday),
+		Avatar:   filmToAdd.DirectorToAdd.Avatar,
+	}
+
+	return &session.FilmToAdd{
+		FilmData: &filmData,
+		Actors:   actors,
+		Director: &directorData,
 	}
 }
 

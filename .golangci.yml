@@ -1,11 +1,5 @@
 run:
   tests: false
-  skip-dirs:
-    - vendor/
-    - uploads/
-
-  skip-files:
-    - ".pb.go"
 
 linters:
   enable:
@@ -15,3 +9,11 @@ linters:
 linters-settings:
   lll:
     line-length: 120
+
+issues:
+  exclude-dirs:
+    - vendor/
+    - uploads/
+
+  exclude-files:
+    - ".pb.go"
