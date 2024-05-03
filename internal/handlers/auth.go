@@ -202,7 +202,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		return
 	}
 
-	reqDel := session.DeleteSessionRequest{Login: tokenClaims["login"].(string), Token: userToken.Value}
+	reqDel := session.DeleteSessionRequest{Login: tokenClaims["Login"].(string), Token: userToken.Value}
 	_, err = (*authPageHandlers.sessionsClient).DeleteSession(ctx, &reqDel)
 	if err != nil {
 		err = WriteError(w, err)
