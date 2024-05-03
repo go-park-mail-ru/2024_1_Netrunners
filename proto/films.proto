@@ -24,6 +24,7 @@ service Films {
   rpc FindSerialsShort(FindFilmsShortRequest) returns (FindFilmsShortResponse) {}
   rpc FindSerialsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
   rpc FindActorsShort(FindActorsShortRequest) returns (FindActorsShortResponse) {}
+  rpc FindActorsLong(FindActorsShortRequest) returns (FindActorsLongResponse) {}
 }
 
 message FilmPreview {
@@ -228,4 +229,16 @@ message FindActorsShortRequest {
 
 message FindActorsShortResponse {
   repeated ActorPreview actors = 1;
+}
+
+message ActorPreviewLong {
+  string uuid = 1;
+  string name = 2;
+  string avatar = 3;
+  google.protobuf.Timestamp birthday = 4;
+  string career = 5;
+}
+
+message FindActorsLongResponse {
+  repeated ActorPreviewLong actors = 1;
 }

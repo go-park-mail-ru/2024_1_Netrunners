@@ -34,9 +34,9 @@ type shortSearchResponse struct {
 }
 
 type longSearchResponse struct {
-	Status int                   `json:"status"`
-	Films  []domain.FilmData     `json:"films"`
-	Actors []domain.ActorPreview `json:"actors"`
+	Status int                `json:"status"`
+	Films  []domain.FilmData  `json:"films"`
+	Actors []domain.ActorData `json:"actors"`
 }
 
 type filmsPreviewsResponse struct {
@@ -480,7 +480,8 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 
 	params := r.URL.Query()
 	if _, ok := params["s"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -488,7 +489,8 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 		return
 	}
 	if _, ok := params["p"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -498,7 +500,8 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 
 	page, err := strconv.Atoi(params["p"][0])
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to parse p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to parse p param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -655,7 +658,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 
 	params := r.URL.Query()
 	if _, ok := params["s"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get s param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -663,7 +667,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		return
 	}
 	if _, ok := params["p"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -671,7 +676,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		return
 	}
 	if _, ok := params["fb"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get p param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -681,7 +687,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 
 	page, err := strconv.Atoi(params["p"][0])
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to parse p param: %v\n", requestId, myerrors.ErrIncorrectSearchParams)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to parse p param: %v\n", requestId,
+			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -789,7 +796,7 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			Key:  params["s"][0],
 			Page: uint32(page),
 		}
-		actors, err := (*filmsPageHandlers.client).FindActorsShort(ctx, &actorsReq)
+		actors, err := (*filmsPageHandlers.client).FindActorsLong(ctx, &actorsReq)
 		if err != nil {
 			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find actors: %v\n", requestId, err)
 			err = WriteError(w, err)
@@ -799,10 +806,10 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			return
 		}
 
-		var actorssConverted []domain.ActorPreview
+		var actorssConverted []domain.ActorData
 		for _, actor := range actors.Actors {
-			actorConverted := convertActorPreviewToRegular(actor)
-			escapeActorPreview(&actorConverted)
+			actorConverted := convertActorPreviewLongToRegular(actor)
+			escapeActorData(&actorConverted)
 			actorssConverted = append(actorssConverted, actorConverted)
 		}
 

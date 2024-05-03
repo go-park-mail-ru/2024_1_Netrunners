@@ -48,6 +48,21 @@ func (mr *MockFilmsStorageMockRecorder) AddFilm(film interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFilm", reflect.TypeOf((*MockFilmsStorage)(nil).AddFilm), film)
 }
 
+// FindActorsLong mocks base method.
+func (m *MockFilmsStorage) FindActorsLong(name string, page int) ([]domain.ActorData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindActorsLong", name, page)
+	ret0, _ := ret[0].([]domain.ActorData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindActorsLong indicates an expected call of FindActorsLong.
+func (mr *MockFilmsStorageMockRecorder) FindActorsLong(name, page interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindActorsLong", reflect.TypeOf((*MockFilmsStorage)(nil).FindActorsLong), name, page)
+}
+
 // FindActorsShort mocks base method.
 func (m *MockFilmsStorage) FindActorsShort(name string, page int) ([]domain.ActorPreview, error) {
 	m.ctrl.T.Helper()

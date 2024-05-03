@@ -36,6 +36,7 @@ const (
 	Films_FindSerialsShort_FullMethodName     = "/session.Films/FindSerialsShort"
 	Films_FindSerialsLong_FullMethodName      = "/session.Films/FindSerialsLong"
 	Films_FindActorsShort_FullMethodName      = "/session.Films/FindActorsShort"
+	Films_FindActorsLong_FullMethodName       = "/session.Films/FindActorsLong"
 )
 
 // FilmsClient is the client API for Films service.
@@ -59,6 +60,7 @@ type FilmsClient interface {
 	FindSerialsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error)
 	FindSerialsLong(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsLongResponse, error)
 	FindActorsShort(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsShortResponse, error)
+	FindActorsLong(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsLongResponse, error)
 }
 
 type filmsClient struct {
@@ -222,6 +224,15 @@ func (c *filmsClient) FindActorsShort(ctx context.Context, in *FindActorsShortRe
 	return out, nil
 }
 
+func (c *filmsClient) FindActorsLong(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsLongResponse, error) {
+	out := new(FindActorsLongResponse)
+	err := c.cc.Invoke(ctx, Films_FindActorsLong_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -243,6 +254,7 @@ type FilmsServer interface {
 	FindSerialsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error)
 	FindSerialsLong(context.Context, *FindFilmsShortRequest) (*FindFilmsLongResponse, error)
 	FindActorsShort(context.Context, *FindActorsShortRequest) (*FindActorsShortResponse, error)
+	FindActorsLong(context.Context, *FindActorsShortRequest) (*FindActorsLongResponse, error)
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -299,6 +311,9 @@ func (UnimplementedFilmsServer) FindSerialsLong(context.Context, *FindFilmsShort
 }
 func (UnimplementedFilmsServer) FindActorsShort(context.Context, *FindActorsShortRequest) (*FindActorsShortResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindActorsShort not implemented")
+}
+func (UnimplementedFilmsServer) FindActorsLong(context.Context, *FindActorsShortRequest) (*FindActorsLongResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindActorsLong not implemented")
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -619,6 +634,24 @@ func _Films_FindActorsShort_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_FindActorsLong_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindActorsShortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).FindActorsLong(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Films_FindActorsLong_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).FindActorsLong(ctx, req.(*FindActorsShortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Films_ServiceDesc is the grpc.ServiceDesc for Films service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -693,6 +726,10 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindActorsShort",
 			Handler:    _Films_FindActorsShort_Handler,
+		},
+		{
+			MethodName: "FindActorsLong",
+			Handler:    _Films_FindActorsLong_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

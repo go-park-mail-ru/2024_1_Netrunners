@@ -222,6 +222,16 @@ func convertActorPreviewToRegular(actor *session.ActorPreview) domain.ActorPrevi
 	}
 }
 
+func convertActorPreviewLongToRegular(actor *session.ActorPreviewLong) domain.ActorData {
+	return domain.ActorData{
+		Uuid:     actor.Uuid,
+		Name:     actor.Name,
+		Avatar:   actor.Avatar,
+		Birthday: convertProtoToTime(actor.Birthday),
+		Career:   actor.Career,
+	}
+}
+
 func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 	var filmsPreview []domain.FilmPreview
 	for _, film := range actor.FilmsPreviews {

@@ -39,7 +39,8 @@ const getFilmDataByUuid = `
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
-		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data, f.duration, f.age_limit, f.is_serial;`
+		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data,
+			f.duration, f.age_limit, f.is_serial;`
 
 const checkIsSerial = `
 	SELECT is_serial, id
@@ -255,7 +256,7 @@ const searchSerialLong = `
 	OFFSET $3;`
 
 const searchActorLong = `
-	SELECT external_id, name, avatar
+	SELECT external_id, name, avatar, birthday, career
 	FROM actor
 	WHERE name LIKE $1
 	LIMIT $2
@@ -959,7 +960,8 @@ func (storage *FilmsStorage) FindFilmsShort(title string, page int) ([]domain.Fi
 }
 
 func (storage *FilmsStorage) FindFilmsLong(title string, page int) ([]domain.FilmData, error) {
-	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+title+"%", largePageLimit, (page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+title+"%", largePageLimit,
+		(page-1)*pageLimit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1050,7 +1052,8 @@ func (storage *FilmsStorage) FindSerialsShort(title string, page int) ([]domain.
 }
 
 func (storage *FilmsStorage) FindSerialsLong(title string, page int) ([]domain.FilmData, error) {
-	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+title+"%", largePageLimit, (page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+title+"%", largePageLimit,
+		(page-1)*pageLimit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1114,6 +1117,42 @@ func (storage *FilmsStorage) FindActorsShort(name string, page int) ([]domain.Ac
 			Uuid:   ActorUuid,
 			Name:   ActorName,
 			Avatar: ActorAvatar,
+		}
+
+		actors = append(actors, actor)
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to save actors by film: %w: %w", err,
+			myerrors.ErrFailInForEachRow)
+	}
+
+	return actors, nil
+}
+
+func (storage *FilmsStorage) FindActorsLong(name string, page int) ([]domain.ActorData, error) {
+	rows, err := storage.pool.Query(context.Background(), searchActorLong, "%"+name+"%", pageLimit, (page-1)*pageLimit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
+			myerrors.ErrInternalServerError)
+	}
+
+	actors := make([]domain.ActorData, 0)
+	var (
+		ActorUuid   string
+		ActorName   string
+		ActorAvatar string
+		Birthday    time.Time
+		Career      string
+	)
+	_, err = pgx.ForEachRow(rows, []any{&ActorUuid, &ActorName, &ActorAvatar, &Birthday, &Career}, func() error {
+		actor := domain.ActorData{
+			Uuid:     ActorUuid,
+			Name:     ActorName,
+			Avatar:   ActorAvatar,
+			Birthday: Birthday,
+			Career:   Career,
 		}
 
 		actors = append(actors, actor)
