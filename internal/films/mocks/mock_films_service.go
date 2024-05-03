@@ -41,7 +41,7 @@ func (m *MockFilmsService) EXPECT() *MockFilmsServiceMockRecorder {
 }
 
 // AddFilm mocks base method.
-func (m *MockFilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAdd) error {
+func (m *MockFilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddFilm", ctx, film)
 	ret0, _ := ret[0].(error)

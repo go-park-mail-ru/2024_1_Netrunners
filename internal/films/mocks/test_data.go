@@ -39,7 +39,20 @@ func NewMockFilmData() domain.FilmData {
 		Data:     "information",
 		AgeLimit: 0,
 		Duration: 240,
-		Genres:   []string{"1", "2", "3"},
+		Genres: []domain.Genre{
+			{
+				Name: "1",
+				Uuid: "1",
+			},
+			{
+				Name: "2",
+				Uuid: "2",
+			},
+			{
+				Name: "3",
+				Uuid: "3",
+			},
+		},
 	}
 }
 
@@ -51,13 +64,6 @@ func NewMockFilmDataToAdd() domain.FilmDataToAdd {
 		Data:     "information",
 		AgeLimit: 18,
 		Duration: 240,
-		Actors: []domain.ActorData{
-			{Uuid: "1", Name: "Fast n Furious 1", Avatar: "avatar", Birthday: time.Now(), Career: "", Height: 100,
-				BirthPlace: "", Spouse: "", Films: []domain.FilmPreview{
-					{Uuid: "1", Title: "Fast n Furious 1"},
-				},
-			},
-		},
 	}
 }
 
