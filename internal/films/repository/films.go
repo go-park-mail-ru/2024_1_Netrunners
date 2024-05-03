@@ -308,7 +308,10 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 			genreUuid string
 		)
 		err = tx.QueryRow(context.Background(), getAmountOfGenresByName, genre).Scan(&genreFlag)
-		fmt.Println(genreFlag)
+		if err != nil {
+			return fmt.Errorf("failed to amount of genres: %w: %w", err,
+				myerrors.ErrFailInExec)
+		}
 		if genreFlag == 0 {
 			err = tx.QueryRow(context.Background(), insertGenre, genre).Scan(&genreUuid)
 			if err != nil {
