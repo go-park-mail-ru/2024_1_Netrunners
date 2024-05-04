@@ -166,16 +166,6 @@ func (service *FilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid s
 	return films, nil
 }
 
-func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error) {
-	films, err := service.storage.FindFilmsShort(title, page)
-	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
-			err)
-		return nil, err
-	}
-	return films, nil
-}
-
 func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error) {
 	genres, err := service.storage.GetAllGenres()
 	if err != nil {
@@ -186,10 +176,20 @@ func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFi
 	return genres, nil
 }
 
+func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error) {
+	films, err := service.storage.FindFilmsShort(title, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find films short: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
+}
+
 func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
 	films, err := service.storage.FindFilmsLong(title, page)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to find films long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
 	page int) ([]domain.FilmPreview, error) {
 	serials, err := service.storage.FindSerialsShort(title, page)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to find serials short: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
 func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
 	serials, err := service.storage.FindSerialsLong(title, page)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to find serials long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
 	page int) ([]domain.ActorPreview, error) {
 	actors, err := service.storage.FindActorsShort(name, page)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to find actors short: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
 func (service *FilmsService) FindActorsLong(ctx context.Context, name string, page int) ([]domain.ActorData, error) {
 	actors, err := service.storage.FindActorsLong(name, page)
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
+		service.logger.Errorf("[reqid=%s] failed to find actors long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
 		return nil, err
 	}
