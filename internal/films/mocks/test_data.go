@@ -66,7 +66,20 @@ func NewMockCommonFilmData() domain.CommonFilmData {
 		Data:     "information",
 		AgeLimit: 0,
 		Duration: 240,
-		Genres:   []string{"1", "2", "3"},
+		Genres: []domain.Genre{
+			{
+				Name: "1",
+				Uuid: "1",
+			},
+			{
+				Name: "2",
+				Uuid: "2",
+			},
+			{
+				Name: "3",
+				Uuid: "3",
+			},
+		},
 	}
 }
 

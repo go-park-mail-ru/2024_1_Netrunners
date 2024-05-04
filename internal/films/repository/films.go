@@ -333,40 +333,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 	film.Genres = genres
 
 	if isSerial {
-		var seasonsCount int
-		err = storage.pool.QueryRow(context.Background(), getSeasonsNumber, internalId).Scan(&seasonsCount)
+		seasons, err := getSeasons(storage, internalId)
 		if err != nil {
-			return domain.CommonFilmData{}, fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			return domain.CommonFilmData{}, fmt.Errorf("failed to get seasons: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
-		}
-
-		seasons := make([]domain.Season, 0, seasonsCount)
-		for i := 1; i <= seasonsCount; i++ {
-			rows, err := storage.pool.Query(context.Background(), getEpisodes, i, internalId)
-			if err != nil {
-				return domain.CommonFilmData{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
-					myerrors.ErrInternalServerError)
-			}
-
-			season := make([]domain.Episode, 0)
-			var link string
-			for rows.Next() {
-				err = rows.Scan(&link)
-				if errors.Is(err, pgx.ErrNoRows) {
-					return domain.CommonFilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
-				}
-				if err != nil {
-					return domain.CommonFilmData{}, err
-				}
-
-				season = append(season, domain.Episode{
-					Link: link,
-				})
-			}
-
-			seasons = append(seasons, domain.Season{
-				Series: season,
-			})
 		}
 
 		film.Seasons = seasons
@@ -1221,4 +1191,43 @@ func (storage *FilmsStorage) FindActorsLong(name string, page int) ([]domain.Act
 	}
 
 	return actors, nil
+}
+
+func getSeasons(storage *FilmsStorage, internalId int) ([]domain.Season, error) {
+	var seasonsCount int
+	err := storage.pool.QueryRow(context.Background(), getSeasonsNumber, internalId).Scan(&seasonsCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
+	}
+
+	seasons := make([]domain.Season, 0, seasonsCount)
+	for i := 1; i <= seasonsCount; i++ {
+		rows, err := storage.pool.Query(context.Background(), getEpisodes, i, internalId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
+				myerrors.ErrInternalServerError)
+		}
+
+		season := make([]domain.Episode, 0)
+		var link string
+		for rows.Next() {
+			err = rows.Scan(&link)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			season = append(season, domain.Episode{
+				Link: link,
+			})
+		}
+
+		seasons = append(seasons, domain.Season{
+			Series: season,
+		})
+	}
+	return seasons, nil
 }
