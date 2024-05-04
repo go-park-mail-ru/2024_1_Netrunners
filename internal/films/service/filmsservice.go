@@ -11,8 +11,8 @@ import (
 )
 
 type FilmsStorage interface {
+	AddFilm(film domain.FilmToAdd) error
 	GetFilmDataByUuid(uuid string) (domain.CommonFilmData, error)
-	AddFilm(film domain.FilmDataToAdd) error
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
@@ -57,7 +57,7 @@ func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string)
 	return film, nil
 }
 
-func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmDataToAdd) error {
+func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd) error {
 	err := service.storage.AddFilm(film)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to add film: %v", ctx.Value(requestId.ReqIDKey), err)

@@ -31,6 +31,7 @@ const (
 	Films_GetAllFavoriteFilms_FullMethodName  = "/session.Films/GetAllFavoriteFilms"
 	Films_GetAllFilmsByGenre_FullMethodName   = "/session.Films/GetAllFilmsByGenre"
 	Films_GetAllGenres_FullMethodName         = "/session.Films/GetAllGenres"
+	Films_AddFilm_FullMethodName              = "/session.Films/AddFilm"
 	Films_FindFilmsShort_FullMethodName       = "/session.Films/FindFilmsShort"
 	Films_FindFilmsLong_FullMethodName        = "/session.Films/FindFilmsLong"
 	Films_FindSerialsShort_FullMethodName     = "/session.Films/FindSerialsShort"
@@ -55,6 +56,7 @@ type FilmsClient interface {
 	GetAllFavoriteFilms(ctx context.Context, in *GetAllFavoriteFilmsRequest, opts ...grpc.CallOption) (*GetAllFavoriteFilmsResponse, error)
 	GetAllFilmsByGenre(ctx context.Context, in *GetAllFilmsByGenreRequest, opts ...grpc.CallOption) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(ctx context.Context, in *GetAllGenresRequest, opts ...grpc.CallOption) (*GetAllGenresResponse, error)
+	AddFilm(ctx context.Context, in *AddFilmRequest, opts ...grpc.CallOption) (*AddFilmResponse, error)
 	FindFilmsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error)
 	FindFilmsLong(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsLongResponse, error)
 	FindSerialsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error)
@@ -179,6 +181,15 @@ func (c *filmsClient) GetAllGenres(ctx context.Context, in *GetAllGenresRequest,
 	return out, nil
 }
 
+func (c *filmsClient) AddFilm(ctx context.Context, in *AddFilmRequest, opts ...grpc.CallOption) (*AddFilmResponse, error) {
+	out := new(AddFilmResponse)
+	err := c.cc.Invoke(ctx, Films_AddFilm_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *filmsClient) FindFilmsShort(ctx context.Context, in *FindFilmsShortRequest, opts ...grpc.CallOption) (*FindFilmsShortResponse, error) {
 	out := new(FindFilmsShortResponse)
 	err := c.cc.Invoke(ctx, Films_FindFilmsShort_FullMethodName, in, out, opts...)
@@ -249,6 +260,7 @@ type FilmsServer interface {
 	GetAllFavoriteFilms(context.Context, *GetAllFavoriteFilmsRequest) (*GetAllFavoriteFilmsResponse, error)
 	GetAllFilmsByGenre(context.Context, *GetAllFilmsByGenreRequest) (*GetAllFilmsByGenreResponse, error)
 	GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error)
+	AddFilm(context.Context, *AddFilmRequest) (*AddFilmResponse, error)
 	FindFilmsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error)
 	FindFilmsLong(context.Context, *FindFilmsShortRequest) (*FindFilmsLongResponse, error)
 	FindSerialsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error)
@@ -296,6 +308,9 @@ func (UnimplementedFilmsServer) GetAllFilmsByGenre(context.Context, *GetAllFilms
 }
 func (UnimplementedFilmsServer) GetAllGenres(context.Context, *GetAllGenresRequest) (*GetAllGenresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllGenres not implemented")
+}
+func (UnimplementedFilmsServer) AddFilm(context.Context, *AddFilmRequest) (*AddFilmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddFilm not implemented")
 }
 func (UnimplementedFilmsServer) FindFilmsShort(context.Context, *FindFilmsShortRequest) (*FindFilmsShortResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindFilmsShort not implemented")
@@ -544,6 +559,24 @@ func _Films_GetAllGenres_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_AddFilm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddFilmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).AddFilm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Films_AddFilm_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).AddFilm(ctx, req.(*AddFilmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Films_FindFilmsShort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FindFilmsShortRequest)
 	if err := dec(in); err != nil {
@@ -706,6 +739,10 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllGenres",
 			Handler:    _Films_GetAllGenres_Handler,
+		},
+		{
+			MethodName: "AddFilm",
+			Handler:    _Films_AddFilm_Handler,
 		},
 		{
 			MethodName: "FindFilmsShort",

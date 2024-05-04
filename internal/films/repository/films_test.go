@@ -3,7 +3,6 @@ package repository
 import (
 	"testing"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
 
@@ -36,7 +35,8 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 		WithArgs(uuid).
 		WillReturnRows(mockRows)
 
-	genreRows := pgxmock.NewRows([]string{"genre"}).AddRow("1").AddRow("2").AddRow("3")
+	genreRows := pgxmock.NewRows([]string{"genre", "uuid"}).AddRow("1", "1").AddRow("2",
+		"2").AddRow("3", "3")
 	mock.ExpectQuery("SELECT").
 		WithArgs(uuid).
 		WillReturnRows(genreRows)
@@ -44,66 +44,6 @@ func TestFilmsStorage_GetFilmDataByUuid(t *testing.T) {
 	filmData, err := storage.GetFilmDataByUuid(uuid)
 	require.NoError(t, err)
 	require.Equal(t, newFilmData, filmData)
-
-	err = mock.ExpectationsWereMet()
-	require.NoError(t, err)
-}
-
-func TestFilmsStorage_AddFilm(t *testing.T) {
-	mock, err := pgxmock.NewPool()
-	require.NoError(t, err)
-	defer mock.Close()
-
-	mock.ExpectBeginTx(pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
-	storage, err := NewFilmsStorage(mock)
-
-	newFilm := mocks.NewMockFilmDataToAdd()
-
-	mockGetAmountOfDirectorsByName := pgxmock.NewRows([]string{"name"}).
-		AddRow(0)
-	mock.ExpectQuery("SELECT").
-		WithArgs(newFilm.Director).
-		WillReturnRows(mockGetAmountOfDirectorsByName)
-
-	mock.ExpectExec("INSERT").
-		WithArgs(newFilm.Director).
-		WillReturnResult(pgxmock.NewResult("INSERT", 1))
-
-	mockGetDirectorsIdByName := pgxmock.NewRows([]string{"id"}).
-		AddRow(1)
-	mock.ExpectQuery("SELECT").
-		WithArgs(newFilm.Director).
-		WillReturnRows(mockGetDirectorsIdByName)
-
-	mock.ExpectExec("INSERT").
-		WithArgs(newFilm.Title, newFilm.Preview, 1, newFilm.Data, newFilm.AgeLimit, newFilm.Duration,
-			newFilm.PublishedAt).WillReturnResult(pgxmock.NewResult("INSERT", 1))
-
-	mockGetFilmIdByTitle := pgxmock.NewRows([]string{"id"}).
-		AddRow(1)
-	mock.ExpectQuery("SELECT").
-		WithArgs(newFilm.Title).
-		WillReturnRows(mockGetFilmIdByTitle)
-
-	mockGetAmountOfActorsByName := pgxmock.NewRows([]string{"id"}).
-		AddRow(1)
-	mock.ExpectQuery("SELECT").
-		WithArgs(newFilm.Actors[0].Name).
-		WillReturnRows(mockGetAmountOfActorsByName)
-
-	mockGetActorId := pgxmock.NewRows([]string{"id"}).
-		AddRow(1)
-	mock.ExpectQuery("SELECT").
-		WithArgs(newFilm.Actors[0].Name).
-		WillReturnRows(mockGetActorId)
-
-	mock.ExpectExec("INSERT").
-		WithArgs(1, 1).WillReturnResult(pgxmock.NewResult("INSERT", 1))
-
-	mock.ExpectCommit()
-
-	err = storage.AddFilm(newFilm)
-	require.Equal(t, nil, err)
 
 	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)

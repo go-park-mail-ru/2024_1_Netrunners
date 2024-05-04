@@ -15,7 +15,7 @@ type FilmData struct {
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
-	Genres       []string  `json:"genres"`
+	Genres       []Genre   `json:"genres"`
 }
 
 type CommonFilmData struct {
@@ -32,7 +32,7 @@ type CommonFilmData struct {
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
 	Seasons      []Season  `json:"seasons"`
-	Genres       []string  `json:"genres"`
+	Genres       []Genre   `json:"genres"`
 }
 
 type Episode struct {
@@ -59,15 +59,16 @@ type SerialData struct {
 }
 
 type FilmDataToAdd struct {
-	Title       string
-	Preview     string
-	Director    string
-	Data        string
-	AgeLimit    uint32
-	Duration    uint32
-	PublishedAt time.Time
-	Actors      []ActorData
-	Genres      []string
+	Title       string    `json:"title"`
+	IsSerial    bool      `json:"isSerial"`
+	Preview     string    `json:"preview"`
+	Director    string    `json:"director"`
+	Data        string    `json:"data"`
+	AgeLimit    uint32    `json:"ageLimit"`
+	Duration    uint32    `json:"duration"`
+	PublishedAt time.Time `json:"publishedAt"`
+	Genres      []string  `json:"genres"`
+	Link        string    `json:"link"`
 }
 
 type FilmPreview struct {
@@ -80,4 +81,10 @@ type FilmPreview struct {
 	ScoresCount  uint64  `json:"scores_count"`
 	Duration     uint32  `json:"duration"`
 	AgeLimit     uint32  `json:"ageLimit"`
+}
+
+type FilmToAdd struct {
+	FilmData      FilmDataToAdd `json:"filmData"`
+	Actors        []ActorToAdd  `json:"actors"`
+	DirectorToAdd DirectorToAdd `json:"directorToAdd"`
 }

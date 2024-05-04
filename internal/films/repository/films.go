@@ -48,8 +48,8 @@ const checkIsSerial = `
 	WHERE external_id = $1`
 
 const getSeasonsNumber = `
-	SELECT count(rows)
-	FROM (SELECT sum(DISTINCT number) FROM season WHERE film_id = $1 GROUP BY film_id, number) AS "rows";`
+	SELECT COUNT(rows)
+	FROM (SELECT SUM(DISTINCT number) FROM season WHERE film_id = $1 GROUP BY film_id, number) AS rows;`
 
 const getEpisodes = `
 	SELECT e.s3_link
@@ -58,27 +58,23 @@ const getEpisodes = `
 	WHERE s.number = $1 AND film_id = $2
 	ORDER BY e.number;`
 
+const getAmountOfFilmsByName = `
+		SELECT COUNT(title) FROM film WHERE title = $1;`
+
 const getAmountOfDirectorsByName = `
 		SELECT COUNT(*)
 		FROM director
 		WHERE name = $1;`
 
-const insertDirector = `
-		INSERT INTO director (name) VALUES ($1);`
+const getDirectorIDByName = `
+		SELECT id FROM director WHERE name = $1;`
 
-const getDirectorsIdByName = `
-		SELECT id
-		FROM director
-		WHERE name = $1;`
+const insertDirector = `
+		INSERT INTO director (name, avatar, birthday) VALUES ($1, $2, $3) RETURNING id;`
 
 const insertFilm = `
-		INSERT INTO film (title, banner, director, data, age_limit, duration, published_at) 
-    	VALUES ($1, $2, $3, $4, $5, $6, $7);`
-
-const getFilmIdByTitle = `
-		SELECT id
-		FROM film
-		WHERE title = $1;`
+		INSERT INTO film (title, banner, director, data, age_limit, duration, published_at, s3_link, is_serial) 
+    	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, external_id;`
 
 const getAmountOfActorsByName = `
 		SELECT COUNT(*)
@@ -86,7 +82,8 @@ const getAmountOfActorsByName = `
 		WHERE actor.name = $1;`
 
 const insertActor = `
-		INSERT INTO actor (name) VALUES ($1);`
+		INSERT INTO actor (name, avatar, career, birthday, birth_place, height, spouse) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
 
 const getActorId = `
 		SELECT id
@@ -171,7 +168,8 @@ const getAmountOfFilmByUuid = `
 		WHERE film.external_id = $1;`
 
 const getAllFavoriteFilms = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration, AVG(c.score), COUNT(c.id), f.age_limit
+		SELECT f.external_id, f.title, f.banner, d.name, f.duration, 
+		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		INNER JOIN favorite_film fav ON f.external_id = fav.film_external_id
 		LEFT JOIN comment c ON f.id = c.film
@@ -199,10 +197,24 @@ const getAllGenres = `
 		FROM genre g;`
 
 const getGenresByFilm = `
-		SELECT g.name
+		SELECT g.name, g.external_id
 		FROM genre g
 		LEFT JOIN film_genres fg ON fg.genre_external_id = g.external_id
 		WHERE fg.film_external_id = $1;`
+
+const getAmountOfGenresByName = `
+		SELECT COUNT(id) 
+		FROM genre 
+		WHERE name = $1`
+
+const insertGenre = `
+		INSERT INTO genre (name) VALUES ($1) RETURNING external_id;`
+
+const getGenreUuidByName = `
+		SELECT external_id FROM genre WHERE name = $1;`
+
+const insertFilmGenre = `
+		INSERT INTO film_genres (film_external_id, genre_external_id) VALUES ($1, $2)`
 
 const searchFilm = `
 	SELECT f.external_id, f.title, f.banner, d.name, f.duration, is_serial,
@@ -210,7 +222,7 @@ const searchFilm = `
 	FROM film f
 	LEFT JOIN comment c ON f.id = c.film
 	JOIN director d ON f.director = d.id
-	WHERE f.title LIKE $1 AND is_serial = false
+	WHERE f.title LIKE $1 AND is_serial = FALSE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
 	LIMIT $2
 	OFFSET $3;`
@@ -221,7 +233,7 @@ const searchSerial = `
 	FROM film f
 	LEFT JOIN comment c ON f.id = c.film
 	JOIN director d ON f.director = d.id
-	WHERE f.title LIKE $1 AND is_serial = true
+	WHERE f.title LIKE $1 AND is_serial = TRUE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
 	LIMIT $2
 	OFFSET $3;`
@@ -239,7 +251,7 @@ const searchFilmLong = `
 	FROM film f
 	LEFT JOIN comment c ON f.id = c.film
 	JOIN director d ON f.director = d.id
-	WHERE f.title LIKE $1 AND is_serial = false
+	WHERE f.title LIKE $1 AND is_serial = FALSE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
 	LIMIT $2
 	OFFSET $3;`
@@ -250,7 +262,7 @@ const searchSerialLong = `
 	FROM film f
 	LEFT JOIN comment c ON f.id = c.film
 	JOIN director d ON f.director = d.id
-	WHERE f.title LIKE $1 AND is_serial = true
+	WHERE f.title LIKE $1 AND is_serial = TRUE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
 	LIMIT $2
 	OFFSET $3;`
@@ -308,10 +320,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 		return domain.CommonFilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 			myerrors.ErrFailInQueryRow)
 	}
-	var genres []string
+	var genres []domain.Genre
 	for genresRows.Next() {
-		var genre string
-		err = genresRows.Scan(&genre)
+		var genre domain.Genre
+		err = genresRows.Scan(&genre.Name, &genre.Uuid)
 		if err != nil {
 			return domain.CommonFilmData{}, fmt.Errorf("failed to get film data by uuid: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
@@ -321,40 +333,10 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 	film.Genres = genres
 
 	if isSerial {
-		var seasonsCount int
-		err = storage.pool.QueryRow(context.Background(), getSeasonsNumber, internalId).Scan(&seasonsCount)
+		seasons, err := getSeasons(storage, internalId)
 		if err != nil {
-			return domain.CommonFilmData{}, fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			return domain.CommonFilmData{}, fmt.Errorf("failed to get seasons: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
-		}
-
-		seasons := make([]domain.Season, 0, seasonsCount)
-		for i := 1; i <= seasonsCount; i++ {
-			rows, err := storage.pool.Query(context.Background(), getEpisodes, i, internalId)
-			if err != nil {
-				return domain.CommonFilmData{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
-					myerrors.ErrInternalServerError)
-			}
-
-			season := make([]domain.Episode, 0)
-			var link string
-			for rows.Next() {
-				err = rows.Scan(&link)
-				if errors.Is(err, pgx.ErrNoRows) {
-					return domain.CommonFilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
-				}
-				if err != nil {
-					return domain.CommonFilmData{}, err
-				}
-
-				season = append(season, domain.Episode{
-					Link: link,
-				})
-			}
-
-			seasons = append(seasons, domain.Season{
-				Series: season,
-			})
 		}
 
 		film.Seasons = seasons
@@ -363,7 +345,7 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 	return film, nil
 }
 
-func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
+func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 	tx, err := storage.pool.BeginTx(context.Background(), pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction to add film: %w: %w", err,
@@ -376,39 +358,80 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 		}
 	}()
 
-	var directorFlag int
-	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.Director).Scan(&directorFlag)
+	var (
+		directorFlag int
+		directorID   int
+		filmID       int
+		filmUuid     string
+		filmFlag     int
+	)
+	err = tx.QueryRow(context.Background(), getAmountOfFilmsByName, film.FilmData.Title).Scan(&filmFlag)
+	if err != nil {
+		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
+	}
+	if filmFlag != 0 {
+		return fmt.Errorf("failed to insert film: %w: %w", err,
+			myerrors.ErrFilmAlreadyExists)
+	}
+
+	err = tx.QueryRow(context.Background(), getAmountOfDirectorsByName, film.DirectorToAdd.Name).Scan(&directorFlag)
 	if err != nil {
 		return fmt.Errorf("failed to get amount of directors: %w: %w", err,
 			myerrors.ErrFailInQueryRow)
 	}
 	if directorFlag == 0 {
-		_, err = tx.Exec(context.Background(), insertDirector, film.Director)
+		err = tx.QueryRow(context.Background(), insertDirector,
+			film.DirectorToAdd.Name, film.DirectorToAdd.Avatar, film.DirectorToAdd.Birthday).Scan(&directorID)
 		if err != nil {
 			return fmt.Errorf("failed to insert director: %w: %w", err,
 				myerrors.ErrFailInExec)
 		}
+	} else {
+		err = tx.QueryRow(context.Background(), getDirectorIDByName,
+			film.DirectorToAdd.Name).Scan(&directorID)
+		if err != nil {
+			return fmt.Errorf("failed to get director id by name: %w: %w", err,
+				myerrors.ErrFailInExec)
+		}
 	}
 
-	var directorID int
-	err = tx.QueryRow(context.Background(), getDirectorsIdByName, film.Director).Scan(&directorID)
-	if err != nil {
-		return fmt.Errorf("failed to get directors id: %w: %w", err,
-			myerrors.ErrFailInQueryRow)
-	}
-
-	_, err = tx.Exec(context.Background(), insertFilm, film.Title, film.Preview, directorID, film.Data,
-		film.AgeLimit, film.Duration, film.PublishedAt)
+	err = tx.QueryRow(context.Background(), insertFilm, film.FilmData.Title, film.FilmData.Preview, directorID,
+		film.FilmData.Data, film.FilmData.AgeLimit, film.FilmData.Duration,
+		film.FilmData.PublishedAt, film.FilmData.Link, film.FilmData.IsSerial).Scan(&filmID, &filmUuid)
 	if err != nil {
 		return fmt.Errorf("failed to insert film: %w: %w", err,
 			myerrors.ErrFailInExec)
 	}
+	for _, genre := range film.FilmData.Genres {
+		var (
+			genreFlag int
+			genreUuid string
+		)
+		err = tx.QueryRow(context.Background(), getAmountOfGenresByName, genre).Scan(&genreFlag)
+		if err != nil {
+			return fmt.Errorf("failed to amount of genres: %w: %w", err,
+				myerrors.ErrFailInExec)
+		}
+		if genreFlag == 0 {
+			err = tx.QueryRow(context.Background(), insertGenre, genre).Scan(&genreUuid)
+			if err != nil {
+				return fmt.Errorf("failed to insert genre: %w: %w", err,
+					myerrors.ErrFailInExec)
+			}
+		} else {
+			err = tx.QueryRow(context.Background(), getGenreUuidByName, genre).Scan(&genreUuid)
+			if err != nil {
+				return fmt.Errorf("failed to get genre uuid: %w: %w", err,
+					myerrors.ErrFailInQueryRow)
+			}
+		}
 
-	var filmID int
-	err = tx.QueryRow(context.Background(), getFilmIdByTitle, film.Title).Scan(&filmID)
-	if err != nil {
-		return fmt.Errorf("failed to get film id: %w: %w", err,
-			myerrors.ErrFailInQueryRow)
+		_, err = tx.Exec(context.Background(), insertFilmGenre, filmUuid, genreUuid)
+		if err != nil {
+			return fmt.Errorf("failed to insert film genre: %w: %w", err,
+				myerrors.ErrFailInQueryRow)
+		}
 	}
 
 	ActorsCast := film.Actors
@@ -419,19 +442,20 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmDataToAdd) error {
 			return fmt.Errorf("failed to get amount of actors: %w: %w", err,
 				myerrors.ErrFailInQueryRow)
 		}
+		var actorID int
 		if actorFlag == 0 {
-			_, err = tx.Exec(context.Background(), insertActor, actor.Name)
+			err = tx.QueryRow(context.Background(), insertActor, actor.Name, actor.Avatar, actor.Career, actor.Birthday,
+				actor.BirthPlace, actor.Height, actor.Spouse).Scan(&actorID)
 			if err != nil {
 				return fmt.Errorf("failed to insert actor: %w: %w", err,
 					myerrors.ErrFailInExec)
 			}
-		}
-
-		var actorID int
-		err = tx.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
-		if err != nil {
-			return fmt.Errorf("failed to get actor id: %w: %w", err,
-				myerrors.ErrFailInQueryRow)
+		} else {
+			err = tx.QueryRow(context.Background(), getActorId, actor.Name).Scan(&actorID)
+			if err != nil {
+				return fmt.Errorf("failed to get actor id: %w: %w", err,
+					myerrors.ErrFailInQueryRow)
+			}
 		}
 
 		_, err = tx.Exec(context.Background(), insertIntoFilmActors, filmID, actorID)
@@ -890,7 +914,8 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			FilmRating   uint64
 			FilmAgeLimit uint32
 		)
-		for filmsRows.Next() {
+		i := 0
+		for filmsRows.Next() && i < 4 {
 			var film domain.FilmPreview
 			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
 				&FilmRating, &FilmAgeLimit)
@@ -908,6 +933,7 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			film.AgeLimit = FilmAgeLimit
 
 			films = append(films, film)
+			i++
 		}
 		genreFilms.Films = films
 		genresFilms = append(genresFilms, genreFilms)
@@ -1165,4 +1191,43 @@ func (storage *FilmsStorage) FindActorsLong(name string, page int) ([]domain.Act
 	}
 
 	return actors, nil
+}
+
+func getSeasons(storage *FilmsStorage, internalId int) ([]domain.Season, error) {
+	var seasonsCount int
+	err := storage.pool.QueryRow(context.Background(), getSeasonsNumber, internalId).Scan(&seasonsCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get amount of directors: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
+	}
+
+	seasons := make([]domain.Season, 0, seasonsCount)
+	for i := 1; i <= seasonsCount; i++ {
+		rows, err := storage.pool.Query(context.Background(), getEpisodes, i, internalId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
+				myerrors.ErrInternalServerError)
+		}
+
+		season := make([]domain.Episode, 0)
+		var link string
+		for rows.Next() {
+			err = rows.Scan(&link)
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			season = append(season, domain.Episode{
+				Link: link,
+			})
+		}
+
+		seasons = append(seasons, domain.Season{
+			Series: season,
+		})
+	}
+	return seasons, nil
 }

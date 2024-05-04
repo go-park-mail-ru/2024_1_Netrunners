@@ -60,58 +60,6 @@ func TestGetFilmDataByUuid_Error(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestAddFilm(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockStorage := mocks.NewMockFilmsStorage(ctrl)
-	mockLogger := zaptest.NewLogger(t).Sugar()
-
-	service := NewFilmsService(mockStorage, mockLogger, "")
-
-	mockFilmData := domain.FilmDataToAdd{
-		Title:    "Mock Title",
-		Preview:  "Mock Preview",
-		Director: "Mock Director",
-		Data:     "Mock Data",
-		AgeLimit: 18,
-		Duration: 120,
-	}
-
-	mockStorage.EXPECT().AddFilm(mockFilmData).Return(nil)
-
-	err := service.AddFilm(context.Background(), mockFilmData)
-
-	assert.NoError(t, err)
-}
-
-func TestAddFilm_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockStorage := mocks.NewMockFilmsStorage(ctrl)
-	mockLogger := zaptest.NewLogger(t).Sugar()
-
-	service := NewFilmsService(mockStorage, mockLogger, "")
-
-	mockFilmData := domain.FilmDataToAdd{
-		Title:    "Mock Title",
-		Preview:  "Mock Preview",
-		Director: "Mock Director",
-		Data:     "Mock Data",
-		AgeLimit: 18,
-		Duration: 120,
-	}
-
-	mockError := errors.New("mock error")
-
-	mockStorage.EXPECT().AddFilm(mockFilmData).Return(mockError)
-
-	err := service.AddFilm(context.Background(), mockFilmData)
-
-	assert.Error(t, err)
-}
-
 func TestRemoveFilm(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

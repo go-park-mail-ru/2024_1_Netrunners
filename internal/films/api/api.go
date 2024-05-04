@@ -15,7 +15,7 @@ import (
 
 type FilmsService interface {
 	GetFilmDataByUuid(ctx context.Context, uuid string) (domain.CommonFilmData, error)
-	AddFilm(ctx context.Context, film domain.FilmDataToAdd) error
+	AddFilm(ctx context.Context, film domain.FilmToAdd) error
 	RemoveFilm(ctx context.Context, uuid string) error
 	GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
@@ -266,16 +266,27 @@ func (server *FilmsServer) GetAllGenres(ctx context.Context,
 	}, nil
 }
 
-func (server *FilmsServer) FindFilmsLong(ctx context.Context,
-	request *session.FindFilmsShortRequest) (*session.FindFilmsLongResponse, error) {
+func (server *FilmsServer) AddFilm(ctx context.Context,
+	req *session.AddFilmRequest) (res *session.AddFilmResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
-	films, err := server.filmsService.FindFilmsLong(ctx, request.Key, int(request.Page))
+	err = server.filmsService.AddFilm(ctx, convertFilmToAdd(req.FilmData))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to add favorite: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to add favorite: %v\n", requestId, err)
+	}
+	return &session.AddFilmResponse{}, nil
+}
+
+func (server *FilmsServer) FindFilmsLong(ctx context.Context,
+	req *session.FindFilmsShortRequest) (*session.FindFilmsLongResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.FindFilmsLong(ctx, req.Key, int(req.Page))
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to get films: %v\n", requestId, err)
 		return nil, fmt.Errorf("[reqid=%s] failed to get films: %v\n", requestId, err)
 	}
 
-	var filmsConverted []*session.FildFilmLong
+	var filmsConverted []*session.FindFilmLong
 	for _, film := range films {
 		filmsConverted = append(filmsConverted, convertFindFilmLongToProto(&film))
 	}
@@ -313,7 +324,7 @@ func (server *FilmsServer) FindSerialsLong(ctx context.Context,
 		return nil, fmt.Errorf("[reqid=%s] failed to get serials: %v\n", requestId, err)
 	}
 
-	var serialsConverted []*session.FildFilmLong
+	var serialsConverted []*session.FindFilmLong
 	for _, serial := range serials {
 		serialsConverted = append(serialsConverted, convertFindFilmLongToProto(&serial))
 	}
@@ -376,6 +387,11 @@ func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 }
 
 func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData {
+	var genres []*session.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, &session.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	seasons := make([]*session.Season, 0, len(film.Seasons))
 	for _, season := range film.Seasons {
 		episodes := make([]*session.Episode, 0, len(season.Series))
@@ -402,12 +418,13 @@ func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData
 		AgeLimit:    film.AgeLimit,
 		Date:        convertTimeToProto(film.Date),
 		Data:        film.Data,
+		Genres:      genres,
 		Seasons:     seasons,
 	}
 }
 
-func convertFindFilmLongToProto(film *domain.FilmData) *session.FildFilmLong {
-	return &session.FildFilmLong{
+func convertFindFilmLongToProto(film *domain.FilmData) *session.FindFilmLong {
+	return &session.FindFilmLong{
 		Uuid:        film.Uuid,
 		Preview:     film.Preview,
 		Title:       film.Title,
@@ -452,12 +469,14 @@ func convertActorPreviewLongToProto(actor domain.ActorData) *session.ActorPrevie
 
 func convertActorDataToProto(actor domain.ActorData) *session.ActorData {
 	return &session.ActorData{
-		Uuid:     actor.Uuid,
-		Name:     actor.Name,
-		Avatar:   actor.Avatar,
-		Birthday: convertTimeToProto(actor.Birthday),
-		Career:   actor.Career,
-		Spouse:   actor.Spouse,
+		Uuid:       actor.Uuid,
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertTimeToProto(actor.Birthday),
+		Career:     actor.Career,
+		Spouse:     actor.Spouse,
+		Birthplace: actor.BirthPlace,
+		Height:     actor.Height,
 	}
 }
 
@@ -478,5 +497,52 @@ func convertGenreFilmsToProto(genreFilms domain.GenreFilms) *session.GenreFilms 
 		Genre:     genreFilms.Name,
 		GenreUuid: genreFilms.Uuid,
 		Films:     filmsConverted,
+	}
+}
+
+func convertProtoToTime(protoTime *timestamppb.Timestamp) time.Time {
+	return protoTime.AsTime()
+}
+
+func convertActorToAddToRegular(actor *session.ActorDataToAdd) domain.ActorToAdd {
+	return domain.ActorToAdd{
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertProtoToTime(actor.BirthdayAt),
+		Career:     actor.Career,
+		Height:     actor.Height,
+		Spouse:     actor.Spouse,
+		BirthPlace: actor.BirthPlace,
+	}
+}
+
+func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
+	filmData := domain.FilmDataToAdd{
+		Title:       filmToAdd.FilmData.Title,
+		Preview:     filmToAdd.FilmData.Preview,
+		Director:    filmToAdd.FilmData.Director,
+		Data:        filmToAdd.FilmData.Data,
+		AgeLimit:    filmToAdd.FilmData.AgeLimit,
+		PublishedAt: convertProtoToTime(filmToAdd.FilmData.PublishedAt),
+		Genres:      filmToAdd.FilmData.Genres,
+		Duration:    filmToAdd.FilmData.Duration,
+		Link:        filmToAdd.FilmData.Link,
+	}
+
+	var actors []domain.ActorToAdd
+	for _, act := range filmToAdd.Actors {
+		actors = append(actors, convertActorToAddToRegular(act))
+	}
+
+	directorData := domain.DirectorToAdd{
+		Name:     filmToAdd.Director.Name,
+		Birthday: convertProtoToTime(filmToAdd.Director.Birthday),
+		Avatar:   filmToAdd.Director.Avatar,
+	}
+
+	return domain.FilmToAdd{
+		FilmData:      filmData,
+		Actors:        actors,
+		DirectorToAdd: directorData,
 	}
 }

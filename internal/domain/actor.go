@@ -3,8 +3,13 @@ package domain
 import "time"
 
 type ActorToAdd struct {
-	Name string
-	Data string
+	Name       string    `json:"name"`
+	Avatar     string    `json:"avatar"`
+	Birthday   time.Time `json:"birthday"`
+	Career     string    `json:"career"`
+	Height     uint32    `json:"height"`
+	BirthPlace string    `json:"birthPlace"`
+	Spouse     string    `json:"spouse"`
 }
 
 type ActorData struct {
@@ -13,7 +18,7 @@ type ActorData struct {
 	Avatar     string        `json:"avatar"`
 	Birthday   time.Time     `json:"birthday"`
 	Career     string        `json:"career"`
-	Height     uint8         `json:"height"`
+	Height     uint32        `json:"height"`
 	BirthPlace string        `json:"birthPlace"`
 	Spouse     string        `json:"spouse"`
 	Films      []FilmPreview `json:"films"`

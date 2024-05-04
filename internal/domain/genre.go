@@ -5,3 +5,8 @@ type GenreFilms struct {
 	Uuid  string        `json:"genreUuid"`
 	Films []FilmPreview `json:"films"`
 }
+
+type Genre struct {
+	Name string `json:"genreName"`
+	Uuid string `json:"genreUuid"`
+}
