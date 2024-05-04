@@ -20,6 +20,12 @@ service Films {
   rpc GetAllFilmsByGenre(GetAllFilmsByGenreRequest) returns (GetAllFilmsByGenreResponse) {}
   rpc GetAllGenres(GetAllGenresRequest) returns (GetAllGenresResponse) {}
   rpc AddFilm(AddFilmRequest) returns (AddFilmResponse) {}
+  rpc FindFilmsShort(FindFilmsShortRequest) returns (FindFilmsShortResponse) {}
+  rpc FindFilmsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
+  rpc FindSerialsShort(FindFilmsShortRequest) returns (FindFilmsShortResponse) {}
+  rpc FindSerialsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
+  rpc FindActorsShort(FindActorsShortRequest) returns (FindActorsShortResponse) {}
+  rpc FindActorsLong(FindActorsShortRequest) returns (FindActorsLongResponse) {}
 }
 
 message FilmPreview {
@@ -31,6 +37,15 @@ message FilmPreview {
   uint64 scores_count = 6;
   uint32 duration = 7;
   uint32 age_limit = 8;
+  bool is_serial = 9;
+}
+
+message Episode {
+  string link = 1;
+}
+
+message Season {
+  repeated Episode episodes = 1;
 }
 
 message Genre {
@@ -51,6 +66,8 @@ message FilmData {
   uint32 age_limit = 10;
   google.protobuf.Timestamp date = 11;
   repeated Genre genres = 12;
+  bool is_serial = 13;
+  repeated Season seasons = 14;
 }
 
 message Comment {
@@ -68,9 +85,10 @@ message ActorData {
   string avatar = 3;
   google.protobuf.Timestamp birthday = 4;
   string career = 5;
-  string genres = 6;
-  string spouse = 7;
-  repeated FilmPreview films_previews = 8;
+  string spouse = 6;
+  repeated FilmPreview films_previews = 7;
+  string birthplace = 8;
+  uint32 height = 9;
 }
 
 message ActorPreview {
@@ -187,14 +205,16 @@ message GetAllGenresResponse {
 
 message FilmDataToAdd {
   string title = 1;
-  string preview = 2;
-  string director = 3;
-  string data = 4;
-  uint32 ageLimit = 5;
-  google.protobuf.Timestamp publishedAt = 6;
-  repeated string genres = 7;
-  uint32 duration = 8;
-  string link = 9;
+  bool is_serial = 2;
+  string preview = 3;
+  string director = 4;
+  string data = 5;
+  uint32 ageLimit = 6;
+  google.protobuf.Timestamp publishedAt = 7;
+  repeated string genres = 8;
+  uint32 duration = 9;
+  string link = 10;
+
 }
 
 message ActorDataToAdd {
@@ -224,3 +244,50 @@ message AddFilmRequest {
 }
 
 message AddFilmResponse {}
+
+message FindFilmsShortRequest {
+  string key = 1;
+  uint32 page = 2;
+}
+
+message FindFilmsShortResponse {
+  repeated FilmPreview films = 1;
+}
+
+message FindFilmLong {
+  string uuid = 1;
+  bool is_serial = 2;
+  string preview = 3;
+  string title = 4;
+  string director = 5;
+  float avg_score = 6;
+  uint64 scores_count = 7;
+  uint32 duration = 8;
+  uint32 age_limit = 9;
+  google.protobuf.Timestamp date = 11;
+}
+
+message FindFilmsLongResponse {
+  repeated FindFilmLong films = 1;
+}
+
+message FindActorsShortRequest {
+  string key = 1;
+  uint32 page = 2;
+}
+
+message FindActorsShortResponse {
+  repeated ActorPreview actors = 1;
+}
+
+message ActorPreviewLong {
+  string uuid = 1;
+  string name = 2;
+  string avatar = 3;
+  google.protobuf.Timestamp birthday = 4;
+  string career = 5;
+}
+
+message FindActorsLongResponse {
+  repeated ActorPreviewLong actors = 1;
+}

@@ -56,6 +56,33 @@ func NewMockFilmData() domain.FilmData {
 	}
 }
 
+func NewMockCommonFilmData() domain.CommonFilmData {
+	return domain.CommonFilmData{
+		Uuid:     "1",
+		Title:    "Fast n Furious",
+		Preview:  "avatar",
+		Director: "Danya",
+		IsSerial: false,
+		Data:     "information",
+		AgeLimit: 0,
+		Duration: 240,
+		Genres: []domain.Genre{
+			{
+				Name: "1",
+				Uuid: "1",
+			},
+			{
+				Name: "2",
+				Uuid: "2",
+			},
+			{
+				Name: "3",
+				Uuid: "3",
+			},
+		},
+	}
+}
+
 func NewMockFilmDataToAdd() domain.FilmDataToAdd {
 	return domain.FilmDataToAdd{
 		Title:    "Fast n Furious",

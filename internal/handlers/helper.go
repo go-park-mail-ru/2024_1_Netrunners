@@ -100,6 +100,13 @@ func escapeFilmData(filmData *domain.FilmData) {
 	filmData.Genres = genres
 }
 
+func escapeSerialData(filmData *domain.SerialData) {
+	filmData.Title = html.EscapeString(filmData.Title)
+	filmData.Data = html.EscapeString(filmData.Data)
+	filmData.Director = html.EscapeString(filmData.Director)
+	filmData.Preview = html.EscapeString(filmData.Preview)
+}
+
 func escapeActorPreview(actor *domain.ActorPreview) {
 	actor.Name = html.EscapeString(actor.Name)
 	actor.Avatar = html.EscapeString(actor.Avatar)
@@ -129,9 +136,25 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		AgeLimit:     film.AgeLimit,
+		IsSerial:     film.IsSerial,
 		Duration:     film.Duration,
 	}
 	return filmNew
+}
+
+func convertLongFilmPreviewToRegular(film *session.FindFilmLong) domain.FilmData {
+	return domain.FilmData{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		Date:         convertProtoToTime(film.Date),
+		AgeLimit:     film.AgeLimit,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
+		IsSerial:     film.IsSerial,
+		Duration:     film.Duration,
+	}
 }
 
 func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
@@ -145,6 +168,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		Title:        film.Title,
 		Preview:      film.Preview,
 		Director:     film.Director,
+		IsSerial:     film.IsSerial,
 		Link:         film.Link,
 		Data:         film.Data,
 		Date:         convertProtoToTime(film.Date),
@@ -153,6 +177,35 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
 		Genres:       genres,
+	}
+}
+
+func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
+	seasons := make([]domain.Season, 0, len(film.Seasons))
+	for _, season := range film.Seasons {
+		episodes := make([]domain.Episode, 0, len(season.Episodes))
+		for _, episode := range season.Episodes {
+			episodes = append(episodes, domain.Episode{
+				Link: episode.Link,
+			})
+		}
+		seasons = append(seasons, domain.Season{
+			Series: episodes,
+		})
+	}
+
+	return domain.SerialData{
+		Uuid:         film.Uuid,
+		Title:        film.Title,
+		Preview:      film.Preview,
+		Director:     film.Director,
+		IsSerial:     film.IsSerial,
+		Seasons:      seasons,
+		Data:         film.Data,
+		Date:         convertProtoToTime(film.Date),
+		AgeLimit:     film.AgeLimit,
+		AverageScore: film.AvgScore,
+		ScoresCount:  film.ScoresCount,
 	}
 }
 
@@ -175,6 +228,16 @@ func convertActorPreviewToRegular(actor *session.ActorPreview) domain.ActorPrevi
 	}
 }
 
+func convertActorPreviewLongToRegular(actor *session.ActorPreviewLong) domain.ActorData {
+	return domain.ActorData{
+		Uuid:     actor.Uuid,
+		Name:     actor.Name,
+		Avatar:   actor.Avatar,
+		Birthday: convertProtoToTime(actor.Birthday),
+		Career:   actor.Career,
+	}
+}
+
 func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 	var filmsPreview []domain.FilmPreview
 	for _, film := range actor.FilmsPreviews {
@@ -183,13 +246,15 @@ func convertActorDataToRegular(actor *session.ActorData) domain.ActorData {
 		filmsPreview = append(filmsPreview, filmRegular)
 	}
 	return domain.ActorData{
-		Uuid:     actor.Uuid,
-		Name:     actor.Name,
-		Avatar:   actor.Avatar,
-		Birthday: convertProtoToTime(actor.Birthday),
-		Career:   actor.Career,
-		Spouse:   actor.Spouse,
-		Films:    filmsPreview,
+		Uuid:       actor.Uuid,
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertProtoToTime(actor.Birthday),
+		BirthPlace: actor.Birthplace,
+		Career:     actor.Career,
+		Spouse:     actor.Spouse,
+		Films:      filmsPreview,
+		Height:     actor.Height,
 	}
 }
 
@@ -261,6 +326,7 @@ func convertActorToAddToRegular(actor domain.ActorToAdd) *session.ActorDataToAdd
 func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
 	filmData := session.FilmDataToAdd{
 		Title:       filmToAdd.FilmData.Title,
+		IsSerial:    filmToAdd.FilmData.IsSerial,
 		Preview:     filmToAdd.FilmData.Preview,
 		Director:    filmToAdd.FilmData.Director,
 		Data:        filmToAdd.FilmData.Data,

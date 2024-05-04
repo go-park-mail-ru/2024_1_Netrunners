@@ -11,8 +11,8 @@ import (
 )
 
 type FilmsStorage interface {
-	GetFilmDataByUuid(uuid string) (domain.FilmData, error)
 	AddFilm(film domain.FilmToAdd) error
+	GetFilmDataByUuid(uuid string) (domain.CommonFilmData, error)
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
@@ -24,6 +24,12 @@ type FilmsStorage interface {
 	GetAllFavoriteFilms(userUuid string) ([]domain.FilmPreview, error)
 	GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error)
 	GetAllGenres() ([]domain.GenreFilms, error)
+	FindFilmsShort(title string, page int) ([]domain.FilmPreview, error)
+	FindFilmsLong(title string, page int) ([]domain.FilmData, error)
+	FindSerialsShort(title string, page int) ([]domain.FilmPreview, error)
+	FindSerialsLong(title string, page int) ([]domain.FilmData, error)
+	FindActorsShort(name string, page int) ([]domain.ActorPreview, error)
+	FindActorsLong(name string, page int) ([]domain.ActorData, error)
 }
 
 type FilmsService struct {
@@ -40,13 +46,14 @@ func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStora
 	}
 }
 
-func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.FilmData, error) {
+func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.CommonFilmData, error) {
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
 			myerrors.ErrNoSuchFilm)
-		return domain.FilmData{}, err
+		return domain.CommonFilmData{}, err
 	}
+
 	return film, nil
 }
 
@@ -167,4 +174,66 @@ func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFi
 		return nil, err
 	}
 	return genres, nil
+}
+
+func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error) {
+	films, err := service.storage.FindFilmsShort(title, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find films short: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
+}
+
+func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
+	films, err := service.storage.FindFilmsLong(title, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find films long: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
+}
+
+func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
+	page int) ([]domain.FilmPreview, error) {
+	serials, err := service.storage.FindSerialsShort(title, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find serials short: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return serials, nil
+}
+
+func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
+	serials, err := service.storage.FindSerialsLong(title, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find serials long: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return serials, nil
+}
+
+func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
+	page int) ([]domain.ActorPreview, error) {
+	actors, err := service.storage.FindActorsShort(name, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find actors short: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return actors, nil
+}
+
+func (service *FilmsService) FindActorsLong(ctx context.Context, name string, page int) ([]domain.ActorData, error) {
+	actors, err := service.storage.FindActorsLong(name, page)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to find actors long: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return actors, nil
 }

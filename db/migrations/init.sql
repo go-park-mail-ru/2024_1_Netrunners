@@ -39,6 +39,11 @@ CREATE TABLE IF NOT EXISTS film
 (
 	id           INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	external_id  UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
+<<<<<<< HEAD
+	is_serial BOOLEAN NOT NULL,
+=======
+	is_serial    BOOLEAN                                                                                 NOT NULL,
+>>>>>>> 3113de9e52b0931ff56bc01ba0ba64ad63c867a9
 	title        TEXT                                                                                    NOT NULL,
 	data         TEXT                                                DEFAULT ''                          NOT NULL,
 	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
@@ -49,6 +54,37 @@ CREATE TABLE IF NOT EXISTS film
 	published_at TIMESTAMPTZ                                         DEFAULT NOW()                       NOT NULL,
 	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS episode
+(
+<<<<<<< HEAD
+	id           INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	number INTEGER NOT NULL,
+	s3_link      TEXT                                                DEFAULT 'https://shorturl.at/jHIMO' NOT NULL,
+=======
+	id      INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	number  INTEGER                                  NOT NULL,
+	s3_link TEXT DEFAULT 'https://shorturl.at/jHIMO' NOT NULL
+>>>>>>> 3113de9e52b0931ff56bc01ba0ba64ad63c867a9
+);
+
+CREATE TABLE IF NOT EXISTS season
+(
+<<<<<<< HEAD
+	film_id INTEGER NOT NULL,
+	number INTEGER NOT NULL,
+	episode_id INTEGER NOT NULL,
+	FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE SET NULL
+	FOREIGN KEY (episode_id) REFERENCES episode (id) ON DELETE SET NULL
+)
+=======
+	film_id    INTEGER NOT NULL,
+	number     INTEGER NOT NULL,
+	episode_id INTEGER NOT NULL,
+	FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE SET NULL,
+	FOREIGN KEY (episode_id) REFERENCES episode (id) ON DELETE SET NULL
+);
+>>>>>>> 3113de9e52b0931ff56bc01ba0ba64ad63c867a9
 
 CREATE TABLE IF NOT EXISTS comment
 (

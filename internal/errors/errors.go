@@ -19,7 +19,9 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrFilmAlreadyExists),
 		errors.Is(err, ErrNoSuchActor),
 		errors.Is(err, ErrNoGenres),
-		errors.Is(err, ErrFailInExec):
+		errors.Is(err, ErrFailInExec),
+		errors.Is(err, ErrFailInExec),
+		errors.Is(err, ErrIncorrectSearchParams):
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),
 		errors.Is(err, ErrNoSuchSessionInTheCache),
