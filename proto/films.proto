@@ -269,6 +269,7 @@ message FindFilmLong {
 
 message FindFilmsLongResponse {
   repeated FindFilmLong films = 1;
+  uint32 count = 2;
 }
 
 message FindActorsShortRequest {
@@ -290,4 +291,5 @@ message ActorPreviewLong {
 
 message FindActorsLongResponse {
   repeated ActorPreviewLong actors = 1;
+  uint32 count = 2;
 }

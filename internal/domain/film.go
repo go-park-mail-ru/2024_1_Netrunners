@@ -18,6 +18,11 @@ type FilmData struct {
 	Genres       []Genre   `json:"genres"`
 }
 
+type SearchFilms struct {
+	Films []FilmData `json:"films"`
+	Count uint32     `json:"count"`
+}
+
 type CommonFilmData struct {
 	Uuid         string    `json:"uuid"`
 	IsSerial     bool      `json:"isSerial"`
