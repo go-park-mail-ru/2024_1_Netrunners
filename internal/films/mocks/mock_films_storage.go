@@ -49,10 +49,10 @@ func (mr *MockFilmsStorageMockRecorder) AddFilm(film interface{}) *gomock.Call {
 }
 
 // FindActorsLong mocks base method.
-func (m *MockFilmsStorage) FindActorsLong(name string, page int) ([]domain.ActorData, error) {
+func (m *MockFilmsStorage) FindActorsLong(name string, page int) (domain.SearchActors, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindActorsLong", name, page)
-	ret0, _ := ret[0].([]domain.ActorData)
+	ret0, _ := ret[0].(domain.SearchActors)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockFilmsStorageMockRecorder) FindActorsShort(name, page interface{}) 
 }
 
 // FindFilmsLong mocks base method.
-func (m *MockFilmsStorage) FindFilmsLong(title string, page int) ([]domain.FilmData, error) {
+func (m *MockFilmsStorage) FindFilmsLong(title string, page int) (domain.SearchFilms, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindFilmsLong", title, page)
-	ret0, _ := ret[0].([]domain.FilmData)
+	ret0, _ := ret[0].(domain.SearchFilms)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -109,10 +109,10 @@ func (mr *MockFilmsStorageMockRecorder) FindFilmsShort(title, page interface{}) 
 }
 
 // FindSerialsLong mocks base method.
-func (m *MockFilmsStorage) FindSerialsLong(title string, page int) ([]domain.FilmData, error) {
+func (m *MockFilmsStorage) FindSerialsLong(title string, page int) (domain.SearchFilms, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindSerialsLong", title, page)
-	ret0, _ := ret[0].([]domain.FilmData)
+	ret0, _ := ret[0].(domain.SearchFilms)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

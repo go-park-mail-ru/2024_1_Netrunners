@@ -25,11 +25,11 @@ type FilmsStorage interface {
 	GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error)
 	GetAllGenres() ([]domain.GenreFilms, error)
 	FindFilmsShort(title string, page int) ([]domain.FilmPreview, error)
-	FindFilmsLong(title string, page int) ([]domain.FilmData, error)
+	FindFilmsLong(title string, page int) (domain.SearchFilms, error)
 	FindSerialsShort(title string, page int) ([]domain.FilmPreview, error)
-	FindSerialsLong(title string, page int) ([]domain.FilmData, error)
+	FindSerialsLong(title string, page int) (domain.SearchFilms, error)
 	FindActorsShort(name string, page int) ([]domain.ActorPreview, error)
-	FindActorsLong(name string, page int) ([]domain.ActorData, error)
+	FindActorsLong(name string, page int) (domain.SearchActors, error)
 }
 
 type FilmsService struct {
@@ -186,12 +186,12 @@ func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, p
 	return films, nil
 }
 
-func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
+func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error) {
 	films, err := service.storage.FindFilmsLong(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find films long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
-		return nil, err
+		return domain.SearchFilms{}, err
 	}
 	return films, nil
 }
@@ -207,12 +207,12 @@ func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
 	return serials, nil
 }
 
-func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error) {
+func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error) {
 	serials, err := service.storage.FindSerialsLong(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find serials long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
-		return nil, err
+		return domain.SearchFilms{}, err
 	}
 	return serials, nil
 }
@@ -228,12 +228,12 @@ func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
 	return actors, nil
 }
 
-func (service *FilmsService) FindActorsLong(ctx context.Context, name string, page int) ([]domain.ActorData, error) {
+func (service *FilmsService) FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error) {
 	actors, err := service.storage.FindActorsLong(name, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find actors long: %v", ctx.Value(requestId.ReqIDKey),
 			err)
-		return nil, err
+		return domain.SearchActors{}, err
 	}
 	return actors, nil
 }

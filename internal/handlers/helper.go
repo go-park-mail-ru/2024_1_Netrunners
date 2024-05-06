@@ -143,6 +143,11 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 }
 
 func convertLongFilmPreviewToRegular(film *session.FindFilmLong) domain.FilmData {
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	return domain.FilmData{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
@@ -154,6 +159,7 @@ func convertLongFilmPreviewToRegular(film *session.FindFilmLong) domain.FilmData
 		ScoresCount:  film.ScoresCount,
 		IsSerial:     film.IsSerial,
 		Duration:     film.Duration,
+		Genres:       genres,
 	}
 }
 
@@ -230,11 +236,12 @@ func convertActorPreviewToRegular(actor *session.ActorPreview) domain.ActorPrevi
 
 func convertActorPreviewLongToRegular(actor *session.ActorPreviewLong) domain.ActorData {
 	return domain.ActorData{
-		Uuid:     actor.Uuid,
-		Name:     actor.Name,
-		Avatar:   actor.Avatar,
-		Birthday: convertProtoToTime(actor.Birthday),
-		Career:   actor.Career,
+		Uuid:       actor.Uuid,
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertProtoToTime(actor.Birthday),
+		Career:     actor.Career,
+		BirthPlace: actor.BirthPlace,
 	}
 }
 

@@ -265,10 +265,12 @@ message FindFilmLong {
   uint32 duration = 8;
   uint32 age_limit = 9;
   google.protobuf.Timestamp date = 11;
+  repeated Genre genres = 12;
 }
 
 message FindFilmsLongResponse {
   repeated FindFilmLong films = 1;
+  uint32 count = 2;
 }
 
 message FindActorsShortRequest {
@@ -286,8 +288,10 @@ message ActorPreviewLong {
   string avatar = 3;
   google.protobuf.Timestamp birthday = 4;
   string career = 5;
+  string birthPlace = 6;
 }
 
 message FindActorsLongResponse {
   repeated ActorPreviewLong actors = 1;
+  uint32 count = 2;
 }
