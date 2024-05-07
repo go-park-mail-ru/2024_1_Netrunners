@@ -33,6 +33,7 @@ type FilmsService interface {
 	FindSerialsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error)
 	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error)
+	GetTopFilms(ctx context.Context) ([]domain.TopFilm, error)
 }
 
 type FilmsServer struct {
@@ -376,6 +377,25 @@ func (server *FilmsServer) FindActorsLong(ctx context.Context,
 	}, nil
 }
 
+func (server *FilmsServer) GetTopFilms(ctx context.Context,
+	request *session.GetTopFilmsRequest) (*session.GetTopFilmsResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.GetTopFilms(ctx)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get top films: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get top films: %v\n", requestId, err)
+	}
+
+	var filmsConverted []*session.TopFilm
+	for _, film := range films {
+		filmsConverted = append(filmsConverted, convertTopFilmToProto(film))
+	}
+
+	return &session.GetTopFilmsResponse{
+		Films: filmsConverted,
+	}, nil
+}
+
 func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 	return &session.FilmPreview{
 		Uuid:        film.Uuid,
@@ -387,6 +407,16 @@ func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 		Duration:    film.Duration,
 		AgeLimit:    film.AgeLimit,
 		IsSerial:    film.IsSerial,
+	}
+}
+
+func convertTopFilmToProto(film domain.TopFilm) *session.TopFilm {
+	return &session.TopFilm{
+		Uuid:     film.Uuid,
+		Preview:  film.Preview,
+		Title:    film.Title,
+		IsSerial: film.IsSerial,
+		Data:     film.Data,
 	}
 }
 

@@ -30,6 +30,7 @@ type FilmsStorage interface {
 	FindSerialsLong(title string, page int) (domain.SearchFilms, error)
 	FindActorsShort(name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(name string, page int) (domain.SearchActors, error)
+	GetTopFilms() ([]domain.TopFilm, error)
 }
 
 type FilmsService struct {
@@ -236,4 +237,14 @@ func (service *FilmsService) FindActorsLong(ctx context.Context, name string, pa
 		return domain.SearchActors{}, err
 	}
 	return actors, nil
+}
+
+func (service *FilmsService) GetTopFilms(ctx context.Context) ([]domain.TopFilm, error) {
+	films, err := service.storage.GetTopFilms()
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get top films: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return films, nil
 }

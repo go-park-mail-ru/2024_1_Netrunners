@@ -850,3 +850,57 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}
 }
+
+type topFilmsResponse struct {
+	Status int              `json:"status"`
+	Films  []domain.TopFilm `json:"films"`
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var req session.GetTopFilmsRequest
+	films, err := (*filmsPageHandlers.client).GetTopFilms(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get top films: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	var filmsConverted []domain.TopFilm
+	for _, film := range films.Films {
+		filmConverted := convertTopFilmToRegular(film)
+		escapeTopFilm(&filmConverted)
+		filmsConverted = append(filmsConverted, filmConverted)
+	}
+
+	response := topFilmsResponse{
+		Status: http.StatusOK,
+		Films:  filmsConverted,
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		err = WriteError(w, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}

@@ -26,6 +26,7 @@ service Films {
   rpc FindSerialsLong(FindFilmsShortRequest) returns (FindFilmsLongResponse) {}
   rpc FindActorsShort(FindActorsShortRequest) returns (FindActorsShortResponse) {}
   rpc FindActorsLong(FindActorsShortRequest) returns (FindActorsLongResponse) {}
+  rpc GetTopFilms(GetTopFilmsRequest) returns (GetTopFilmsResponse) {}
 }
 
 message FilmPreview {
@@ -295,4 +296,18 @@ message ActorPreviewLong {
 message FindActorsLongResponse {
   repeated ActorPreviewLong actors = 1;
   uint32 count = 2;
+}
+
+message TopFilm {
+  string uuid = 1;
+  bool is_serial = 2;
+  string preview = 3;
+  string title = 4;
+  string data = 5;
+}
+
+message GetTopFilmsRequest {}
+
+message GetTopFilmsResponse {
+  repeated TopFilm films = 1;
 }
