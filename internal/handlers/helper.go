@@ -201,6 +201,11 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		})
 	}
 
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	return domain.SerialData{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
@@ -213,6 +218,7 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		AgeLimit:     film.AgeLimit,
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
+		Genres:       genres,
 	}
 }
 

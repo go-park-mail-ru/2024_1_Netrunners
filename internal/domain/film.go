@@ -62,6 +62,7 @@ type SerialData struct {
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
+	Genres       []Genre   `json:"genres"`
 }
 
 type FilmDataToAdd struct {
