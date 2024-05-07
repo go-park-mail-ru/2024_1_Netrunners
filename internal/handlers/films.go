@@ -37,7 +37,7 @@ type longSearchResponse struct {
 	Status int                `json:"status"`
 	Films  []domain.FilmData  `json:"films"`
 	Actors []domain.ActorData `json:"actors"`
-	Count  int                `json:"count"`
+	Count  int                `json:"searchResCount"`
 }
 
 type filmsPreviewsResponse struct {

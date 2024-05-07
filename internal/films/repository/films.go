@@ -52,7 +52,7 @@ const getSeasonsNumber = `
 	FROM (SELECT SUM(DISTINCT number) FROM season WHERE film_id = $1 GROUP BY film_id, number) AS rows;`
 
 const getEpisodes = `
-	SELECT e.s3_link
+	SELECT e.s3_link, e.title
 	FROM season s
 	LEFT JOIN episode e ON s.episode_id = e.id
 	WHERE s.number = $1 AND film_id = $2
@@ -206,6 +206,12 @@ const getAmountOfGenresByName = `
 		SELECT COUNT(id) 
 		FROM genre 
 		WHERE name = $1`
+
+const insertEpisode = `
+	INSERT INTO episode(number, title, s3_link) VALUES ($1, $2, $3) RETURNING id;`
+
+const insertSeason = `
+	INSERT INTO season(film_id, number, episode_id) VALUES ($1, $2, $3);`
 
 const insertGenre = `
 		INSERT INTO genre (name) VALUES ($1) RETURNING external_id;`
@@ -418,6 +424,27 @@ func (storage *FilmsStorage) AddFilm(film domain.FilmToAdd) error {
 		return fmt.Errorf("failed to insert film: %w: %w", err,
 			myerrors.ErrFailInExec)
 	}
+
+	if film.FilmData.IsSerial {
+		var episodeId int
+		for seasonNum, season := range film.FilmData.Seasons {
+			for episodeNum, episode := range season.Series {
+				err = tx.QueryRow(context.Background(), insertEpisode, episodeNum+1, episode.Title,
+					episode.Link).Scan(&episodeId)
+				if err != nil {
+					return fmt.Errorf("failed to insert film episode: %w: %w", err,
+						myerrors.ErrFailInExec)
+				}
+
+				_, err = tx.Exec(context.Background(), insertSeason, filmID, seasonNum+1, episodeId)
+				if err != nil {
+					return fmt.Errorf("failed to insert film season: %w: %w", err,
+						myerrors.ErrFailInQueryRow)
+				}
+			}
+		}
+	}
+
 	for _, genre := range film.FilmData.Genres {
 		var (
 			genreFlag int
@@ -1295,9 +1322,12 @@ func getSeasons(storage *FilmsStorage, internalId int) ([]domain.Season, error) 
 		}
 
 		season := make([]domain.Episode, 0)
-		var link string
+		var (
+			link  string
+			title string
+		)
 		for rows.Next() {
-			err = rows.Scan(&link)
+			err = rows.Scan(&link, &title)
 			if errors.Is(err, pgx.ErrNoRows) {
 				return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
 			}
@@ -1306,7 +1336,8 @@ func getSeasons(storage *FilmsStorage, internalId int) ([]domain.Season, error) 
 			}
 
 			season = append(season, domain.Episode{
-				Link: link,
+				Link:  link,
+				Title: title,
 			})
 		}
 

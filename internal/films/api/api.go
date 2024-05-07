@@ -269,6 +269,7 @@ func (server *FilmsServer) GetAllGenres(ctx context.Context,
 func (server *FilmsServer) AddFilm(ctx context.Context,
 	req *session.AddFilmRequest) (res *session.AddFilmResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
+
 	err = server.filmsService.AddFilm(ctx, convertFilmToAdd(req.FilmData))
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to add favorite: %v\n", requestId, err)
@@ -400,7 +401,8 @@ func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData
 		episodes := make([]*session.Episode, 0, len(season.Series))
 		for _, episode := range season.Series {
 			episodes = append(episodes, &session.Episode{
-				Link: episode.Link,
+				Link:  episode.Link,
+				Title: episode.Title,
 			})
 		}
 		seasons = append(seasons, &session.Season{
@@ -527,6 +529,21 @@ func convertActorToAddToRegular(actor *session.ActorDataToAdd) domain.ActorToAdd
 }
 
 func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
+	seasons := make([]domain.Season, 0, len(filmToAdd.FilmData.Seasons))
+	for _, season := range filmToAdd.FilmData.Seasons {
+		episodes := make([]domain.Episode, 0, len(season.Episodes))
+		for _, episode := range season.Episodes {
+			episodes = append(episodes, domain.Episode{
+				Title: episode.Title,
+				Link:  episode.Link,
+			})
+		}
+
+		seasons = append(seasons, domain.Season{
+			Series: episodes,
+		})
+	}
+
 	filmData := domain.FilmDataToAdd{
 		Title:       filmToAdd.FilmData.Title,
 		Preview:     filmToAdd.FilmData.Preview,
@@ -537,6 +554,8 @@ func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
 		Genres:      filmToAdd.FilmData.Genres,
 		Duration:    filmToAdd.FilmData.Duration,
 		Link:        filmToAdd.FilmData.Link,
+		IsSerial:    filmToAdd.FilmData.IsSerial,
+		Seasons:     seasons,
 	}
 
 	var actors []domain.ActorToAdd

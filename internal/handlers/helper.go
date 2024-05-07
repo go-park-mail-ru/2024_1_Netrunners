@@ -192,7 +192,8 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		episodes := make([]domain.Episode, 0, len(season.Episodes))
 		for _, episode := range season.Episodes {
 			episodes = append(episodes, domain.Episode{
-				Link: episode.Link,
+				Link:  episode.Link,
+				Title: episode.Title,
 			})
 		}
 		seasons = append(seasons, domain.Season{
@@ -331,6 +332,21 @@ func convertActorToAddToRegular(actor domain.ActorToAdd) *session.ActorDataToAdd
 }
 
 func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
+	seasons := make([]*session.Season, 0, len(filmToAdd.FilmData.Seasons))
+	for _, season := range filmToAdd.FilmData.Seasons {
+		episodes := make([]*session.Episode, 0, len(season.Series))
+		for _, episode := range season.Series {
+			episodes = append(episodes, &session.Episode{
+				Link:  episode.Link,
+				Title: episode.Title,
+			})
+		}
+
+		seasons = append(seasons, &session.Season{
+			Episodes: episodes,
+		})
+	}
+
 	filmData := session.FilmDataToAdd{
 		Title:       filmToAdd.FilmData.Title,
 		IsSerial:    filmToAdd.FilmData.IsSerial,
@@ -342,6 +358,7 @@ func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
 		Genres:      filmToAdd.FilmData.Genres,
 		Duration:    filmToAdd.FilmData.Duration,
 		Link:        filmToAdd.FilmData.Link,
+		Seasons:     seasons,
 	}
 
 	var actors []*session.ActorDataToAdd

@@ -41,7 +41,8 @@ type CommonFilmData struct {
 }
 
 type Episode struct {
-	Link string `json:"link"`
+	Title string `json:"title"`
+	Link  string `json:"link"`
 }
 
 type Season struct {
@@ -74,6 +75,7 @@ type FilmDataToAdd struct {
 	PublishedAt time.Time `json:"publishedAt"`
 	Genres      []string  `json:"genres"`
 	Link        string    `json:"link"`
+	Seasons     []Season  `json:"seasons,omitempty"`
 }
 
 type FilmPreview struct {

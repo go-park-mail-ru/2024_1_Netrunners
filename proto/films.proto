@@ -42,6 +42,7 @@ message FilmPreview {
 
 message Episode {
   string link = 1;
+  string title = 2;
 }
 
 message Season {
@@ -214,7 +215,7 @@ message FilmDataToAdd {
   repeated string genres = 8;
   uint32 duration = 9;
   string link = 10;
-
+  repeated Season seasons = 11;
 }
 
 message ActorDataToAdd {
