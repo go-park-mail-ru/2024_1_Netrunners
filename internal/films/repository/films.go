@@ -107,12 +107,12 @@ const getFilmPreview = `
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmsPreviews = `
-    SELECT f.external_id, f.title, f.banner, d.name, f.duration,
+    SELECT f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration,
         COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
     FROM film f
     LEFT JOIN comment c ON f.id = c.film
     JOIN director d ON f.director = d.id
-    GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
+    GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmComments = `
 		SELECT c.external_id, f.external_id, u.name AS author_name, c.text, c.score, 
@@ -559,6 +559,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 		filmUuid     string
 		filmPreview  string
 		filmTitle    string
+		isSerial     bool
 		filmDirector string
 		filmDuration uint32
 		filmScore    float32
@@ -567,7 +568,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&filmUuid, &filmTitle, &filmPreview, &filmDirector, &filmDuration, &filmScore, &filmRating,
+		err = rows.Scan(&filmUuid, &filmTitle, &isSerial, &filmPreview, &filmDirector, &filmDuration, &filmScore, &filmRating,
 			&filmAgeLimit)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
@@ -578,6 +579,7 @@ func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error)
 
 		film.Uuid = filmUuid
 		film.Title = filmTitle
+		film.IsSerial = isSerial
 		film.Preview = filmPreview
 		film.Director = filmDirector
 		film.Duration = filmDuration
