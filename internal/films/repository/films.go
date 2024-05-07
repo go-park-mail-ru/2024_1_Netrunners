@@ -32,6 +32,9 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 	}, nil
 }
 
+const amountOfFilmsOnAllFilmsPage = 1000
+const amountOfFilmsInEveryGenre = 4
+
 const getFilmDataByUuid = `
 		SELECT f.external_id, f.is_serial, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, 
 		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit
@@ -895,7 +898,7 @@ func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.Film
 }
 
 func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreUuid, 100)
+	rows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreUuid, amountOfFilmsOnAllFilmsPage)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, genreUuid)
 	}
@@ -951,7 +954,8 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 		if err != nil {
 			return nil, err
 		}
-		filmsRows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreFilms.Uuid, 4)
+		filmsRows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreFilms.Uuid,
+			amountOfFilmsInEveryGenre)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, genreFilms.Uuid)
 		}
