@@ -28,11 +28,11 @@ type FilmsService interface {
 	GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error)
 	GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error)
 	FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error)
-	FindFilmsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error)
+	FindFilmsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error)
 	FindSerialsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error)
-	FindSerialsLong(ctx context.Context, title string, page int) ([]domain.FilmData, error)
+	FindSerialsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error)
 	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
-	FindActorsLong(ctx context.Context, name string, page int) ([]domain.ActorData, error)
+	FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error)
 }
 
 type FilmsServer struct {
@@ -269,6 +269,7 @@ func (server *FilmsServer) GetAllGenres(ctx context.Context,
 func (server *FilmsServer) AddFilm(ctx context.Context,
 	req *session.AddFilmRequest) (res *session.AddFilmResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
+
 	err = server.filmsService.AddFilm(ctx, convertFilmToAdd(req.FilmData))
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to add favorite: %v\n", requestId, err)
@@ -287,12 +288,13 @@ func (server *FilmsServer) FindFilmsLong(ctx context.Context,
 	}
 
 	var filmsConverted []*session.FindFilmLong
-	for _, film := range films {
+	for _, film := range films.Films {
 		filmsConverted = append(filmsConverted, convertFindFilmLongToProto(&film))
 	}
 
 	return &session.FindFilmsLongResponse{
 		Films: filmsConverted,
+		Count: films.Count,
 	}, nil
 }
 
@@ -325,12 +327,13 @@ func (server *FilmsServer) FindSerialsLong(ctx context.Context,
 	}
 
 	var serialsConverted []*session.FindFilmLong
-	for _, serial := range serials {
+	for _, serial := range serials.Films {
 		serialsConverted = append(serialsConverted, convertFindFilmLongToProto(&serial))
 	}
 
 	return &session.FindFilmsLongResponse{
 		Films: serialsConverted,
+		Count: serials.Count,
 	}, nil
 }
 
@@ -363,12 +366,13 @@ func (server *FilmsServer) FindActorsLong(ctx context.Context,
 	}
 
 	var actorsConverted []*session.ActorPreviewLong
-	for _, actor := range actors {
+	for _, actor := range actors.Actors {
 		actorsConverted = append(actorsConverted, convertActorPreviewLongToProto(actor))
 	}
 
 	return &session.FindActorsLongResponse{
 		Actors: actorsConverted,
+		Count:  actors.Count,
 	}, nil
 }
 
@@ -397,7 +401,8 @@ func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData
 		episodes := make([]*session.Episode, 0, len(season.Series))
 		for _, episode := range season.Series {
 			episodes = append(episodes, &session.Episode{
-				Link: episode.Link,
+				Link:  episode.Link,
+				Title: episode.Title,
 			})
 		}
 		seasons = append(seasons, &session.Season{
@@ -424,6 +429,11 @@ func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData
 }
 
 func convertFindFilmLongToProto(film *domain.FilmData) *session.FindFilmLong {
+	var genres []*session.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, &session.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	return &session.FindFilmLong{
 		Uuid:        film.Uuid,
 		Preview:     film.Preview,
@@ -433,6 +443,7 @@ func convertFindFilmLongToProto(film *domain.FilmData) *session.FindFilmLong {
 		ScoresCount: film.ScoresCount,
 		Duration:    film.Duration,
 		AgeLimit:    film.AgeLimit,
+		Genres:      genres,
 		Date:        convertTimeToProto(film.Date),
 		IsSerial:    film.IsSerial,
 	}
@@ -459,11 +470,12 @@ func convertActorPreviewToProto(actor domain.ActorPreview) *session.ActorPreview
 
 func convertActorPreviewLongToProto(actor domain.ActorData) *session.ActorPreviewLong {
 	return &session.ActorPreviewLong{
-		Uuid:     actor.Uuid,
-		Name:     actor.Name,
-		Avatar:   actor.Avatar,
-		Birthday: convertTimeToProto(actor.Birthday),
-		Career:   actor.Career,
+		Uuid:       actor.Uuid,
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertTimeToProto(actor.Birthday),
+		Career:     actor.Career,
+		BirthPlace: actor.BirthPlace,
 	}
 }
 
@@ -517,6 +529,21 @@ func convertActorToAddToRegular(actor *session.ActorDataToAdd) domain.ActorToAdd
 }
 
 func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
+	seasons := make([]domain.Season, 0, len(filmToAdd.FilmData.Seasons))
+	for _, season := range filmToAdd.FilmData.Seasons {
+		episodes := make([]domain.Episode, 0, len(season.Episodes))
+		for _, episode := range season.Episodes {
+			episodes = append(episodes, domain.Episode{
+				Title: episode.Title,
+				Link:  episode.Link,
+			})
+		}
+
+		seasons = append(seasons, domain.Season{
+			Series: episodes,
+		})
+	}
+
 	filmData := domain.FilmDataToAdd{
 		Title:       filmToAdd.FilmData.Title,
 		Preview:     filmToAdd.FilmData.Preview,
@@ -527,6 +554,8 @@ func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
 		Genres:      filmToAdd.FilmData.Genres,
 		Duration:    filmToAdd.FilmData.Duration,
 		Link:        filmToAdd.FilmData.Link,
+		IsSerial:    filmToAdd.FilmData.IsSerial,
+		Seasons:     seasons,
 	}
 
 	var actors []domain.ActorToAdd

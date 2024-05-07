@@ -18,6 +18,11 @@ type FilmData struct {
 	Genres       []Genre   `json:"genres"`
 }
 
+type SearchFilms struct {
+	Films []FilmData `json:"films"`
+	Count uint32     `json:"count"`
+}
+
 type CommonFilmData struct {
 	Uuid         string    `json:"uuid"`
 	IsSerial     bool      `json:"isSerial"`
@@ -36,7 +41,8 @@ type CommonFilmData struct {
 }
 
 type Episode struct {
-	Link string `json:"link"`
+	Title string `json:"title"`
+	Link  string `json:"link"`
 }
 
 type Season struct {
@@ -56,6 +62,7 @@ type SerialData struct {
 	Date         time.Time `json:"date"`
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
+	Genres       []Genre   `json:"genres"`
 }
 
 type FilmDataToAdd struct {
@@ -69,6 +76,7 @@ type FilmDataToAdd struct {
 	PublishedAt time.Time `json:"publishedAt"`
 	Genres      []string  `json:"genres"`
 	Link        string    `json:"link"`
+	Seasons     []Season  `json:"seasons,omitempty"`
 }
 
 type FilmPreview struct {

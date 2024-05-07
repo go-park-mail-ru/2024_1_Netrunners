@@ -12,6 +12,11 @@ type ActorToAdd struct {
 	Spouse     string    `json:"spouse"`
 }
 
+type SearchActors struct {
+	Actors []ActorData `json:"actors"`
+	Count  uint32      `json:"count"`
+}
+
 type ActorData struct {
 	Uuid       string        `json:"uuid"`
 	Name       string        `json:"name"`

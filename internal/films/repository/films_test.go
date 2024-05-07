@@ -104,12 +104,12 @@ func TestFilmsStorage_GetAllFilmsPreviews(t *testing.T) {
 
 	newFilmPreviews := mocks.NewMockFilmPreviews()
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "title", "banner", "name", "duration", "avg_score", "scores",
+	mockRows := pgxmock.NewRows([]string{"uuid", "title", "is_serial", "banner", "name", "duration", "avg_score", "scores",
 		"age_limit"}).
-		AddRow(newFilmPreviews[0].Uuid, newFilmPreviews[0].Title, newFilmPreviews[0].Preview,
+		AddRow(newFilmPreviews[0].Uuid, newFilmPreviews[0].Title, newFilmPreviews[0].IsSerial, newFilmPreviews[0].Preview,
 			newFilmPreviews[0].Director, newFilmPreviews[0].Duration, newFilmPreviews[0].AverageScore,
 			newFilmPreviews[0].ScoresCount, newFilmPreviews[0].AgeLimit).
-		AddRow(newFilmPreviews[1].Uuid, newFilmPreviews[1].Title, newFilmPreviews[1].Preview,
+		AddRow(newFilmPreviews[1].Uuid, newFilmPreviews[1].Title, newFilmPreviews[0].IsSerial, newFilmPreviews[1].Preview,
 			newFilmPreviews[1].Director, newFilmPreviews[1].Duration, newFilmPreviews[1].AverageScore,
 			newFilmPreviews[1].ScoresCount, newFilmPreviews[0].AgeLimit)
 

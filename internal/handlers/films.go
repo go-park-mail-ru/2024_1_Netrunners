@@ -37,6 +37,7 @@ type longSearchResponse struct {
 	Status int                `json:"status"`
 	Films  []domain.FilmData  `json:"films"`
 	Actors []domain.ActorData `json:"actors"`
+	Count  int                `json:"searchResCount"`
 }
 
 type filmsPreviewsResponse struct {
@@ -638,6 +639,7 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		response := longSearchResponse{
 			Status: http.StatusOK,
 			Films:  filmsConverted,
+			Count:  int(films.Count),
 		}
 
 		jsonResponse, err := json.Marshal(response)
@@ -685,6 +687,7 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		response := longSearchResponse{
 			Status: http.StatusOK,
 			Films:  serialsConverted,
+			Count:  int(serials.Count),
 		}
 
 		jsonResponse, err := json.Marshal(response)
@@ -732,6 +735,7 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		response := longSearchResponse{
 			Status: http.StatusOK,
 			Actors: actorssConverted,
+			Count:  int(actors.Count),
 		}
 
 		jsonResponse, err := json.Marshal(response)

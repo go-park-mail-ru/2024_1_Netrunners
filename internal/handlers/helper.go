@@ -143,6 +143,11 @@ func convertFilmPreviewToRegular(film *session.FilmPreview) domain.FilmPreview {
 }
 
 func convertLongFilmPreviewToRegular(film *session.FindFilmLong) domain.FilmData {
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
+	}
+
 	return domain.FilmData{
 		Uuid:         film.Uuid,
 		Title:        film.Title,
@@ -154,6 +159,7 @@ func convertLongFilmPreviewToRegular(film *session.FindFilmLong) domain.FilmData
 		ScoresCount:  film.ScoresCount,
 		IsSerial:     film.IsSerial,
 		Duration:     film.Duration,
+		Genres:       genres,
 	}
 }
 
@@ -186,12 +192,18 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		episodes := make([]domain.Episode, 0, len(season.Episodes))
 		for _, episode := range season.Episodes {
 			episodes = append(episodes, domain.Episode{
-				Link: episode.Link,
+				Link:  episode.Link,
+				Title: episode.Title,
 			})
 		}
 		seasons = append(seasons, domain.Season{
 			Series: episodes,
 		})
+	}
+
+	var genres []domain.Genre
+	for _, genre := range film.Genres {
+		genres = append(genres, domain.Genre{Name: genre.Name, Uuid: genre.Uuid})
 	}
 
 	return domain.SerialData{
@@ -206,6 +218,7 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		AgeLimit:     film.AgeLimit,
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
+		Genres:       genres,
 	}
 }
 
@@ -230,11 +243,12 @@ func convertActorPreviewToRegular(actor *session.ActorPreview) domain.ActorPrevi
 
 func convertActorPreviewLongToRegular(actor *session.ActorPreviewLong) domain.ActorData {
 	return domain.ActorData{
-		Uuid:     actor.Uuid,
-		Name:     actor.Name,
-		Avatar:   actor.Avatar,
-		Birthday: convertProtoToTime(actor.Birthday),
-		Career:   actor.Career,
+		Uuid:       actor.Uuid,
+		Name:       actor.Name,
+		Avatar:     actor.Avatar,
+		Birthday:   convertProtoToTime(actor.Birthday),
+		Career:     actor.Career,
+		BirthPlace: actor.BirthPlace,
 	}
 }
 
@@ -324,6 +338,21 @@ func convertActorToAddToRegular(actor domain.ActorToAdd) *session.ActorDataToAdd
 }
 
 func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
+	seasons := make([]*session.Season, 0, len(filmToAdd.FilmData.Seasons))
+	for _, season := range filmToAdd.FilmData.Seasons {
+		episodes := make([]*session.Episode, 0, len(season.Series))
+		for _, episode := range season.Series {
+			episodes = append(episodes, &session.Episode{
+				Link:  episode.Link,
+				Title: episode.Title,
+			})
+		}
+
+		seasons = append(seasons, &session.Season{
+			Episodes: episodes,
+		})
+	}
+
 	filmData := session.FilmDataToAdd{
 		Title:       filmToAdd.FilmData.Title,
 		IsSerial:    filmToAdd.FilmData.IsSerial,
@@ -335,6 +364,7 @@ func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
 		Genres:      filmToAdd.FilmData.Genres,
 		Duration:    filmToAdd.FilmData.Duration,
 		Link:        filmToAdd.FilmData.Link,
+		Seasons:     seasons,
 	}
 
 	var actors []*session.ActorDataToAdd
