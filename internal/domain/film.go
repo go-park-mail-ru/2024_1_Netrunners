@@ -96,3 +96,11 @@ type FilmToAdd struct {
 	Actors        []ActorToAdd  `json:"actors"`
 	DirectorToAdd DirectorToAdd `json:"directorToAdd"`
 }
+
+type TopFilm struct {
+	Uuid     string `json:"uuid"`
+	IsSerial bool   `json:"isSerial"`
+	Title    string `json:"title"`
+	Preview  string `json:"preview_data"`
+	Data     string `json:"data"`
+}

@@ -82,6 +82,7 @@ func main() {
 	router.HandleFunc("/films/genres/{uuid}/all", filmsPageHandlers.GetAllFilmsByGenre).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/genres/preview", filmsPageHandlers.GetAllGenres).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/top", filmsPageHandlers.GetTopFilms).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")

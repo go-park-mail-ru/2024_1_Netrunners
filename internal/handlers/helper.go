@@ -1,12 +1,17 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -116,6 +121,12 @@ func escapeFilmPreview(film *domain.FilmPreview) {
 	film.Preview = html.EscapeString(film.Preview)
 	film.Director = html.EscapeString(film.Director)
 	film.Title = html.EscapeString(film.Title)
+}
+
+func escapeTopFilm(film *domain.TopFilm) {
+	film.Preview = html.EscapeString(film.Preview)
+	film.Title = html.EscapeString(film.Title)
+	film.Data = html.EscapeString(film.Data)
 }
 
 func escapeComment(comment *domain.Comment) {
@@ -385,6 +396,16 @@ func convertFilmToAdd(filmToAdd domain.FilmToAdd) *session.FilmToAdd {
 	}
 }
 
+func convertTopFilmToRegular(film *session.TopFilm) domain.TopFilm {
+	return domain.TopFilm{
+		Uuid:     film.Uuid,
+		Preview:  film.Preview,
+		Title:    film.Title,
+		IsSerial: film.IsSerial,
+		Data:     film.Data,
+	}
+}
+
 func IsTokenValid(token *http.Cookie, secretKey string) (jwt.MapClaims, error) {
 	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -470,4 +491,33 @@ func GenerateTokens(login string, isAdmin bool, version uint32) (tokenSigned str
 	}
 
 	return tokenSigned, nil
+}
+
+func Encode(file *multipart.FileHeader) (string, error) {
+	allowedExtensions := map[string]bool{
+		".jpg": true,
+		".png": true,
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if !allowedExtensions[ext] {
+		return "", fmt.Errorf("wrong extensions, allowed extensions are .jpg and .png")
+	}
+
+	maxSize := int64(5 * 1024 * 1024)
+	if file.Size > maxSize {
+		return "", fmt.Errorf("file is too big, max size is 10 MB")
+	}
+
+	avatar, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer avatar.Close()
+
+	fileBytes, err := io.ReadAll(avatar)
+	if err != nil {
+		return "", err
+	}
+	base64String := base64.StdEncoding.EncodeToString(fileBytes)
+	return base64String, nil
 }

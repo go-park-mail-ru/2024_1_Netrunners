@@ -190,7 +190,8 @@ const getAllFilmsByGenreUuid = `
 		LEFT JOIN comment c ON f.id = c.film
 		JOIN director d ON f.director = d.id
 		WHERE fg.genre_external_id = $1
-		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit
+		LIMIT $2;`
 
 const getAllGenres = `
 		SELECT g.external_id, g.name
@@ -294,6 +295,16 @@ const searchActorTotal = `
 	SELECT COUNT(*)
 	FROM actor
 	WHERE LOWER(name) LIKE $1;`
+
+const getTop4Films = `
+		SELECT f.external_id, f.is_serial, f.title, f.banner, f.data, COALESCE(AVG(c.score), 0) AS avg_score, 
+		       COALESCE(COUNT(c.id), 0) AS comment_count
+		FROM film AS f
+		JOIN director AS d ON f.director = d.id
+		LEFT JOIN comment AS c ON f.id = c.film
+		GROUP BY f.external_id, f.title, f.banner, f.data, f.is_serial
+		ORDER BY avg_score DESC
+		LIMIT 4;`
 
 const (
 	pageLimit      = 5
@@ -884,7 +895,7 @@ func (storage *FilmsStorage) GetAllFavoriteFilms(userUuid string) ([]domain.Film
 }
 
 func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.FilmPreview, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreUuid)
+	rows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreUuid, 100)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, genreUuid)
 	}
@@ -940,7 +951,7 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 		if err != nil {
 			return nil, err
 		}
-		filmsRows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreFilms.Uuid)
+		filmsRows, err := storage.pool.Query(context.Background(), getAllFilmsByGenreUuid, genreFilms.Uuid, 4)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("%w, %s", myerrors.ErrNotFound, genreFilms.Uuid)
 		}
@@ -958,8 +969,7 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			FilmRating   uint64
 			FilmAgeLimit uint32
 		)
-		i := 0
-		for filmsRows.Next() && i < 4 {
+		for filmsRows.Next() {
 			var film domain.FilmPreview
 			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
 				&FilmRating, &FilmAgeLimit)
@@ -977,7 +987,6 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			film.AgeLimit = FilmAgeLimit
 
 			films = append(films, film)
-			i++
 		}
 		genreFilms.Films = films
 		genresFilms = append(genresFilms, genreFilms)
@@ -1348,4 +1357,39 @@ func getSeasons(storage *FilmsStorage, internalId int) ([]domain.Season, error) 
 		})
 	}
 	return seasons, nil
+}
+
+func (storage *FilmsStorage) GetTopFilms() ([]domain.TopFilm, error) {
+	rows, err := storage.pool.Query(context.Background(), getTop4Films)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
+			myerrors.ErrInternalServerError)
+	}
+
+	films := make([]domain.TopFilm, 0)
+	var (
+		FilmUuid     string
+		FilmIsSerial bool
+		FilmTitle    string
+		FilmPreview  string
+		FilmData     string
+		avg          float32
+		count        int
+	)
+	for rows.Next() {
+		var film domain.TopFilm
+		err = rows.Scan(&FilmUuid, &FilmIsSerial, &FilmTitle, &FilmPreview, &FilmData, &avg, &count)
+		if err != nil {
+			return nil, err
+		}
+
+		film.Uuid = FilmUuid
+		film.Title = FilmTitle
+		film.Preview = FilmPreview
+		film.Data = FilmData
+		film.IsSerial = FilmIsSerial
+
+		films = append(films, film)
+	}
+	return films, nil
 }
