@@ -98,18 +98,19 @@ services:
   #     - app_network
   #   restart: always
 
-  # node_exporter:
-  #   image: quay.io/prometheus/node-exporter:latest
-  #   container_name: node_exporter
-  #   command:
-  #     - '--path.rootfs=/host'
-  #   network_mode: host
-  #   pid: host
-  #   volumes:
-  #     - '/:/host:ro,rslave'
-  #   networks:
-  #     - app_network
-  #   restart: always
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.3.1
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: always
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - app_network
+    ports:
+      - 8093:9100
 
   grafana:
     image: grafana/grafana
