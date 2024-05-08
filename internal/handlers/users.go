@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
@@ -17,14 +18,16 @@ import (
 type UserPageHandlers struct {
 	usersClient    *session.UsersClient
 	sessionsClient *session.SessionsClient
+	metrics        *metrics.HttpMetrics
 	logger         *zap.SugaredLogger
 }
 
 func NewUserPageHandlers(usersClient *session.UsersClient, sessionsClient *session.SessionsClient,
-	logger *zap.SugaredLogger) *UserPageHandlers {
+	metrics *metrics.HttpMetrics, logger *zap.SugaredLogger) *UserPageHandlers {
 	return &UserPageHandlers{
 		usersClient:    usersClient,
 		sessionsClient: sessionsClient,
+		metrics:        metrics,
 		logger:         logger,
 	}
 }
@@ -41,7 +44,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	req := session.GetUserDataByUuidRequest{Uuid: uuid}
 	userProto, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &req)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -57,7 +60,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -67,7 +70,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -88,7 +91,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	req := session.GetUserPreviewRequest{Uuid: uuid}
 	userPreviewProto, err := (*UserPageHandlers.usersClient).GetUserPreview(ctx, &req)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -105,7 +108,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -115,7 +118,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -129,7 +132,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
-		err = WriteError(w, myerrors.ErrNoActiveSession)
+		err = WriteError(w, r, UserPageHandlers.metrics, myerrors.ErrNoActiveSession)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -138,7 +141,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	_, err = IsTokenValid(userToken, os.Getenv("SECRETKEY"))
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -149,7 +152,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	req := session.GetUserDataByUuidRequest{Uuid: uuid}
 	getUserByDataRes, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &req)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -162,7 +165,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	case "chPassword":
 		err = ValidatePassword(newData)
 		if err != nil {
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -172,7 +175,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		reqPass := session.ChangeUserPasswordByUuidRequest{Uuid: uuid, NewPassword: newData}
 		changePassRes, err := (*UserPageHandlers.usersClient).ChangeUserPasswordByUuid(ctx, &reqPass)
 		if err != nil {
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -183,7 +186,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	case "chUsername":
 		err = ValidateUsername(newData)
 		if err != nil {
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -193,7 +196,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		reqName := session.ChangeUserNameByUuidRequest{Uuid: uuid, NewUsername: newData}
 		changeNameRes, err := (*UserPageHandlers.usersClient).ChangeUserNameByUuid(ctx, &reqName)
 		if err != nil {
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -206,7 +209,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		avatar64, err := Encode(files[0])
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to encode into base64: %v\n", requestId, err)
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -216,7 +219,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		reqAvatar := session.ChangeUserAvatarByUuidRequest{Uuid: uuid, NewAvatar: avatar64}
 		changeAvatarRes, err := (*UserPageHandlers.usersClient).ChangeUserAvatarByUuid(ctx, &reqAvatar)
 		if err != nil {
-			err = WriteError(w, err)
+			err = WriteError(w, r, UserPageHandlers.metrics, err)
 			if err != nil {
 				UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 			}
@@ -229,7 +232,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	tokenSigned, err := GenerateTokens(currUserProto.Email, false, version)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -239,7 +242,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	reqAdd := session.AddRequest{Login: currUserProto.Email, Token: tokenSigned, Version: version}
 	_, err = (*UserPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 		}
@@ -257,7 +260,7 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 
 	http.SetCookie(w, tokenCookie)
 
-	err = WriteSuccess(w)
+	err = WriteSuccess(w, r, UserPageHandlers.metrics)
 	if err != nil {
 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}

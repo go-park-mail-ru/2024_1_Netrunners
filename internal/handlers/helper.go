@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
@@ -31,7 +32,7 @@ type ErrorResponse struct {
 	Err    string `json:"error"`
 }
 
-func WriteSuccess(w http.ResponseWriter) error {
+func WriteSuccess(w http.ResponseWriter, req *http.Request, metrics *metrics.HttpMetrics) error {
 	response := SuccessResponse{
 		Status: http.StatusOK,
 	}
@@ -47,10 +48,12 @@ func WriteSuccess(w http.ResponseWriter) error {
 		return err
 	}
 
+	metrics.IncRequestsTotal(req.URL.Path, req.Method, 200)
+
 	return nil
 }
 
-func WriteError(w http.ResponseWriter, err error) error {
+func WriteError(w http.ResponseWriter, req *http.Request, metrics *metrics.HttpMetrics, err error) error {
 	statusCode, err := myerrors.ParseError(err)
 
 	response := ErrorResponse{
@@ -68,6 +71,8 @@ func WriteError(w http.ResponseWriter, err error) error {
 	if err != nil {
 		return err
 	}
+
+	metrics.IncRequestsTotal(req.URL.Path, req.Method, statusCode)
 
 	return nil
 }

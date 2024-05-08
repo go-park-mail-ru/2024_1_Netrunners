@@ -18,7 +18,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 
 	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
+		"postgres",
 		"5432",
 		"postgres",
 		"root1234",

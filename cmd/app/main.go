@@ -12,11 +12,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/middleware"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
@@ -54,16 +56,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	httpMetrics := metrics.InitHttpMetrics()
+	httpMetrics.Register()
+
 	filmsClient := session.NewFilmsClient(filmsConn)
 	usersClient := session.NewUsersClient(usersConn)
 	sessionClient := session.NewSessionsClient(authConn)
 
-	middleware := middleware.NewMiddleware(sugarLogger, serverIP)
-	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, sugarLogger)
-	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, sugarLogger)
-	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, sugarLogger)
+	middleware := middleware.NewMiddleware(httpMetrics, sugarLogger, serverIP)
+	authPageHandlers := handlers.NewAuthPageHandlers(&usersClient, &sessionClient, httpMetrics, sugarLogger)
+	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, httpMetrics, sugarLogger)
+	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, httpMetrics, sugarLogger)
 
 	router := mux.NewRouter()
+
+	router.Handle("/metrics", promhttp.Handler())
 
 	router.HandleFunc("/auth/login", authPageHandlers.Login).Methods("POST", "OPTIONS")
 	router.HandleFunc("/auth/logout", authPageHandlers.Logout).Methods("POST", "OPTIONS")

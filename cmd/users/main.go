@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 
 	helper "github.com/go-park-mail-ru/2024_1_Netrunners/cmd"
-	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
+	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/repository"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/service"
@@ -46,7 +46,7 @@ func main() {
 
 	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
+		"postgres",
 		"5432",
 		"postgres",
 		"root1234",

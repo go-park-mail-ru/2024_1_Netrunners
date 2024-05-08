@@ -68,6 +68,53 @@ services:
       - postgres
     restart: always
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - app_network
+    depends_on:
+      - app
+    restart: always
+
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor-arm:v0.49.1
+  #   container_name: cadvisor
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+    # networks:
+    #   - app_network
+  #   restart: always
+
+  grafana:
+    image: grafana/grafana
+    user: root
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    container_name: grafana
+    hostname: grafana
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - app_network
+    depends_on:
+      - prometheus
+    restart: always
+
 networks:
   app_network:
     driver: bridge

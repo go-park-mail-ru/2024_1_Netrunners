@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -1108,7 +1109,7 @@ func (storage *FilmsStorage) FindFilmsLong(title string, page int) (domain.Searc
 	}
 
 	var count int
-	err = storage.pool.QueryRow(context.Background(), searchFilmTotal, "%"+title+"%").Scan(&count)
+	err = storage.pool.QueryRow(context.Background(), searchFilmTotal, "%"+strings.ToLower(title)+"%").Scan(&count)
 	if err != nil {
 		return domain.SearchFilms{}, err
 	}
@@ -1229,7 +1230,7 @@ func (storage *FilmsStorage) FindSerialsLong(title string, page int) (domain.Sea
 	}
 
 	var count int
-	err = storage.pool.QueryRow(context.Background(), searchSerialTotal, "%"+title+"%").Scan(&count)
+	err = storage.pool.QueryRow(context.Background(), searchSerialTotal, "%"+strings.ToLower(title)+"%").Scan(&count)
 	if err != nil {
 		return domain.SearchFilms{}, err
 	}
@@ -1309,7 +1310,7 @@ func (storage *FilmsStorage) FindActorsLong(name string, page int) (domain.Searc
 	}
 
 	var count int
-	err = storage.pool.QueryRow(context.Background(), searchActorTotal, "%"+name+"%").Scan(&count)
+	err = storage.pool.QueryRow(context.Background(), searchActorTotal, "%"+strings.ToLower(name)+"%").Scan(&count)
 	if err != nil {
 		return domain.SearchActors{}, err
 	}
