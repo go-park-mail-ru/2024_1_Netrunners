@@ -24,7 +24,6 @@ func InitGrpcMetrics(service string) *GrpcMetrics {
 
 func (grpcMetrics *GrpcMetrics) Register() {
 	prometheus.MustRegister(grpcMetrics.methodCallsTotal)
-	prometheus.MustRegister(grpcMetrics.methodCallsTotal)
 }
 
 func (grpcMetrics *GrpcMetrics) IncRequestsTotal(method string) {

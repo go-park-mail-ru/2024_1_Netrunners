@@ -21,6 +21,7 @@ services:
       dockerfile: ./cmd/films/Dockerfile
     ports:
       - 8020:8020
+      - 8021:8021
     networks:
       - app_network
     depends_on:
