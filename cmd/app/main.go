@@ -56,7 +56,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	httpMetrics := metrics.InitHttpMetrics()
+	httpMetrics := metrics.NewHttpMetrics()
 	httpMetrics.Register()
 
 	filmsClient := session.NewFilmsClient(filmsConn)

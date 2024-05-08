@@ -85,6 +85,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		return
 	}
 
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -143,6 +145,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		return
 	}
 
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -196,6 +200,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 		}
 		return
 	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
@@ -254,6 +260,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorsByFilm(w http.ResponseWrite
 		return
 	}
 
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -300,6 +308,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorByUuid(w http.ResponseWriter
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal: %v\n", requestID, err)
 	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
@@ -418,6 +428,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 		return
 	}
 
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -466,6 +478,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 		}
 		return
 	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
@@ -575,6 +589,8 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 		return
 	}
 
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -656,6 +672,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			return
 		}
 
+		filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write(jsonResponse)
 		if err != nil {
@@ -704,6 +722,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			return
 		}
 
+		filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write(jsonResponse)
 		if err != nil {
@@ -751,6 +771,8 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			}
 			return
 		}
+
+		filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write(jsonResponse)
@@ -811,6 +833,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, 
 		}
 		return
 	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
@@ -896,6 +920,8 @@ func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r
 		}
 		return
 	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)

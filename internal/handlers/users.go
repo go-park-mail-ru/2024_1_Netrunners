@@ -67,6 +67,8 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 		return
 	}
 
+	UserPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
@@ -114,6 +116,8 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		}
 		return
 	}
+
+	UserPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)

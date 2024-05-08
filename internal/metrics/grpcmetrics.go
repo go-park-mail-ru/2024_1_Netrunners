@@ -9,7 +9,7 @@ type GrpcMetrics struct {
 	methodCallsTotal *prometheus.CounterVec
 }
 
-func InitGrpcMetrics(service string) *GrpcMetrics {
+func NewGrpcMetrics(service string) *GrpcMetrics {
 	return &GrpcMetrics{
 		service: service,
 		methodCallsTotal: prometheus.NewCounterVec(

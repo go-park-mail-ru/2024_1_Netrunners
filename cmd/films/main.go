@@ -66,7 +66,7 @@ func main() {
 	}
 
 	// init metrics handler
-	grpcMetrics := metrics.InitGrpcMetrics("films")
+	grpcMetrics := metrics.NewGrpcMetrics("films")
 	grpcMetrics.Register()
 
 	go func() {

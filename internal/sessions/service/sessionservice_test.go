@@ -7,6 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/sessions/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,9 @@ func TestAddSession(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -47,7 +50,9 @@ func TestDeleteSession(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -74,7 +79,9 @@ func TestUpdateSession(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -101,7 +108,9 @@ func TestCheckVersion(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -133,7 +142,9 @@ func TestGetVersion(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -165,7 +176,9 @@ func TestHasSession(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 	token := "token123"
@@ -192,7 +205,9 @@ func TestCheckAllUserSessionTokens(t *testing.T) {
 	mockStorage := mockService.NewMocksessionStorage(ctrl)
 	mockLogger := zap.NewExample().Sugar()
 
-	service := NewSessionService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("sessions")
+
+	service := NewSessionService(mockStorage, metrics, mockLogger)
 
 	login := "testuser"
 

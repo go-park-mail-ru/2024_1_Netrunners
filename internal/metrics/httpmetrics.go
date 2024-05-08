@@ -11,7 +11,7 @@ type HttpMetrics struct {
 	requestDuration *prometheus.HistogramVec
 }
 
-func InitHttpMetrics() *HttpMetrics {
+func NewHttpMetrics() *HttpMetrics {
 	return &HttpMetrics{
 		requestsTotal: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -37,7 +37,7 @@ func (httpMetrics *HttpMetrics) Register() {
 }
 
 func (httpMetrics *HttpMetrics) IncRequestsTotal(endpoint, method string, status int) {
-	httpMetrics.requestsTotal.WithLabelValues(endpoint, method, fmt.Sprintf("%s", status)).Inc()
+	httpMetrics.requestsTotal.WithLabelValues(endpoint, method, fmt.Sprintf("%d", status)).Inc()
 }
 
 func (httpMetrics *HttpMetrics) IncRequestDuration(endpoint, method string, duration float64) {

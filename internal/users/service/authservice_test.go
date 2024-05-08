@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	mockService "github.com/go-park-mail-ru/2024_1_Netrunners/internal/users/mocks"
 )
 
@@ -26,14 +27,16 @@ func TestAuthService_HasUser(t *testing.T) {
 
 	mockStorage.EXPECT().HasUser(login, password).Return(nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	err := authService.HasUser(context.Background(), login, password)
 
 	assert.NoError(t, err)
 
 	mockStorage.EXPECT().HasUser(login, password).Return(errors.New(""))
 
-	authService = NewUsersService(mockStorage, mockLogger)
+	authService = NewUsersService(mockStorage, metrics, mockLogger)
 	err = authService.HasUser(context.Background(), login, password)
 
 	assert.Error(t, err)
@@ -51,14 +54,16 @@ func TestAuthService_ChangeUserPassword(t *testing.T) {
 
 	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(domain.User{}, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	_, err := authService.ChangeUserPassword(context.Background(), login, newPassword)
 
 	assert.NoError(t, err)
 
 	mockStorage.EXPECT().ChangeUserPassword(login, newPassword).Return(domain.User{}, errors.New(""))
 
-	authService = NewUsersService(mockStorage, mockLogger)
+	authService = NewUsersService(mockStorage, metrics, mockLogger)
 	_, err = authService.ChangeUserPassword(context.Background(), login, newPassword)
 
 	assert.Error(t, err)
@@ -76,7 +81,9 @@ func TestAuthService_ChangeUserName(t *testing.T) {
 
 	mockStorage.EXPECT().ChangeUserName(login, newName).Return(domain.User{}, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	_, err := authService.ChangeUserName(context.Background(), login, newName)
 
 	assert.NoError(t, err)
@@ -104,7 +111,9 @@ func TestAuthService_GetUserDataByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().GetUserDataByUuid(uuid).Return(user, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	retrievedUser, err := authService.GetUserDataByUuid(context.Background(), uuid)
 
 	assert.NoError(t, err)
@@ -112,7 +121,7 @@ func TestAuthService_GetUserDataByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().GetUserDataByUuid(uuid).Return(user, errors.New(""))
 
-	authService = NewUsersService(mockStorage, mockLogger)
+	authService = NewUsersService(mockStorage, metrics, mockLogger)
 	_, err = authService.GetUserDataByUuid(context.Background(), uuid)
 
 	assert.Error(t, err)
@@ -134,7 +143,9 @@ func TestAuthService_GetUserPreview(t *testing.T) {
 
 	mockStorage.EXPECT().GetUserPreview(uuid).Return(userPreview, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	retrievedUserPreview, err := authService.GetUserPreview(context.Background(), uuid)
 
 	assert.NoError(t, err)
@@ -142,7 +153,7 @@ func TestAuthService_GetUserPreview(t *testing.T) {
 
 	mockStorage.EXPECT().GetUserPreview(uuid).Return(userPreview, errors.New(""))
 
-	authService = NewUsersService(mockStorage, mockLogger)
+	authService = NewUsersService(mockStorage, metrics, mockLogger)
 	retrievedUserPreview, err = authService.GetUserPreview(context.Background(), uuid)
 
 	assert.Error(t, err)
@@ -160,7 +171,9 @@ func TestAuthService_ChangeUserPasswordByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().ChangeUserPasswordByUuid(uuid, newPassword).Return(domain.User{}, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	_, err := authService.ChangeUserPasswordByUuid(context.Background(), uuid, newPassword)
 
 	assert.NoError(t, err)
@@ -178,7 +191,9 @@ func TestAuthService_ChangeUserNameByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().ChangeUserNameByUuid(uuid, newName).Return(domain.User{}, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	_, err := authService.ChangeUserNameByUuid(context.Background(), uuid, newName)
 
 	assert.NoError(t, err)
@@ -196,7 +211,9 @@ func TestAuthService_GetUser(t *testing.T) {
 
 	mockStorage.EXPECT().GetUser(gomock.Eq(login)).Return(expectedUser, nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	user, err := authService.GetUser(context.Background(), login)
 
 	assert.NoError(t, err)
@@ -218,7 +235,9 @@ func TestAuthService_CreateUser(t *testing.T) {
 
 	mockStorage.EXPECT().CreateUser(user).Return(nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	err := authService.CreateUser(context.Background(), user)
 
 	assert.NoError(t, err)
@@ -235,7 +254,9 @@ func TestAuthService_RemoveUser(t *testing.T) {
 
 	mockStorage.EXPECT().RemoveUser(login).Return(nil)
 
-	authService := NewUsersService(mockStorage, mockLogger)
+	metrics := metrics.NewGrpcMetrics("users")
+
+	authService := NewUsersService(mockStorage, metrics, mockLogger)
 	err := authService.RemoveUser(context.Background(), login)
 
 	assert.NoError(t, err)

@@ -66,7 +66,7 @@ func main() {
 	}
 
 	// init metrics handler
-	grpcMetrics := metrics.InitGrpcMetrics("users")
+	grpcMetrics := metrics.NewGrpcMetrics("users")
 	grpcMetrics.Register()
 
 	go func() {
