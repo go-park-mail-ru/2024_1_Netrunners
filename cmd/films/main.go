@@ -85,6 +85,8 @@ func main() {
 
 	filmService := service.NewFilmsService(filmsStorage, grpcMetrics, sugarLogger, "./uploads/films")
 
+	filmService := service.NewFilmsService(filmsStorage, grpcMetrics, sugarLogger, "./uploads/films")
+
 	// init grpc server
 	s := grpc.NewServer()
 	srv := api.NewFilmsServer(filmService, sugarLogger)
