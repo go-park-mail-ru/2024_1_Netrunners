@@ -46,7 +46,7 @@ func main() {
 
 	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"postgres",
+		"localhost",
 		"5432",
 		"postgres",
 		"root1234",

@@ -83,19 +83,19 @@ services:
       - app
     restart: always
 
-  # cadvisor:
-  #   image: gcr.io/cadvisor/cadvisor-arm:v0.49.1
-  #   container_name: cadvisor
-  #   ports:
-  #     - 8080:8080
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-    # networks:
-    #   - app_network
-  #   restart: always
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor-arm:v0.49.1
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - app_network
+    restart: always
 
   grafana:
     image: grafana/grafana
