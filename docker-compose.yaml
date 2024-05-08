@@ -92,9 +92,18 @@ services:
     image: gcr.io/cadvisor/cadvisor-amd64:v0.49.1
     container_name: cadvisor
     ports:
+<<<<<<< HEAD
       - 8090:8080
     volumes:
       - '/:/host:ro,rslave'
+=======
+      - 8090:8090
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+>>>>>>> 9e31cb9 (a)
     networks:
       - app_network
     restart: always
