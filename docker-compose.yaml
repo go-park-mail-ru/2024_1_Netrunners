@@ -34,6 +34,7 @@ services:
       dockerfile: ./cmd/users/Dockerfile
     ports:
       - 8030:8030
+      - 8031:8031
     networks:
       - app_network
     depends_on:
@@ -48,6 +49,7 @@ services:
       dockerfile: ./cmd/sessions/Dockerfile
     ports:
       - 8010:8010
+      - 8011:8011
     networks:
       - app_network
     depends_on:

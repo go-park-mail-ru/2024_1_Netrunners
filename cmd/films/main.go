@@ -65,13 +65,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	filmService := service.NewFilmsService(filmsStorage, sugarLogger, "./uploads/films")
-
 	// init metrics handler
 	grpcMetrics := metrics.InitGrpcMetrics("films")
 	grpcMetrics.Register()
-
-	grpcMetrics.IncRequestsTotal("aboba")
 
 	router := mux.NewRouter()
 
@@ -84,6 +80,8 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Starting metrics server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort+1))
+
+	filmService := service.NewFilmsService(filmsStorage, grpcMetrics, sugarLogger, "./uploads/films")
 
 	// init grpc server
 	s := grpc.NewServer()

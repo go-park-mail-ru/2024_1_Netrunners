@@ -17,3 +17,13 @@ scrape_configs:
     static_configs:
       - targets: ['films:8021']
     metrics_path: /metrics
+  - job_name: auth
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['sessions:8011']
+    metrics_path: /metrics
+  - job_name: users
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['users:8031']
+    metrics_path: /metrics
