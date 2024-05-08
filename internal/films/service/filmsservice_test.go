@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/mocks"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 )
 
 func TestGetFilmDataByUuid(t *testing.T) {
@@ -20,7 +21,9 @@ func TestGetFilmDataByUuid(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockFilmData := domain.CommonFilmData{
@@ -48,7 +51,9 @@ func TestGetFilmDataByUuid_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "1"
 	mockError := errors.New("mock error")
@@ -67,7 +72,9 @@ func TestRemoveFilm(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 
@@ -85,7 +92,9 @@ func TestRemoveFilm_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockError := errors.New("mock error")
@@ -104,7 +113,9 @@ func TestGetFilmPreview(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockFilmPreview := domain.FilmPreview{
@@ -132,7 +143,9 @@ func TestGetFilmPreview_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockError := errors.New("mock error")
@@ -151,7 +164,9 @@ func TestGetAllFilmsPreviews(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	mockFilmPreviews := []domain.FilmPreview{
 		{Uuid: "1", Title: "Mock Title 1"},
@@ -173,7 +188,9 @@ func TestGetAllFilmsPreviews_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	mockError := errors.New("mock error")
 
@@ -191,7 +208,9 @@ func TestGetAllFilmComments(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockComments := []domain.Comment{
@@ -214,7 +233,9 @@ func TestGetAllFilmComments_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockError := errors.New("mock error")
@@ -233,7 +254,9 @@ func TestGetAllFilmActors(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockActors := []domain.ActorPreview{
@@ -256,7 +279,9 @@ func TestGetAllFilmActors_Error(t *testing.T) {
 	mockStorage := mocks.NewMockFilmsStorage(ctrl)
 	mockLogger := zaptest.NewLogger(t).Sugar()
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
 	uuid := "123"
 	mockError := errors.New("mock error")
@@ -289,7 +314,9 @@ func TestActorsService_GetActorByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().GetActorByUuid("1").Return(expectedActor, nil)
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 	actor, err := service.GetActorByUuid(context.Background(), "1")
 
 	assert.NoError(t, err)
@@ -306,7 +333,9 @@ func TestActorsService_GetActorsByFilm(t *testing.T) {
 	expectedActors := mocks.NewMockActorPreview()
 	mockStorage.EXPECT().GetActorsByFilm("1").Return(expectedActors, nil)
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 	actors, err := service.GetActorsByFilm(context.Background(), "1")
 
 	assert.NoError(t, err)
@@ -323,7 +352,9 @@ func TestActorsService_GetActorByUuid_Error(t *testing.T) {
 	expectedError := errors.New("storage error")
 	mockStorage.EXPECT().GetActorByUuid("1").Return(domain.ActorData{}, expectedError)
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 	actor, err := service.GetActorByUuid(context.Background(), "1")
 
 	assert.Error(t, err)
@@ -340,7 +371,9 @@ func TestActorsService_GetActorsByFilm_Error(t *testing.T) {
 	expectedError := errors.New("storage error")
 	mockStorage.EXPECT().GetActorsByFilm("1").Return([]domain.ActorPreview{}, expectedError)
 
-	service := NewFilmsService(mockStorage, mockLogger, "")
+	metrics := metrics.NewGrpcMetrics("films")
+
+	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 	actors, err := service.GetActorsByFilm(context.Background(), "1")
 
 	assert.Error(t, err)

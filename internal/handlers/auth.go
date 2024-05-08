@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"os"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
@@ -50,14 +52,16 @@ type SessionService interface {
 type AuthPageHandlers struct {
 	usersClient    *session.UsersClient
 	sessionsClient *session.SessionsClient
+	metrics        *metrics.HttpMetrics
 	logger         *zap.SugaredLogger
 }
 
 func NewAuthPageHandlers(usersClient *session.UsersClient, sessionsClient *session.SessionsClient,
-	logger *zap.SugaredLogger) *AuthPageHandlers {
+	metrics *metrics.HttpMetrics, logger *zap.SugaredLogger) *AuthPageHandlers {
 	return &AuthPageHandlers{
 		usersClient:    usersClient,
 		sessionsClient: sessionsClient,
+		metrics:        metrics,
 		logger:         logger,
 	}
 }
@@ -70,7 +74,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to decode: %v\n", requestID, myerrors.ErrFailedDecode)
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -83,7 +87,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] login is not valid: %v\n", requestID,
 			myerrors.ErrLoginIsNotValid)
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -94,7 +98,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] password is not valid: %v\n", requestID,
 			myerrors.ErrPasswordIsToShort)
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -106,7 +110,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to check sessions: %v\n", requestID,
 			myerrors.ErrNoActiveSession)
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -115,7 +119,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	if has.Has {
 		authPageHandlers.logger.Errorf("[reqid=%s] user already exists: %v\n", requestID,
 			myerrors.ErrUserAlreadyExists)
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -125,7 +129,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	reqGetUser := session.GetUserRequest{Login: login}
 	user, err := (*authPageHandlers.usersClient).GetUser(ctx, &reqGetUser)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -134,7 +138,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 
 	tokenSigned, err := GenerateTokens(user.User.Email, user.User.IsAdmin, user.User.Version)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -144,7 +148,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	reqAdd := session.AddRequest{Login: user.User.Email, Token: tokenSigned, Version: user.User.Version}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -172,7 +176,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
-	err = WriteSuccess(w)
+	err = WriteSuccess(w, r, authPageHandlers.metrics)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
@@ -186,7 +190,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -195,7 +199,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 
 	tokenClaims, err := IsTokenValid(userToken, os.Getenv("SECRETKEY"))
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -205,7 +209,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 	reqDel := session.DeleteSessionRequest{Login: tokenClaims["Login"].(string), Token: userToken.Value}
 	_, err = (*authPageHandlers.sessionsClient).DeleteSession(ctx, &reqDel)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -228,7 +232,7 @@ func (authPageHandlers *AuthPageHandlers) Logout(w http.ResponseWriter, r *http.
 		authPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] success logout", requestID))
 	}
 
-	err = WriteSuccess(w)
+	err = WriteSuccess(w, r, authPageHandlers.metrics)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
@@ -241,7 +245,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err := json.NewDecoder(r.Body).Decode(&inputUserData)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -254,7 +258,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err = ValidateLogin(login)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -263,7 +267,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err = ValidateUsername(username)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -272,7 +276,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	err = ValidatePassword(password)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -290,7 +294,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	reqCreate := session.CreateUserRequest{User: convertUserSignUpDataToRegular(user)}
 	_, err = (*authPageHandlers.usersClient).CreateUser(ctx, &reqCreate)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -299,7 +303,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	tokenSigned, err := GenerateTokens(user.Email, false, version)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -309,7 +313,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	reqAdd := session.AddRequest{Login: user.Email, Token: tokenSigned}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -319,7 +323,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	reqGetUser := session.GetUserRequest{Login: user.Email}
 	userForUuid, err := (*authPageHandlers.usersClient).GetUser(ctx, &reqGetUser)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -347,7 +351,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 
 	http.SetCookie(w, tokenCookie)
 
-	err = WriteSuccess(w)
+	err = WriteSuccess(w, r, authPageHandlers.metrics)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
@@ -359,7 +363,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 
 	userToken, err := r.Cookie("access")
 	if err != nil {
-		err = WriteError(w, myerrors.ErrNoActiveSession)
+		err = WriteError(w, r, authPageHandlers.metrics, myerrors.ErrNoActiveSession)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -368,7 +372,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 
 	tokenClaims, err := IsTokenValid(userToken, os.Getenv("SECRETKEY"))
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -378,7 +382,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	reqHas := session.HasSessionRequest{Login: tokenClaims["Login"].(string), Token: userToken.Value}
 	_, err = (*authPageHandlers.sessionsClient).HasSession(ctx, &reqHas)
 	if err != nil {
-		err = WriteError(w, myerrors.ErrNoActiveSession)
+		err = WriteError(w, r, authPageHandlers.metrics, myerrors.ErrNoActiveSession)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -388,7 +392,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	tokenSigned, err := GenerateTokens(tokenClaims["Login"].(string), tokenClaims["IsAdmin"].(bool),
 		uint32(tokenClaims["Version"].(float64)))
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -399,7 +403,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 		Version: uint32(tokenClaims["Version"].(float64))}
 	_, err = (*authPageHandlers.sessionsClient).Add(ctx, &reqAdd)
 	if err != nil {
-		err = WriteError(w, err)
+		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {
 			authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
@@ -415,7 +419,7 @@ func (authPageHandlers *AuthPageHandlers) Check(w http.ResponseWriter, r *http.R
 	}
 
 	http.SetCookie(w, tokenCookie)
-	err = WriteSuccess(w)
+	err = WriteSuccess(w, r, authPageHandlers.metrics)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}

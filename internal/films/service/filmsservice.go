@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
@@ -35,19 +36,23 @@ type FilmsStorage interface {
 
 type FilmsService struct {
 	storage          FilmsStorage
+	metrics          *metrics.GrpcMetrics
 	logger           *zap.SugaredLogger
 	localStoragePath string
 }
 
-func NewFilmsService(storage FilmsStorage, logger *zap.SugaredLogger, localStoragePath string) *FilmsService {
+func NewFilmsService(storage FilmsStorage, metrics *metrics.GrpcMetrics, logger *zap.SugaredLogger,
+	localStoragePath string) *FilmsService {
 	return &FilmsService{
 		storage:          storage,
+		metrics:          metrics,
 		logger:           logger,
 		localStoragePath: localStoragePath,
 	}
 }
 
 func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.CommonFilmData, error) {
+	service.metrics.IncRequestsTotal("GetFilmDataByUuid")
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
@@ -59,6 +64,7 @@ func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string)
 }
 
 func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd) error {
+	service.metrics.IncRequestsTotal("AddFilm")
 	err := service.storage.AddFilm(film)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to add film: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -68,6 +74,7 @@ func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd)
 }
 
 func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error {
+	service.metrics.IncRequestsTotal("RemoveFilm")
 	err := service.storage.RemoveFilm(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove film: %v", ctx.Value(requestId.ReqIDKey), err)
@@ -77,6 +84,7 @@ func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error 
 }
 
 func (service *FilmsService) GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("GetFilmPreview")
 	filmPreview, err := service.storage.GetFilmPreview(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film preview: %v", ctx.Value(requestId.ReqIDKey),
@@ -87,6 +95,7 @@ func (service *FilmsService) GetFilmPreview(ctx context.Context, uuid string) (d
 }
 
 func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("GetAllFilmsPreviews")
 	filmPreviews, err := service.storage.GetAllFilmsPreviews()
 	if err != nil {
 		service.logger.Errorf("[reqid=%v] failed to get all films previews: %v",
@@ -97,6 +106,7 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 }
 
 func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error) {
+	service.metrics.IncRequestsTotal("GetAllFilmComments")
 	comments, err := service.storage.GetAllFilmComments(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film comments: %v",
@@ -107,6 +117,7 @@ func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string
 }
 
 func (service *FilmsService) GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
+	service.metrics.IncRequestsTotal("GetActorsByFilm")
 	actors, err := service.storage.GetActorsByFilm(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film actors: %v", ctx.Value(requestId.ReqIDKey),
@@ -117,6 +128,7 @@ func (service *FilmsService) GetActorsByFilm(ctx context.Context, uuid string) (
 }
 
 func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error) {
+	service.metrics.IncRequestsTotal("GetActorByUuid")
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(requestId.ReqIDKey),
@@ -128,6 +140,7 @@ func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid strin
 }
 
 func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	service.metrics.IncRequestsTotal("PutFavoriteFilm")
 	err := service.storage.PutFavoriteFilm(filmUuid, userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to put favorite film: %v", ctx.Value(requestId.ReqIDKey),
@@ -138,6 +151,7 @@ func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid strin
 }
 
 func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
+	service.metrics.IncRequestsTotal("RemoveFavoriteFilm")
 	err := service.storage.RemoveFavoriteFilm(filmUuid, userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
@@ -148,6 +162,7 @@ func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid st
 }
 
 func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("GetAllFavoriteFilms")
 	films, err := service.storage.GetAllFavoriteFilms(userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
@@ -158,6 +173,7 @@ func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid s
 }
 
 func (service *FilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("GetAllFilmsByGenre")
 	films, err := service.storage.GetAllFilmsByGenre(genreUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get genre films: %v", ctx.Value(requestId.ReqIDKey),
@@ -168,6 +184,7 @@ func (service *FilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid s
 }
 
 func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFilms, error) {
+	service.metrics.IncRequestsTotal("GetAllGenres")
 	genres, err := service.storage.GetAllGenres()
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get genres: %v", ctx.Value(requestId.ReqIDKey),
@@ -178,6 +195,7 @@ func (service *FilmsService) GetAllGenres(ctx context.Context) ([]domain.GenreFi
 }
 
 func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, page int) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("FindFilmsShort")
 	films, err := service.storage.FindFilmsShort(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find films short: %v", ctx.Value(requestId.ReqIDKey),
@@ -188,6 +206,7 @@ func (service *FilmsService) FindFilmsShort(ctx context.Context, title string, p
 }
 
 func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error) {
+	service.metrics.IncRequestsTotal("FindFilmsLong")
 	films, err := service.storage.FindFilmsLong(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find films long: %v", ctx.Value(requestId.ReqIDKey),
@@ -199,6 +218,7 @@ func (service *FilmsService) FindFilmsLong(ctx context.Context, title string, pa
 
 func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
 	page int) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("FindSerialsShort")
 	serials, err := service.storage.FindSerialsShort(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find serials short: %v", ctx.Value(requestId.ReqIDKey),
@@ -209,6 +229,7 @@ func (service *FilmsService) FindSerialsShort(ctx context.Context, title string,
 }
 
 func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, page int) (domain.SearchFilms, error) {
+	service.metrics.IncRequestsTotal("FindSerialsLong")
 	serials, err := service.storage.FindSerialsLong(title, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find serials long: %v", ctx.Value(requestId.ReqIDKey),
@@ -220,6 +241,7 @@ func (service *FilmsService) FindSerialsLong(ctx context.Context, title string, 
 
 func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
 	page int) ([]domain.ActorPreview, error) {
+	service.metrics.IncRequestsTotal("FindActorsShort")
 	actors, err := service.storage.FindActorsShort(name, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find actors short: %v", ctx.Value(requestId.ReqIDKey),
@@ -230,6 +252,7 @@ func (service *FilmsService) FindActorsShort(ctx context.Context, name string,
 }
 
 func (service *FilmsService) FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error) {
+	service.metrics.IncRequestsTotal("FindActorsLong")
 	actors, err := service.storage.FindActorsLong(name, page)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to find actors long: %v", ctx.Value(requestId.ReqIDKey),
@@ -240,6 +263,7 @@ func (service *FilmsService) FindActorsLong(ctx context.Context, name string, pa
 }
 
 func (service *FilmsService) GetTopFilms(ctx context.Context) ([]domain.TopFilm, error) {
+	service.metrics.IncRequestsTotal("GetTopFilms")
 	films, err := service.storage.GetTopFilms()
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get top films: %v", ctx.Value(requestId.ReqIDKey),

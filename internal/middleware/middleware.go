@@ -10,16 +10,19 @@ import (
 
 	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
 )
 
 type Middleware struct {
+	metrics  *metrics.HttpMetrics
 	logger   *zap.SugaredLogger
 	serverIP string
 }
 
-func NewMiddleware(logger *zap.SugaredLogger, serverIP string) *Middleware {
+func NewMiddleware(metrics *metrics.HttpMetrics, logger *zap.SugaredLogger, serverIP string) *Middleware {
 	return &Middleware{
+		metrics:  metrics,
 		logger:   logger,
 		serverIP: serverIP,
 	}
@@ -47,10 +50,12 @@ func (middlewareHandlers *Middleware) PanicMiddleware(next http.Handler) http.Ha
 		defer func() {
 			if err := recover(); err != nil {
 				middlewareHandlers.logger.Fatalf("panic raised from %v: %v", r.URL, err)
-				err = handlers.WriteError(w, myerrors.ErrInternalServerError)
+				err = handlers.WriteError(w, r, middlewareHandlers.metrics, myerrors.ErrInternalServerError)
 				if err != nil {
 					middlewareHandlers.logger.Errorf("error at writing response: %v\n", err)
 				}
+
+				middlewareHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 500)
 			}
 		}()
 
@@ -77,5 +82,7 @@ func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) htt
 		middlewareHandlers.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], "+
 			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
+
+		middlewareHandlers.metrics.IncRequestDuration(r.URL.Path, r.Method, float64(time.Since(start).Milliseconds()))
 	})
 }
