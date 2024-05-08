@@ -2,7 +2,7 @@ scrape_configs:
   - job_name: cadvisor
     scrape_interval: 5s
     static_configs:
-      - targets: ['cadvisor:8090']
+      - targets: ['cadvisor:8080']
   - job_name: node_exporter
     scrape_interval: 5s
     static_configs:
@@ -15,5 +15,5 @@ scrape_configs:
   - job_name: films
     scrape_interval: 5s
     static_configs:
-      - targets: ['app:8021']
+      - targets: ['films:8021']
     metrics_path: /metrics
