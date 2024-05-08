@@ -1,19 +1,19 @@
 version: "3.8"
 
 services:
-  # postgres:
-  #   image: postgres:15
-  #   container_name: postgres
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: root1234
-  #   build:
-  #     dockerfile: ./db/migrations/Dockerfile
-  #   ports:
-  #     - 5432:5432
-  #   networks:
-  #     - app_network
-  #   restart: always
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root1234
+    build:
+      dockerfile: ./db/migrations/Dockerfile
+    ports:
+      - 5435:5432
+    networks:
+      - app_network
+    restart: always
 
   films:
     container_name: films
@@ -23,8 +23,8 @@ services:
       - 8020:8020
     networks:
       - app_network
-    # depends_on:
-    #   - postgres
+    depends_on:
+      - postgres
     restart: always
 
   users:
@@ -35,8 +35,8 @@ services:
       - 8030:8030
     networks:
       - app_network
-    # depends_on:
-    #   - postgres
+    depends_on:
+      - postgres
     restart: always
 
   sessions:
@@ -49,8 +49,8 @@ services:
       - 8010:8010
     networks:
       - app_network
-    # depends_on:
-    #   - postgres
+    depends_on:
+      - postgres
     restart: always
 
   app:
@@ -65,7 +65,7 @@ services:
       - films
       - users
       - sessions
-      # - postgres
+      - postgres
     restart: always
 
   prometheus:
