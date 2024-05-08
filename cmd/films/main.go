@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
@@ -18,6 +21,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/api"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/repository"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/films/service"
+	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	session "github.com/go-park-mail-ru/2024_1_Netrunners/internal/session/proto"
 )
 
@@ -63,11 +67,30 @@ func main() {
 
 	filmService := service.NewFilmsService(filmsStorage, sugarLogger, "./uploads/films")
 
+	// init metrics handler
+	grpcMetrics := metrics.InitGrpcMetrics("films")
+	grpcMetrics.Register()
+
+	grpcMetrics.IncRequestsTotal("aboba")
+
+	router := mux.NewRouter()
+
+	router.Handle("/metrics", promhttp.Handler())
+	metricsServer := &http.Server{
+		Handler: router,
+		Addr:    fmt.Sprintf(":%d", backEndPort+1),
+	}
+	if err := metricsServer.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
+	fmt.Printf("Starting metrics server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort+1))
+
+	// init grpc server
 	s := grpc.NewServer()
 	srv := api.NewFilmsServer(filmService, sugarLogger)
 	session.RegisterFilmsServer(s, srv)
 
-	listener, err := net.Listen("tcp", ":8020")
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", backEndPort))
 	if err != nil {
 		log.Fatal(err)
 	}
