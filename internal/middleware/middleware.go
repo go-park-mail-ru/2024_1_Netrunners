@@ -82,5 +82,7 @@ func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) htt
 		middlewareHandlers.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], "+
 			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
+
+		middlewareHandlers.metrics.IncRequestDuration(r.URL.Path, r.Method, float64(time.Since(start).Milliseconds()))
 	})
 }

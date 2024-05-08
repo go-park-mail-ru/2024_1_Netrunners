@@ -24,9 +24,9 @@ func InitHttpMetrics() *HttpMetrics {
 			prometheus.HistogramOpts{
 				Name:    "http_requests_duration",
 				Help:    "Duration of http requests with status codes",
-				Buckets: []float64{0.001, 0.01, 0.1, 1, 10},
+				Buckets: []float64{0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000},
 			},
-			[]string{"method", "status"},
+			[]string{"endpoint", "method"},
 		),
 	}
 }
@@ -40,6 +40,6 @@ func (httpMetrics *HttpMetrics) IncRequestsTotal(endpoint, method string, status
 	httpMetrics.requestsTotal.WithLabelValues(endpoint, method, fmt.Sprintf("%s", status)).Inc()
 }
 
-func (httpMetrics *HttpMetrics) IncRequestDuration(method string, status int, duration float64) {
-	httpMetrics.requestDuration.WithLabelValues(method, fmt.Sprintf("%s", status)).Observe(duration)
+func (httpMetrics *HttpMetrics) IncRequestDuration(endpoint, method string, duration float64) {
+	httpMetrics.requestDuration.WithLabelValues(endpoint, method).Observe(duration)
 }
