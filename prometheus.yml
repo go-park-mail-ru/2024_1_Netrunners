@@ -1,5 +1,4 @@
 scrape_configs:
-<<<<<<< HEAD
   - job_name: cadvisor
     scrape_interval: 5s
     static_configs:
@@ -8,12 +7,6 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['node_exporter:9100']
-=======
-  # - job_name: cadvisor
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['cadvisor:8090']
->>>>>>> 2aa874a (a)
   - job_name: app
     scrape_interval: 5s
     static_configs:
