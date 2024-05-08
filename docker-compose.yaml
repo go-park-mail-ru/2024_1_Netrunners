@@ -84,7 +84,7 @@ services:
     restart: always
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor-arm:v0.49.1
+    image: gcr.io/cadvisor/cadvisor-amd64:v0.49.1
     container_name: cadvisor
     ports:
       - 8080:8080
