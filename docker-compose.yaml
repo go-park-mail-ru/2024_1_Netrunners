@@ -24,8 +24,8 @@ services:
       - 8021:8021
     networks:
       - app_network
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     restart: always
 
   users:
@@ -37,8 +37,8 @@ services:
       - 8031:8031
     networks:
       - app_network
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     restart: always
 
   sessions:
@@ -52,8 +52,8 @@ services:
       - 8011:8011
     networks:
       - app_network
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     restart: always
 
   app:
@@ -68,7 +68,7 @@ services:
       - films
       - users
       - sessions
-      - postgres
+      # - postgres
     restart: always
 
   prometheus:
