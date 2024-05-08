@@ -12,3 +12,8 @@ scrape_configs:
     static_configs:
       - targets: ['app:8081']
     metrics_path: /metrics
+  - job_name: films
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['app:8021']
+    metrics_path: /metrics
