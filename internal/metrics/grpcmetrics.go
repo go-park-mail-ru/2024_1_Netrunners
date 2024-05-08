@@ -14,7 +14,7 @@ func InitGrpcMetrics(service string) *GrpcMetrics {
 		service: service,
 		methodCallsTotal: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "method_Calls_total",
+				Name: "method_calls_total",
 				Help: "Total amount of grpc methods calls",
 			},
 			[]string{"service", "method"},

@@ -49,17 +49,19 @@ func main() {
 	grpcMetrics := metrics.InitGrpcMetrics("auth")
 	grpcMetrics.Register()
 
-	router := mux.NewRouter()
+	go func() {
+		router := mux.NewRouter()
 
-	router.Handle("/metrics", promhttp.Handler())
-	metricsServer := &http.Server{
-		Handler: router,
-		Addr:    fmt.Sprintf(":%d", backEndPort+1),
-	}
-	if err := metricsServer.ListenAndServe(); err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
-	fmt.Printf("Starting metrics server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort+1))
+		router.Handle("/metrics", promhttp.Handler())
+		metricsServer := &http.Server{
+			Handler: router,
+			Addr:    fmt.Sprintf(":%d", backEndPort+1),
+		}
+		if err := metricsServer.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+		fmt.Printf("Starting metrics server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort+1))
+	}()
 
 	sessionService := service.NewSessionService(cacheStorage, grpcMetrics, sugarLogger)
 
