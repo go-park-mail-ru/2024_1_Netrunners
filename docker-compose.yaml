@@ -72,7 +72,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - 8091:8091
+      - 8091:9090
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
@@ -102,7 +102,7 @@ services:
     image: grafana/grafana
     user: root
     ports:
-      - 8092:8092
+      - 8092:3000
     volumes:
       - ./grafana:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
