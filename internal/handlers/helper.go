@@ -105,7 +105,7 @@ func WriteResponse(w http.ResponseWriter, r *http.Request, metrics *metrics.Http
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		return fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
 
 	return nil
