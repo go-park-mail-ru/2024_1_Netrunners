@@ -45,7 +45,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// init metrics handler
 	grpcMetrics := metrics.NewGrpcMetrics("auth")
 	grpcMetrics.Register()
 
@@ -65,7 +64,6 @@ func main() {
 
 	sessionService := service.NewSessionService(cacheStorage, grpcMetrics, sugarLogger)
 
-	// init grpc server
 	s := grpc.NewServer()
 	srv := api.NewSessionServer(sessionService, sugarLogger)
 	session.RegisterSessionsServer(s, srv)

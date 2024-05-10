@@ -84,10 +84,11 @@ func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) htt
 			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
 
-		fmt.Println()
-		fmt.Println(mux.CurrentRoute(r))
-		fmt.Println()
+		pathTemplate, err := mux.CurrentRoute(r).GetPathTemplate()
+		if err != nil {
+			middlewareHandlers.logger.Errorf("unable to get path template: %v", err)
+		}
 
-		middlewareHandlers.metrics.IncRequestDuration(r.URL.Path, r.Method, float64(time.Since(start).Milliseconds()))
+		middlewareHandlers.metrics.IncRequestDuration(pathTemplate, r.Method, float64(time.Since(start).Milliseconds()))
 	})
 }
