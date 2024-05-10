@@ -320,6 +320,88 @@ paths:
         default:
           description: Unknown error
 
+  /films/comments/add:
+    post:
+      tags:
+        - Films
+      summary: Add comment to film with given uuid and given user uuid
+      security:
+        - AccessCookie: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCommentRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Incorrect film uuid or user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+  /films/comments/remove:
+    post:
+      tags:
+        - Films
+      summary: Remove comment to film with given uuid and given user uuid
+      security:
+        - AccessCookie: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCommentRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Incorrect film uuid or user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
   /films/{uuid}/actors:
     get:
       tags:
@@ -477,7 +559,7 @@ paths:
   /films/find:
     get:
       tags:
-          - Films
+        - Films
       summary: Find films
       security:
         - AccessCookie: []
@@ -513,7 +595,7 @@ paths:
         default:
           description: Unknown error
 
-# Profile
+  # Profile
 
   /profile/{uuid}/data:
     get:
@@ -803,7 +885,7 @@ paths:
         default:
           description: Unknown error
 
-# Actors
+  # Actors
 
   /actors/{uuid}:
     get:
@@ -864,7 +946,7 @@ paths:
             schema:
               $ref: '#/components/schemas/NewActorRequest'
       responses:
-        '200':
+        '200  ':
           description: Success
           content:
             application/form:
@@ -900,7 +982,7 @@ paths:
   /actors/find:
     get:
       tags:
-          - Actors
+        - Actors
       summary: Find actor
       security:
         - AccessCookie: []
@@ -1153,7 +1235,8 @@ components:
                   properties:
                     preview_data:
                       type: string
-        
+
+
     GenreResponse:
       required:
         - status
@@ -1229,7 +1312,27 @@ components:
                 type: string
                 example: '2011-04-11T10:20:30'
 
-# Profile
+    NewCommentRequest:
+      required:
+        - film_uuid
+        - user_uuid
+        - comment_text
+        - score
+      properties:
+        film_uuid:
+          type: string
+          example: 'Transformers'
+        user_uuid:
+          type: string
+          example: 'Transformers'
+        comment_text:
+          type: string
+          example: 'Transformers'
+        score:
+          type: integer
+          example: 5
+
+    # Profile
 
     ProfileResponse:
       required:
@@ -1261,7 +1364,7 @@ components:
               example: false
             avatar:
               type: string
-              
+
     ProfilePreviewResponse:
       required:
         - status
@@ -1280,7 +1383,7 @@ components:
               example: 'Ahmed'
             avatar:
               type: string
-        
+
     ProfileEditRequest:
       required:
         - action
@@ -1295,7 +1398,7 @@ components:
         avatar:
           type: string
 
-# Actors
+    # Actors
 
     NewActorRequest:
       required:
