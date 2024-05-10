@@ -12,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	"github.com/gorilla/mux"
 )
 
 type Middleware struct {
@@ -82,6 +83,10 @@ func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) htt
 		middlewareHandlers.logger.Info(fmt.Sprintf("requestProcessed reqid[%s], method[%s], URLPath[%s], "+
 			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
+
+		fmt.Println()
+		fmt.Println(mux.CurrentRoute(r))
+		fmt.Println()
 
 		middlewareHandlers.metrics.IncRequestDuration(r.URL.Path, r.Method, float64(time.Since(start).Milliseconds()))
 	})
