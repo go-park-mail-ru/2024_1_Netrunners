@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"os"
 
@@ -58,19 +57,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 		UserInfo: user,
 	}
 
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		err = WriteError(w, r, UserPageHandlers.metrics, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-		return
-	}
-
-	UserPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
-
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonResponse)
+	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
@@ -108,19 +95,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 		UserPreview: userPreview,
 	}
 
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		err = WriteError(w, r, UserPageHandlers.metrics, err)
-		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
-		}
-		return
-	}
-
-	UserPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
-
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonResponse)
+	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {

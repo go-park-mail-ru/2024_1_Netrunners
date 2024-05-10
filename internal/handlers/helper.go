@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -48,7 +49,12 @@ func WriteSuccess(w http.ResponseWriter, req *http.Request, metrics *metrics.Htt
 		return err
 	}
 
-	metrics.IncRequestsTotal(req.URL.Path, req.Method, 200)
+	pathTemplate, err := mux.CurrentRoute(req).GetPathTemplate()
+	if err != nil {
+		return fmt.Errorf("unable to get path template: %w", err)
+	}
+
+	metrics.IncRequestsTotal(pathTemplate, req.Method, 200)
 
 	return nil
 }
@@ -72,7 +78,35 @@ func WriteError(w http.ResponseWriter, req *http.Request, metrics *metrics.HttpM
 		return err
 	}
 
-	metrics.IncRequestsTotal(req.URL.Path, req.Method, statusCode)
+	pathTemplate, err := mux.CurrentRoute(req).GetPathTemplate()
+	if err != nil {
+		return fmt.Errorf("unable to get path template: %w", err)
+	}
+
+	metrics.IncRequestsTotal(pathTemplate, req.Method, statusCode)
+
+	return nil
+}
+
+func WriteResponse(w http.ResponseWriter, r *http.Request, metrics *metrics.HttpMetrics, response any,
+	requestID any) error {
+	pathTemplate, err := mux.CurrentRoute(r).GetPathTemplate()
+	if err != nil {
+		return fmt.Errorf("unable to get path template: %w", err)
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		return fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+	}
+
+	metrics.IncRequestsTotal(pathTemplate, r.Method, 200)
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+	}
 
 	return nil
 }
