@@ -240,12 +240,13 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 
 func convertCommentToRegular(comment *session.Comment) domain.Comment {
 	return domain.Comment{
-		Uuid:     comment.Uuid,
-		FilmUuid: comment.FilmUuid,
-		Text:     comment.Text,
-		Author:   comment.Author,
-		Score:    comment.Score,
-		AddedAt:  convertProtoToTime(comment.AddedAt),
+		Uuid:       comment.Uuid,
+		FilmUuid:   comment.FilmUuid,
+		Text:       comment.Text,
+		Author:     comment.Author,
+		AuthorUuid: comment.AuthorUuid,
+		Score:      comment.Score,
+		AddedAt:    convertProtoToTime(comment.AddedAt),
 	}
 }
 
@@ -408,6 +409,22 @@ func convertTopFilmToRegular(film *session.TopFilm) domain.TopFilm {
 		Title:    film.Title,
 		IsSerial: film.IsSerial,
 		Data:     film.Data,
+	}
+}
+
+func convertCommentToAddToProto(commentToAdd domain.CommentToAdd) *session.CommentToAdd {
+	return &session.CommentToAdd{
+		FilmUuid:   commentToAdd.FilmUuid,
+		AuthorUuid: commentToAdd.AuthorUuid,
+		Text:       commentToAdd.Text,
+		Score:      commentToAdd.Score,
+	}
+}
+
+func convertCommentToRemoveToProto(comment domain.CommentToRemove) *session.CommentToRemove {
+	return &session.CommentToRemove{
+		FilmUuid:   comment.FilmUuid,
+		AuthorUuid: comment.AuthorUuid,
 	}
 }
 

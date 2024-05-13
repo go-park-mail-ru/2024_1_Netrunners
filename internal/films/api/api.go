@@ -19,7 +19,6 @@ type FilmsService interface {
 	RemoveFilm(ctx context.Context, uuid string) error
 	GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
-	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
 	GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
 	GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error)
 	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
@@ -34,6 +33,9 @@ type FilmsService interface {
 	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error)
 	GetTopFilms(ctx context.Context) ([]domain.TopFilm, error)
+	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
+	AddComment(ctx context.Context, comment domain.CommentToAdd) error
+	RemoveComment(ctx context.Context, comment domain.CommentToRemove) error
 }
 
 type FilmsServer struct {
@@ -95,24 +97,6 @@ func (server *FilmsServer) GetFilmPreviewByUuid(ctx context.Context,
 
 	return &session.FilmPreviewByUuidResponse{
 		FilmPreview: filmConverted,
-	}, nil
-}
-
-func (server *FilmsServer) GetAllFilmComments(ctx context.Context,
-	req *session.AllFilmCommentsRequest) (res *session.AllFilmCommentsResponse, err error) {
-	requestId := ctx.Value(reqid.ReqIDKey)
-	comments, err := server.filmsService.GetAllFilmComments(ctx, req.Uuid)
-	if err != nil {
-		server.logger.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)
-	}
-	var commentsConverted []*session.Comment
-	for _, comment := range comments {
-		commentsConverted = append(commentsConverted, convertCommentToProto(&comment))
-	}
-
-	return &session.AllFilmCommentsResponse{
-		Comments: commentsConverted,
 	}, nil
 }
 
@@ -396,6 +380,48 @@ func (server *FilmsServer) GetTopFilms(ctx context.Context,
 	}, nil
 }
 
+func (server *FilmsServer) GetAllFilmComments(ctx context.Context,
+	req *session.AllFilmCommentsRequest) (res *session.AllFilmCommentsResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	comments, err := server.filmsService.GetAllFilmComments(ctx, req.Uuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)
+	}
+	var commentsConverted []*session.Comment
+	for _, comment := range comments {
+		commentsConverted = append(commentsConverted, convertCommentToProto(&comment))
+	}
+
+	return &session.AllFilmCommentsResponse{
+		Comments: commentsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) AddComment(ctx context.Context,
+	req *session.AddCommentRequest) (*session.AddCommentResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	err := server.filmsService.AddComment(ctx, convertCommentToAddToRegular(req.Comment))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to add comment: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to add comment: %v\n", requestId, err)
+	}
+
+	return &session.AddCommentResponse{}, nil
+}
+
+func (server *FilmsServer) RemoveComment(ctx context.Context,
+	req *session.RemoveCommentRequest) (*session.RemoveCommentResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	err := server.filmsService.RemoveComment(ctx, convertCommentToRemoveToRegular(req.Comment))
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to remove comment: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to remove comment: %v\n", requestId, err)
+	}
+
+	return &session.RemoveCommentResponse{}, nil
+}
+
 func convertFilmPreviewToProto(film *domain.FilmPreview) *session.FilmPreview {
 	return &session.FilmPreview{
 		Uuid:        film.Uuid,
@@ -481,12 +507,13 @@ func convertFindFilmLongToProto(film *domain.FilmData) *session.FindFilmLong {
 
 func convertCommentToProto(comment *domain.Comment) *session.Comment {
 	return &session.Comment{
-		Uuid:     comment.Uuid,
-		Text:     comment.Text,
-		FilmUuid: comment.FilmUuid,
-		Author:   comment.Author,
-		Score:    comment.Score,
-		AddedAt:  convertTimeToProto(comment.AddedAt),
+		Uuid:       comment.Uuid,
+		Text:       comment.Text,
+		FilmUuid:   comment.FilmUuid,
+		Author:     comment.Author,
+		AuthorUuid: comment.AuthorUuid,
+		Score:      comment.Score,
+		AddedAt:    convertTimeToProto(comment.AddedAt),
 	}
 }
 
@@ -603,5 +630,21 @@ func convertFilmToAdd(filmToAdd *session.FilmToAdd) domain.FilmToAdd {
 		FilmData:      filmData,
 		Actors:        actors,
 		DirectorToAdd: directorData,
+	}
+}
+
+func convertCommentToAddToRegular(comment *session.CommentToAdd) domain.CommentToAdd {
+	return domain.CommentToAdd{
+		FilmUuid:   comment.FilmUuid,
+		AuthorUuid: comment.AuthorUuid,
+		Text:       comment.Text,
+		Score:      comment.Score,
+	}
+}
+
+func convertCommentToRemoveToRegular(comment *session.CommentToRemove) domain.CommentToRemove {
+	return domain.CommentToRemove{
+		FilmUuid:   comment.FilmUuid,
+		AuthorUuid: comment.AuthorUuid,
 	}
 }

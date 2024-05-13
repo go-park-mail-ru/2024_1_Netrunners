@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -933,4 +934,118 @@ func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r
 		}
 		return
 	}
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) AddComment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	userToken, err := r.Cookie("access")
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, myerrors.ErrNoActiveSession)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	_, err = IsTokenValid(userToken, os.Getenv("SECRETKEY"))
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	var commentAddData domain.CommentToAdd
+	err = json.NewDecoder(r.Body).Decode(&commentAddData)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	req := session.AddCommentRequest{
+		Comment: convertCommentToAddToProto(commentAddData),
+	}
+	_, err = (*filmsPageHandlers.client).AddComment(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to add comment: %v\n", requestId, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
+	err = WriteSuccess(w, r, filmsPageHandlers.metrics)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+
+	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film removed successfully", requestId))
+
+}
+
+func (filmsPageHandlers *FilmsPageHandlers) RemoveComment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	userToken, err := r.Cookie("access")
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, myerrors.ErrNoActiveSession)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	_, err = IsTokenValid(userToken, os.Getenv("SECRETKEY"))
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	var commentRemoveData domain.CommentToRemove
+	err = json.NewDecoder(r.Body).Decode(&commentRemoveData)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	req := session.RemoveCommentRequest{
+		Comment: convertCommentToRemoveToProto(commentRemoveData),
+	}
+	_, err = (*filmsPageHandlers.client).RemoveComment(ctx, &req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to remove comment: %v\n", requestId, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	filmsPageHandlers.metrics.IncRequestsTotal(r.URL.Path, r.Method, 200)
+
+	err = WriteSuccess(w, r, filmsPageHandlers.metrics)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+
+	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film removed successfully", requestId))
+
 }

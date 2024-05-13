@@ -40,7 +40,7 @@ const getFilmDataByUuid = `
 		SELECT f.external_id, f.is_serial, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, 
 		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit
 		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
 		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data,
@@ -105,7 +105,7 @@ const getFilmPreview = `
 		SELECT f.external_id, f.title, f.banner, d.name, f.duration,
         	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
@@ -114,17 +114,16 @@ const getAllFilmsPreviews = `
     SELECT f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration,
         COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
     FROM film f
-    LEFT JOIN comment c ON f.id = c.film
+    LEFT JOIN comment c ON f.external_id = c.film_external_id
     JOIN director d ON f.director = d.id
     GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmComments = `
-		SELECT c.external_id, f.external_id, u.name AS author_name, c.text, c.score, 
+		SELECT c.external_id, film_external_id, author_external_id, u.name AS author_name, c.text, c.score, 
 		       c.added_at
 		FROM comment c
-		JOIN users u ON c.author = u.id
-		JOIN film f ON c.film = f.id
-		WHERE f.external_id = $1;`
+		JOIN users u ON c.author_external_id = u.external_id
+		WHERE film_external_id = $1;`
 
 const getAllFilmActors = `
 		SELECT a.external_id, a.name, a.avatar
@@ -143,7 +142,7 @@ const getFilmsByActor = `
         	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		LEFT JOIN (film_actor fa LEFT JOIN actor a ON fa.actor = a.id) faa ON f.id = faa.film
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE faa.external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
@@ -176,7 +175,7 @@ const getAllFavoriteFilms = `
 		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		INNER JOIN favorite_film fav ON f.external_id = fav.film_external_id
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE fav.user_external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit;`
@@ -191,7 +190,7 @@ const getAllFilmsByGenreUuid = `
         	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		LEFT JOIN film_genres fg ON f.external_id = fg.film_external_id
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE fg.genre_external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit
@@ -231,7 +230,7 @@ const searchFilm = `
 	SELECT f.external_id, f.title, f.banner, d.name, f.duration, is_serial,
 	COALESCE(AVG(c.score), 0) AS avg_score, f.age_limit
 	FROM film f
-	LEFT JOIN comment c ON f.id = c.film
+	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
 	WHERE f.title LIKE $1 AND is_serial = FALSE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
@@ -242,7 +241,7 @@ const searchSerial = `
 	SELECT f.external_id, f.title, f.banner, d.name, f.duration, is_serial,
 	COALESCE(AVG(c.score), 0) AS avg_score, f.age_limit
 	FROM film f
-	LEFT JOIN comment c ON f.id = c.film
+	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
 	WHERE f.title LIKE $1 AND is_serial = TRUE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
@@ -260,7 +259,7 @@ const searchFilmLong = `
 	SELECT f.external_id, f.title, f.banner, d.name, f.duration, is_serial,
 	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit, f.published_at
 	FROM film f
-	LEFT JOIN comment c ON f.id = c.film
+	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
 	WHERE LOWER(f.title) LIKE $1 AND is_serial = FALSE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
@@ -276,7 +275,7 @@ const searchSerialLong = `
 	SELECT f.external_id, f.title, f.banner, d.name, f.duration, is_serial,
 	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit, f.published_at
 	FROM film f
-	LEFT JOIN comment c ON f.id = c.film
+	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
 	WHERE LOWER(f.title) LIKE $1 AND is_serial = TRUE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
@@ -305,10 +304,23 @@ const getTop4Films = `
 		       COALESCE(COUNT(c.id), 0) AS comment_count
 		FROM film AS f
 		JOIN director AS d ON f.director = d.id
-		LEFT JOIN comment AS c ON f.id = c.film
+		LEFT JOIN comment AS c ON f.external_id = c.film_external_id
 		GROUP BY f.external_id, f.title, f.banner, f.data, f.is_serial
 		ORDER BY avg_score DESC
 		LIMIT 4;`
+
+const putNewComment = `
+		INSERT INTO comment (text, score, author_external_id, film_external_id)
+		VALUES ($1, $2, $3, $4);`
+
+const getCommentByUuids = `
+		SELECT film_external_id, author_external_id 
+		FROM comment 
+		WHERE film_external_id = $1 AND author_external_id = $2;`
+
+const removeComment = `
+		DELETE FROM comment 
+		WHERE film_external_id = $1 AND author_external_id = $2;`
 
 const (
 	pageLimit      = 5
@@ -651,15 +663,17 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 
 	comments := make([]domain.Comment, 0)
 	var (
-		CommentUuid     string
-		CommentFilmUuid string
-		CommentAuthor   string
-		CommentText     string
-		CommentScore    uint32
-		CommentAddedAt  time.Time
+		CommentUuid       string
+		CommentFilmUuid   string
+		CommentAuthorUuid string
+		CommentAuthor     string
+		CommentText       string
+		CommentScore      uint32
+		CommentAddedAt    time.Time
 	)
 	for rows.Next() {
-		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthor, &CommentText, &CommentScore, &CommentAddedAt)
+		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthorUuid, &CommentAuthor, &CommentText,
+			&CommentScore, &CommentAddedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
 		}
@@ -670,6 +684,7 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 
 		comment.Uuid = CommentUuid
 		comment.Author = CommentAuthor
+		comment.AuthorUuid = CommentAuthorUuid
 		comment.FilmUuid = CommentFilmUuid
 		comment.Text = CommentText
 		comment.Score = CommentScore
@@ -1397,4 +1412,82 @@ func (storage *FilmsStorage) GetTopFilms() ([]domain.TopFilm, error) {
 		films = append(films, film)
 	}
 	return films, nil
+}
+
+func (storage *FilmsStorage) AddComment(comment domain.CommentToAdd) error {
+	var (
+		amountOfUsers   int
+		amountOfFilms   int
+		filmUuidExisted string
+		userUuidExisted string
+	)
+	if comment.Score < 1 || comment.Score > 5 {
+		return myerrors.ErrWrongScore
+	}
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, comment.AuthorUuid).Scan(&amountOfUsers)
+	if err != nil {
+		return err
+	}
+	if amountOfUsers == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getAmountOfFilmByUuid, comment.FilmUuid).Scan(&amountOfFilms)
+	if err != nil {
+		return err
+	}
+	if amountOfFilms == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchFilm)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getCommentByUuids, comment.FilmUuid,
+		comment.AuthorUuid).Scan(&filmUuidExisted, &userUuidExisted)
+	if errors.Is(err, pgx.ErrNoRows) {
+		_, err = storage.pool.Exec(context.Background(), putNewComment, comment.Text, comment.Score,
+			comment.AuthorUuid, comment.FilmUuid)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return myerrors.ErrCommentAlreadyExists
+}
+
+func (storage *FilmsStorage) RemoveComment(comment domain.CommentToRemove) error {
+	var (
+		amountOfUsers   int
+		amountOfFilms   int
+		filmUuidExisted string
+		userUuidExisted string
+	)
+	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, comment.AuthorUuid).Scan(&amountOfUsers)
+	if err != nil {
+		return err
+	}
+	if amountOfUsers == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchUser)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getAmountOfFilmByUuid, comment.FilmUuid).Scan(&amountOfFilms)
+	if err != nil {
+		return err
+	}
+	if amountOfFilms == 0 {
+		return fmt.Errorf("%w", myerrors.ErrNoSuchFilm)
+	}
+
+	err = storage.pool.QueryRow(context.Background(), getCommentByUuids, comment.FilmUuid,
+		comment.AuthorUuid).Scan(&filmUuidExisted, &userUuidExisted)
+	if err != nil {
+		return err
+	}
+
+	_, err = storage.pool.Exec(context.Background(), removeComment, filmUuidExisted, userUuidExisted)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

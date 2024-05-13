@@ -29,4 +29,7 @@ var (
 	ErrFavoriteAlreadyExists = errors.New("favorite already exists")
 	ErrNoGenres              = errors.New("no genres found")
 	ErrFilmAlreadyExists     = errors.New("film already exists")
+	ErrNoSuchFilm            = errors.New("no such film with given uuid")
+	ErrWrongScore            = errors.New("score should be from 1 to 5")
+	ErrCommentAlreadyExists  = errors.New("comment for this film already exists")
 )

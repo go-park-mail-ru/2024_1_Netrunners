@@ -13,6 +13,4 @@ var (
 
 	ErrNoSuchActor     = errors.New("failed to get actor")
 	ErrNoActorsForFilm = errors.New("failed to get film's actors")
-
-	ErrNoSuchFilm = errors.New("failed to get film")
 )

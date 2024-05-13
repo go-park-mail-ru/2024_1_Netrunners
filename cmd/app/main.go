@@ -41,17 +41,17 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	authConn, err := grpc.Dial("sessions:8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	filmsConn, err := grpc.Dial("films:8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	filmsConn, err := grpc.Dial(":8020", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	usersConn, err := grpc.Dial("users:8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,16 +90,12 @@ func main() {
 	router.HandleFunc("/films/genres/preview", filmsPageHandlers.GetAllGenres).Methods("GET", "OPTIONS")
 	router.HandleFunc("/films/add", filmsPageHandlers.AddFilm).Methods("POST", "OPTIONS")
 	router.HandleFunc("/films/top", filmsPageHandlers.GetTopFilms).Methods("GET", "OPTIONS")
+	router.HandleFunc("/films/comments/add", filmsPageHandlers.AddComment).Methods("POST", "OPTIONS")
+	router.HandleFunc("/films/comments/remove", filmsPageHandlers.RemoveComment).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
-
-	router.HandleFunc("/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
-	router.HandleFunc("/films/remove_favorite", filmsPageHandlers.RemoveFavoriteFilm).Methods("POST", "OPTIONS")
-	router.HandleFunc("/films/{uuid}/all_favorite", filmsPageHandlers.GetAllFavoriteFilms).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/find/short", filmsPageHandlers.ShortSearch).Methods("GET", "OPTIONS")
-	router.HandleFunc("/films/find/long", filmsPageHandlers.LongSearch).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")

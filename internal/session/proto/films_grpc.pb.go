@@ -21,7 +21,6 @@ type FilmsClient interface {
 	GetAllFilmsPreviews(ctx context.Context, in *AllFilmsPreviewsRequest, opts ...grpc.CallOption) (*AllFilmsPreviewsResponse, error)
 	GetFilmDataByUuid(ctx context.Context, in *FilmDataByUuidRequest, opts ...grpc.CallOption) (*FilmDataByUuidResponse, error)
 	GetFilmPreviewByUuid(ctx context.Context, in *FilmPreviewByUuidRequest, opts ...grpc.CallOption) (*FilmPreviewByUuidResponse, error)
-	GetAllFilmComments(ctx context.Context, in *AllFilmCommentsRequest, opts ...grpc.CallOption) (*AllFilmCommentsResponse, error)
 	RemoveFilmByUuid(ctx context.Context, in *RemoveFilmByUuidRequest, opts ...grpc.CallOption) (*RemoveFilmByUuidResponse, error)
 	GetActorDataByUuid(ctx context.Context, in *ActorDataByUuidRequest, opts ...grpc.CallOption) (*ActorDataByUuidResponse, error)
 	GetActorsByFilm(ctx context.Context, in *ActorsByFilmRequest, opts ...grpc.CallOption) (*ActorsByFilmResponse, error)
@@ -38,6 +37,9 @@ type FilmsClient interface {
 	FindActorsShort(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsShortResponse, error)
 	FindActorsLong(ctx context.Context, in *FindActorsShortRequest, opts ...grpc.CallOption) (*FindActorsLongResponse, error)
 	GetTopFilms(ctx context.Context, in *GetTopFilmsRequest, opts ...grpc.CallOption) (*GetTopFilmsResponse, error)
+	GetAllFilmComments(ctx context.Context, in *AllFilmCommentsRequest, opts ...grpc.CallOption) (*AllFilmCommentsResponse, error)
+	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error)
+	RemoveComment(ctx context.Context, in *RemoveCommentRequest, opts ...grpc.CallOption) (*RemoveCommentResponse, error)
 }
 
 type filmsClient struct {
@@ -69,15 +71,6 @@ func (c *filmsClient) GetFilmDataByUuid(ctx context.Context, in *FilmDataByUuidR
 func (c *filmsClient) GetFilmPreviewByUuid(ctx context.Context, in *FilmPreviewByUuidRequest, opts ...grpc.CallOption) (*FilmPreviewByUuidResponse, error) {
 	out := new(FilmPreviewByUuidResponse)
 	err := c.cc.Invoke(ctx, "/session.Films/GetFilmPreviewByUuid", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *filmsClient) GetAllFilmComments(ctx context.Context, in *AllFilmCommentsRequest, opts ...grpc.CallOption) (*AllFilmCommentsResponse, error) {
-	out := new(AllFilmCommentsResponse)
-	err := c.cc.Invoke(ctx, "/session.Films/GetAllFilmComments", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -228,6 +221,33 @@ func (c *filmsClient) GetTopFilms(ctx context.Context, in *GetTopFilmsRequest, o
 	return out, nil
 }
 
+func (c *filmsClient) GetAllFilmComments(ctx context.Context, in *AllFilmCommentsRequest, opts ...grpc.CallOption) (*AllFilmCommentsResponse, error) {
+	out := new(AllFilmCommentsResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/GetAllFilmComments", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error) {
+	out := new(AddCommentResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/AddComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *filmsClient) RemoveComment(ctx context.Context, in *RemoveCommentRequest, opts ...grpc.CallOption) (*RemoveCommentResponse, error) {
+	out := new(RemoveCommentResponse)
+	err := c.cc.Invoke(ctx, "/session.Films/RemoveComment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FilmsServer is the server API for Films service.
 // All implementations must embed UnimplementedFilmsServer
 // for forward compatibility
@@ -235,7 +255,6 @@ type FilmsServer interface {
 	GetAllFilmsPreviews(context.Context, *AllFilmsPreviewsRequest) (*AllFilmsPreviewsResponse, error)
 	GetFilmDataByUuid(context.Context, *FilmDataByUuidRequest) (*FilmDataByUuidResponse, error)
 	GetFilmPreviewByUuid(context.Context, *FilmPreviewByUuidRequest) (*FilmPreviewByUuidResponse, error)
-	GetAllFilmComments(context.Context, *AllFilmCommentsRequest) (*AllFilmCommentsResponse, error)
 	RemoveFilmByUuid(context.Context, *RemoveFilmByUuidRequest) (*RemoveFilmByUuidResponse, error)
 	GetActorDataByUuid(context.Context, *ActorDataByUuidRequest) (*ActorDataByUuidResponse, error)
 	GetActorsByFilm(context.Context, *ActorsByFilmRequest) (*ActorsByFilmResponse, error)
@@ -252,6 +271,9 @@ type FilmsServer interface {
 	FindActorsShort(context.Context, *FindActorsShortRequest) (*FindActorsShortResponse, error)
 	FindActorsLong(context.Context, *FindActorsShortRequest) (*FindActorsLongResponse, error)
 	GetTopFilms(context.Context, *GetTopFilmsRequest) (*GetTopFilmsResponse, error)
+	GetAllFilmComments(context.Context, *AllFilmCommentsRequest) (*AllFilmCommentsResponse, error)
+	AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error)
+	RemoveComment(context.Context, *RemoveCommentRequest) (*RemoveCommentResponse, error)
 }
 
 // UnimplementedFilmsServer must be embedded to have forward compatible implementations.
@@ -266,9 +288,6 @@ func (UnimplementedFilmsServer) GetFilmDataByUuid(context.Context, *FilmDataByUu
 }
 func (UnimplementedFilmsServer) GetFilmPreviewByUuid(context.Context, *FilmPreviewByUuidRequest) (*FilmPreviewByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFilmPreviewByUuid not implemented")
-}
-func (UnimplementedFilmsServer) GetAllFilmComments(context.Context, *AllFilmCommentsRequest) (*AllFilmCommentsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllFilmComments not implemented")
 }
 func (UnimplementedFilmsServer) RemoveFilmByUuid(context.Context, *RemoveFilmByUuidRequest) (*RemoveFilmByUuidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveFilmByUuid not implemented")
@@ -317,6 +336,15 @@ func (UnimplementedFilmsServer) FindActorsLong(context.Context, *FindActorsShort
 }
 func (UnimplementedFilmsServer) GetTopFilms(context.Context, *GetTopFilmsRequest) (*GetTopFilmsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopFilms not implemented")
+}
+func (UnimplementedFilmsServer) GetAllFilmComments(context.Context, *AllFilmCommentsRequest) (*AllFilmCommentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllFilmComments not implemented")
+}
+func (UnimplementedFilmsServer) AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddComment not implemented")
+}
+func (UnimplementedFilmsServer) RemoveComment(context.Context, *RemoveCommentRequest) (*RemoveCommentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveComment not implemented")
 }
 func (UnimplementedFilmsServer) mustEmbedUnimplementedFilmsServer() {}
 
@@ -381,24 +409,6 @@ func _Films_GetFilmPreviewByUuid_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FilmsServer).GetFilmPreviewByUuid(ctx, req.(*FilmPreviewByUuidRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Films_GetAllFilmComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AllFilmCommentsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FilmsServer).GetAllFilmComments(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/session.Films/GetAllFilmComments",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FilmsServer).GetAllFilmComments(ctx, req.(*AllFilmCommentsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -691,6 +701,60 @@ func _Films_GetTopFilms_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Films_GetAllFilmComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AllFilmCommentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).GetAllFilmComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/GetAllFilmComments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).GetAllFilmComments(ctx, req.(*AllFilmCommentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_AddComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).AddComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/AddComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).AddComment(ctx, req.(*AddCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Films_RemoveComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FilmsServer).RemoveComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/session.Films/RemoveComment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FilmsServer).RemoveComment(ctx, req.(*RemoveCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Films_ServiceDesc is the grpc.ServiceDesc for Films service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -709,10 +773,6 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFilmPreviewByUuid",
 			Handler:    _Films_GetFilmPreviewByUuid_Handler,
-		},
-		{
-			MethodName: "GetAllFilmComments",
-			Handler:    _Films_GetAllFilmComments_Handler,
 		},
 		{
 			MethodName: "RemoveFilmByUuid",
@@ -777,6 +837,18 @@ var Films_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTopFilms",
 			Handler:    _Films_GetTopFilms_Handler,
+		},
+		{
+			MethodName: "GetAllFilmComments",
+			Handler:    _Films_GetAllFilmComments_Handler,
+		},
+		{
+			MethodName: "AddComment",
+			Handler:    _Films_AddComment_Handler,
+		},
+		{
+			MethodName: "RemoveComment",
+			Handler:    _Films_RemoveComment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
