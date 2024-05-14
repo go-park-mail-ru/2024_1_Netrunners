@@ -39,6 +39,20 @@ func (m *MockFilmsStorage) EXPECT() *MockFilmsStorageMockRecorder {
 	return m.recorder
 }
 
+// AddComment mocks base method.
+func (m *MockFilmsStorage) AddComment(comment domain.CommentToAdd) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddComment", comment)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddComment indicates an expected call of AddComment.
+func (mr *MockFilmsStorageMockRecorder) AddComment(comment any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddComment", reflect.TypeOf((*MockFilmsStorage)(nil).AddComment), comment)
+}
+
 // AddFilm mocks base method.
 func (m *MockFilmsStorage) AddFilm(film domain.FilmToAdd) error {
 	m.ctrl.T.Helper()
@@ -305,6 +319,20 @@ func (m *MockFilmsStorage) PutFavoriteFilm(filmUuid, userUuid string) error {
 func (mr *MockFilmsStorageMockRecorder) PutFavoriteFilm(filmUuid, userUuid any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutFavoriteFilm", reflect.TypeOf((*MockFilmsStorage)(nil).PutFavoriteFilm), filmUuid, userUuid)
+}
+
+// RemoveComment mocks base method.
+func (m *MockFilmsStorage) RemoveComment(comment domain.CommentToRemove) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveComment", comment)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveComment indicates an expected call of RemoveComment.
+func (mr *MockFilmsStorageMockRecorder) RemoveComment(comment any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveComment", reflect.TypeOf((*MockFilmsStorage)(nil).RemoveComment), comment)
 }
 
 // RemoveFavoriteFilm mocks base method.
