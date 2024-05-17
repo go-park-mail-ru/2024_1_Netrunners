@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS film
 (
 	id           INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	external_id  UUID UNIQUE                                         DEFAULT gen_random_uuid()           NOT NULL,
-	is_serial BOOLEAN DEFAULT FALSE NOT NULL,
+	is_serial    BOOLEAN                                             DEFAULT FALSE                       NOT NULL,
 	title        TEXT                                                                                    NOT NULL,
 	data         TEXT                                                DEFAULT ''                          NOT NULL,
 	banner       TEXT                                                DEFAULT 'https://shorturl.at/akMR2' NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS episode
 (
 	id      INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	number  INTEGER                                  NOT NULL,
-	title TEXT NOT NULL,
+	title   TEXT                                     NOT NULL,
 	s3_link TEXT DEFAULT 'https://shorturl.at/jHIMO' NOT NULL
 );
 
@@ -64,21 +64,21 @@ CREATE TABLE IF NOT EXISTS season
 	film_id    INTEGER NOT NULL,
 	number     INTEGER NOT NULL,
 	episode_id INTEGER NOT NULL,
-	FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE cascade,
+	FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE,
 	FOREIGN KEY (episode_id) REFERENCES episode (id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS comment
 (
-	id          INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	external_id UUID UNIQUE DEFAULT gen_random_uuid()       NOT NULL,
-	text        TEXT                                        NOT NULL,
-	score       SMALLINT CHECK (score >= 0 AND score <= 10) NOT NULL,
-	author      INTEGER,
-	film        INTEGER                                     NOT NULL,
-	added_at    TIMESTAMPTZ DEFAULT NOW()                   NOT NULL,
-	FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
-	FOREIGN KEY (film) REFERENCES film (id) ON DELETE CASCADE
+	id                 INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	external_id        UUID UNIQUE DEFAULT gen_random_uuid()       NOT NULL,
+	text               TEXT                                        NOT NULL,
+	score              SMALLINT CHECK (score >= 0 AND score <= 10) NOT NULL,
+	author_external_id UUID                                        NOT NULL,
+	film_external_id   UUID                                        NOT NULL,
+	added_at           TIMESTAMPTZ DEFAULT NOW()                   NOT NULL,
+	FOREIGN KEY (author_external_id) REFERENCES users (external_id) ON DELETE SET NULL,
+	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS film_actor
