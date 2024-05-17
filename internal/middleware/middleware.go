@@ -12,6 +12,7 @@ import (
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/handlers"
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/metrics"
 	reqid "github.com/go-park-mail-ru/2024_1_Netrunners/internal/requestId"
+	"github.com/gorilla/mux"
 )
 
 type Middleware struct {
@@ -83,6 +84,11 @@ func (middlewareHandlers *Middleware) AccessLogMiddleware(next http.Handler) htt
 			"time = [%s];",
 			reqId, r.Method, r.URL.Path, time.Since(start)))
 
-		middlewareHandlers.metrics.IncRequestDuration(r.URL.Path, r.Method, float64(time.Since(start).Milliseconds()))
+		pathTemplate, err := mux.CurrentRoute(r).GetPathTemplate()
+		if err != nil {
+			middlewareHandlers.logger.Errorf("unable to get path template: %v", err)
+		}
+
+		middlewareHandlers.metrics.IncRequestDuration(pathTemplate, r.Method, float64(time.Since(start).Milliseconds()))
 	})
 }

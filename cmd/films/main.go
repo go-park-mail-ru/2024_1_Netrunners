@@ -65,7 +65,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// init metrics handler
 	grpcMetrics := metrics.NewGrpcMetrics("films")
 	grpcMetrics.Register()
 
@@ -85,7 +84,6 @@ func main() {
 
 	filmService := service.NewFilmsService(filmsStorage, grpcMetrics, sugarLogger, "./uploads/films")
 
-	// init grpc server
 	s := grpc.NewServer()
 	srv := api.NewFilmsServer(filmService, sugarLogger)
 	session.RegisterFilmsServer(s, srv)
