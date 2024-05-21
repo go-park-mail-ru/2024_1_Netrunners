@@ -33,7 +33,7 @@ type FilmsService interface {
 	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error)
 	GetTopFilms(ctx context.Context) ([]domain.TopFilm, error)
-	GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error)
+	GetAllFilmComments(ctx context.Context, filmUuid string, userUuid string) ([]domain.Comment, error)
 	AddComment(ctx context.Context, comment domain.CommentToAdd) error
 	RemoveComment(ctx context.Context, comment domain.CommentToRemove) error
 }
@@ -383,7 +383,7 @@ func (server *FilmsServer) GetTopFilms(ctx context.Context,
 func (server *FilmsServer) GetAllFilmComments(ctx context.Context,
 	req *session.AllFilmCommentsRequest) (res *session.AllFilmCommentsResponse, err error) {
 	requestId := ctx.Value(reqid.ReqIDKey)
-	comments, err := server.filmsService.GetAllFilmComments(ctx, req.Uuid)
+	comments, err := server.filmsService.GetAllFilmComments(ctx, req.FilmUuid, req.UserUuid)
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)
 		return nil, fmt.Errorf("[reqid=%s] failed to get all film comments: %v\n", requestId, err)

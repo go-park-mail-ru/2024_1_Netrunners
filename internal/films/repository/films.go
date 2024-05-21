@@ -118,12 +118,19 @@ const getAllFilmsPreviews = `
     JOIN director d ON f.director = d.id
     GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
+const getCommentForUser = `
+		SELECT c.external_id, film_external_id, author_external_id, u.name AS author_name, c.text, c.score, 
+		       c.added_at
+		FROM comment c
+		JOIN users u ON c.author_external_id = u.external_id
+		WHERE film_external_id = $1 AND author_external_id = $2;`
+
 const getAllFilmComments = `
 		SELECT c.external_id, film_external_id, author_external_id, u.name AS author_name, c.text, c.score, 
 		       c.added_at
 		FROM comment c
 		JOIN users u ON c.author_external_id = u.external_id
-		WHERE film_external_id = $1;`
+		WHERE film_external_id = $1 AND author_external_id != $2;`
 
 const getAllFilmActors = `
 		SELECT a.external_id, a.name, a.avatar
@@ -321,6 +328,12 @@ const getCommentByUuids = `
 const removeComment = `
 		DELETE FROM comment 
 		WHERE film_external_id = $1 AND author_external_id = $2;`
+
+const checkComment = `
+		SELECT EXISTS (
+    	SELECT 1 
+    	FROM comment 
+    	WHERE film_external_id = $1 AND author_external_id = $2);`
 
 const (
 	pageLimit      = 5
@@ -654,15 +667,10 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 	return actors, nil
 }
 
-func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
-	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, uuid)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
-			myerrors.ErrFailInQuery)
-	}
-
+func (storage *FilmsStorage) GetAllFilmComments(filmUuid string, userUuid string) ([]domain.Comment, error) {
 	comments := make([]domain.Comment, 0)
 	var (
+		comment           domain.Comment
 		CommentUuid       string
 		CommentFilmUuid   string
 		CommentAuthorUuid string
@@ -671,16 +679,34 @@ func (storage *FilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, 
 		CommentScore      uint32
 		CommentAddedAt    time.Time
 	)
+
+	err := storage.pool.QueryRow(context.Background(), getCommentForUser, filmUuid, userUuid).Scan(&comment.Uuid,
+		&comment.FilmUuid, &comment.AuthorUuid, &comment.Author, &comment.Text, &comment.Score, &comment.AddedAt)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
+				myerrors.ErrFailInQuery)
+		}
+	}
+
+	comments = append(comments, comment)
+
+	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, filmUuid, userUuid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
+			myerrors.ErrFailInQuery)
+
+	}
+
 	for rows.Next() {
-		err = rows.Scan(&CommentUuid, &CommentFilmUuid, &CommentAuthorUuid, &CommentAuthor, &CommentText,
-			&CommentScore, &CommentAddedAt)
+		err = rows.Scan(&comment.Uuid, &comment.FilmUuid, &comment.AuthorUuid, &comment.Author, &comment.Text,
+			&comment.Score, &comment.AddedAt)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
 		}
 		if err != nil {
 			return nil, err
 		}
-		var comment domain.Comment
 
 		comment.Uuid = CommentUuid
 		comment.Author = CommentAuthor
@@ -1490,4 +1516,13 @@ func (storage *FilmsStorage) RemoveComment(comment domain.CommentToRemove) error
 	}
 
 	return nil
+}
+
+func (storage *FilmsStorage) CheckComment(comment domain.CommentToRemove) (ok bool, err error) {
+	err = storage.pool.QueryRow(context.Background(), checkComment, comment.FilmUuid, comment.AuthorUuid).Scan(&ok)
+	if err != nil {
+		return false, err
+	}
+
+	return ok, nil
 }

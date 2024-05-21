@@ -165,12 +165,23 @@ type filmCommentsResponse struct {
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
-	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
+	var commentData domain.CommentToRemove
+	err := json.NewDecoder(r.Body).Decode(&commentData)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestID, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	req := session.AllFilmCommentsRequest{
-		Uuid: uuid,
+		FilmUuid: commentData.FilmUuid,
+		UserUuid: commentData.AuthorUuid,
 	}
 	comments, err := (*filmsPageHandlers.client).GetAllFilmComments(ctx, &req)
 	if err != nil {
@@ -1047,5 +1058,4 @@ func (filmsPageHandlers *FilmsPageHandlers) RemoveComment(w http.ResponseWriter,
 	}
 
 	filmsPageHandlers.logger.Info(fmt.Sprintf("[reqid=%s] favorite film removed successfully", requestId))
-
 }

@@ -31,7 +31,7 @@ type FilmsStorage interface {
 	FindActorsShort(name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(name string, page int) (domain.SearchActors, error)
 	GetTopFilms() ([]domain.TopFilm, error)
-	GetAllFilmComments(uuid string) ([]domain.Comment, error)
+	GetAllFilmComments(filmUuid string, userUuid string) ([]domain.Comment, error)
 	AddComment(comment domain.CommentToAdd) error
 	RemoveComment(comment domain.CommentToRemove) error
 }
@@ -107,9 +107,9 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 	return filmPreviews, nil
 }
 
-func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error) {
+func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid string, userUuid string) ([]domain.Comment, error) {
 	service.metrics.IncRequestsTotal("GetAllFilmComments")
-	comments, err := service.storage.GetAllFilmComments(uuid)
+	comments, err := service.storage.GetAllFilmComments(filmUuid, userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film comments: %v",
 			ctx.Value(requestId.ReqIDKey), err)
