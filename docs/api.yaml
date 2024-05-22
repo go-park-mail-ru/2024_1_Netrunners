@@ -951,7 +951,107 @@ paths:
         default:
           description: Unknown error
 
-  # Actors
+  /profile/{uuid}/subscription:
+    get:
+      tags:
+        - Profile
+      summary: Get all subscriptions
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/SubscrioptionsResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+    post:
+      tags:
+        - Profile
+      summary: Pay subscription
+      security:
+        - AccessCookie: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Uuid of the user
+          required: true
+          content:
+            application/form:
+              schema:
+                type: string
+                example: frfdF48AfJ1MAFfKF13KFAOS
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PayRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          description: Incorrect card data
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          description: Not authorized
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '404': # if you are trying to get someone's else profile
+          description: Incorrect user uuid
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/form:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        default:
+          description: Unknown error
+
+# Actors
 
   /actors/{uuid}:
     get:
@@ -1591,6 +1691,46 @@ components:
           example: 'new_username'
         avatar:
           type: string
+          
+    SubscrioptionsResponse:
+      required:
+        - subscrioptions
+      properties:
+        subscrioptions:
+          type: object
+          required:
+            - price
+            - title
+            - description
+          properties:
+            price:
+              type: string
+              example: '400'
+            title:
+              type: string
+              example: 'Premium'
+            description:
+              type: string
+        
+    PayRequest:
+      required:
+        - card
+        - month
+        - year
+        - cvc
+      properties:
+        card:
+          type: string
+          example: '4242 4242 4242 4242'
+        month:
+          type: string
+          example: '10'
+        year:
+          type: string
+          example: '26'
+        cvc:
+          type: string
+          example: '123'
 
     # Actors
 
