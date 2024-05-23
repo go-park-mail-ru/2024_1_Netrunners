@@ -107,7 +107,8 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 	return filmPreviews, nil
 }
 
-func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid string, userUuid string) ([]domain.Comment, error) {
+func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid string,
+	userUuid string) ([]domain.Comment, error) {
 	service.metrics.IncRequestsTotal("GetAllFilmComments")
 	comments, err := service.storage.GetAllFilmComments(filmUuid, userUuid)
 	if err != nil {

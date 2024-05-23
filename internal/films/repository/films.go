@@ -33,8 +33,12 @@ func NewFilmsStorage(pool PgxIface) (*FilmsStorage, error) {
 	}, nil
 }
 
-const amountOfFilmsOnAllFilmsPage = 1000
-const amountOfFilmsInEveryGenre = 4
+const (
+	amountOfFilmsOnAllFilmsPage = 1000
+	amountOfFilmsInEveryGenre   = 4
+	maxScore                    = 5
+	minScore                    = 1
+)
 
 const getFilmDataByUuid = `
 		SELECT f.external_id, f.is_serial, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, 
@@ -1447,7 +1451,7 @@ func (storage *FilmsStorage) AddComment(comment domain.CommentToAdd) error {
 		filmUuidExisted string
 		userUuidExisted string
 	)
-	if comment.Score < 1 || comment.Score > 5 {
+	if comment.Score < minScore || comment.Score > maxScore {
 		return myerrors.ErrWrongScore
 	}
 	err := storage.pool.QueryRow(context.Background(), getAmountOfUserByUuid, comment.AuthorUuid).Scan(&amountOfUsers)
