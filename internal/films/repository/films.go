@@ -197,14 +197,14 @@ const getOneFavoriteByUuids = `
 		WHERE film_external_id = $1 AND user_external_id = $2;`
 
 const getAllFilmsByGenreUuid = `
-		SELECT f.external_id, f.title, f.banner, d.name, f.duration,
+		SELECT f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration,
         	COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
 		LEFT JOIN film_genres fg ON f.external_id = fg.film_external_id
 		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE fg.genre_external_id = $1
-		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit
+		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
 		LIMIT $2;`
 
 const getAllGenres = `
@@ -1018,10 +1018,11 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			FilmScore    float32
 			FilmRating   uint64
 			FilmAgeLimit uint32
+			FilmIsSerial bool
 		)
 		for filmsRows.Next() {
 			var film domain.FilmPreview
-			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
+			err = filmsRows.Scan(&FilmUuid, &FilmTitle, &FilmIsSerial, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
 				&FilmRating, &FilmAgeLimit)
 			if err != nil {
 				return nil, err
@@ -1035,6 +1036,7 @@ func (storage *FilmsStorage) GetAllGenres() ([]domain.GenreFilms, error) {
 			film.ScoresCount = FilmRating
 			film.AverageScore = FilmScore
 			film.AgeLimit = FilmAgeLimit
+			film.IsSerial = FilmIsSerial
 
 			films = append(films, film)
 		}

@@ -33,7 +33,7 @@ func main() {
 	)
 	flag.IntVar(&frontEndPort, "f-port", 8080, "front-end server port")
 	flag.IntVar(&backEndPort, "b-port", 8030, "back-end server port")
-	flag.StringVar(&serverIP, "ip", "94.139.247.246", "back-end server port")
+	flag.StringVar(&serverIP, "ip", "90.156.218.166", "back-end server port")
 
 	flag.Parse()
 
