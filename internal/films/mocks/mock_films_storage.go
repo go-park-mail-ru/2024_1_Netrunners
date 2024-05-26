@@ -203,18 +203,18 @@ func (mr *MockFilmsStorageMockRecorder) GetAllFavoriteFilms(userUuid any) *gomoc
 }
 
 // GetAllFilmComments mocks base method.
-func (m *MockFilmsStorage) GetAllFilmComments(uuid string) ([]domain.Comment, error) {
+func (m *MockFilmsStorage) GetAllFilmComments(filmUuid, userUuid string) ([]domain.Comment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllFilmComments", uuid)
+	ret := m.ctrl.Call(m, "GetAllFilmComments", filmUuid, userUuid)
 	ret0, _ := ret[0].([]domain.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAllFilmComments indicates an expected call of GetAllFilmComments.
-func (mr *MockFilmsStorageMockRecorder) GetAllFilmComments(uuid any) *gomock.Call {
+func (mr *MockFilmsStorageMockRecorder) GetAllFilmComments(filmUuid, userUuid any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmComments), uuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllFilmComments", reflect.TypeOf((*MockFilmsStorage)(nil).GetAllFilmComments), filmUuid, userUuid)
 }
 
 // GetAllFilmsByGenre mocks base method.

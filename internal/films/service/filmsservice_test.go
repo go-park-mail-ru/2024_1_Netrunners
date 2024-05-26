@@ -212,15 +212,16 @@ func TestGetAllFilmComments(t *testing.T) {
 
 	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
-	uuid := "123"
+	userUuid := "123"
+	filmUuid := "123"
 	mockComments := []domain.Comment{
-		{Uuid: "1", FilmUuid: uuid, Text: "Comment 1"},
-		{Uuid: "2", FilmUuid: uuid, Text: "Comment 2"},
+		{Uuid: "1", FilmUuid: filmUuid, Text: "Comment 1"},
+		{Uuid: "2", FilmUuid: filmUuid, Text: "Comment 2"},
 	}
 
-	mockStorage.EXPECT().GetAllFilmComments(uuid).Return(mockComments, nil)
+	mockStorage.EXPECT().GetAllFilmComments(filmUuid, userUuid).Return(mockComments, nil)
 
-	comments, err := service.GetAllFilmComments(context.Background(), uuid)
+	comments, err := service.GetAllFilmComments(context.Background(), filmUuid, userUuid)
 
 	assert.NoError(t, err)
 	assert.Equal(t, mockComments, comments)
@@ -237,12 +238,13 @@ func TestGetAllFilmComments_Error(t *testing.T) {
 
 	service := NewFilmsService(mockStorage, metrics, mockLogger, "")
 
-	uuid := "123"
+	userUuid := "123"
+	filmUuid := "123"
 	mockError := errors.New("mock error")
 
-	mockStorage.EXPECT().GetAllFilmComments(uuid).Return(nil, mockError)
+	mockStorage.EXPECT().GetAllFilmComments(filmUuid, userUuid).Return(nil, mockError)
 
-	_, err := service.GetAllFilmComments(context.Background(), uuid)
+	_, err := service.GetAllFilmComments(context.Background(), filmUuid, userUuid)
 
 	assert.Error(t, err)
 }
