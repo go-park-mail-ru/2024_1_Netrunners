@@ -91,7 +91,7 @@ func main() {
 	router.HandleFunc("/api/films/top", filmsPageHandlers.GetTopFilms).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/comments/add", filmsPageHandlers.AddComment).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/films/comments/remove", filmsPageHandlers.RemoveComment).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/films/{uuid}/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/films/comments", filmsPageHandlers.GetAllFilmComments).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
