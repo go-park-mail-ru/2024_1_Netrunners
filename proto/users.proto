@@ -39,6 +39,7 @@ message User {
   string avatar = 7;
   google.protobuf.Timestamp birthday = 8;
   google.protobuf.Timestamp registeredAt = 9;
+  bool HasSubscription = 10;
 }
 
 message UserPreview {

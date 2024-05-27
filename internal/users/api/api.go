@@ -229,15 +229,16 @@ func convertUserSignUpToRegular(user *session.UserSignUp) domain.UserSignUp {
 
 func convertUserToProto(user domain.User) *session.User {
 	return &session.User{
-		Uuid:         user.Uuid,
-		Email:        user.Email,
-		Username:     user.Name,
-		Password:     user.Password,
-		IsAdmin:      user.IsAdmin,
-		Version:      user.Version,
-		RegisteredAt: convertTimeToProto(user.RegisteredAt),
-		Birthday:     convertTimeToProto(user.Birthday),
-		Avatar:       user.Avatar,
+		Uuid:            user.Uuid,
+		Email:           user.Email,
+		Username:        user.Name,
+		Password:        user.Password,
+		IsAdmin:         user.IsAdmin,
+		Version:         user.Version,
+		RegisteredAt:    convertTimeToProto(user.RegisteredAt),
+		Birthday:        convertTimeToProto(user.Birthday),
+		Avatar:          user.Avatar,
+		HasSubscription: user.HasSubscription,
 	}
 }
 

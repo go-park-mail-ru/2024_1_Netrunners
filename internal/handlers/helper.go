@@ -324,15 +324,16 @@ func convertProtoToTime(protoTime *timestamppb.Timestamp) time.Time {
 
 func convertUserToRegular(user *session.User) domain.User {
 	return domain.User{
-		Uuid:         user.Uuid,
-		Email:        user.Email,
-		Password:     user.Password,
-		Name:         user.Username,
-		Version:      user.Version,
-		IsAdmin:      user.IsAdmin,
-		Avatar:       user.Avatar,
-		Birthday:     convertProtoToTime(user.Birthday),
-		RegisteredAt: convertProtoToTime(user.RegisteredAt),
+		Uuid:            user.Uuid,
+		Email:           user.Email,
+		Password:        user.Password,
+		Name:            user.Username,
+		Version:         user.Version,
+		IsAdmin:         user.IsAdmin,
+		Avatar:          user.Avatar,
+		Birthday:        convertProtoToTime(user.Birthday),
+		RegisteredAt:    convertProtoToTime(user.RegisteredAt),
+		HasSubscription: user.HasSubscription,
 	}
 }
 

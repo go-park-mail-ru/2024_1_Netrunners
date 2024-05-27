@@ -125,6 +125,17 @@ func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string)
 			ctx.Value(requestId.ReqIDKey), err)
 		return domain.User{}, err
 	}
+
+	service.metrics.IncRequestsTotal("HasSubscription")
+	stat, err := service.storage.HasSubscription(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to check subscription: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+
+	user.HasSubscription = stat
+
 	return user, nil
 }
 

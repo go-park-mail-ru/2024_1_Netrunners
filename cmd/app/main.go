@@ -98,9 +98,9 @@ func main() {
 	router.HandleFunc("/api/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
-	router.HandleFunc("/profile/{uuid}/subscriptions/check", usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
-	router.HandleFunc("/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
-	router.HandleFunc("/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/check", usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")
