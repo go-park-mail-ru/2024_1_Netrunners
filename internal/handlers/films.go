@@ -77,6 +77,48 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 	}
 }
 
+func (filmsPageHandlers *FilmsPageHandlers) GetFilmsPreviewsWithSub(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestID := ctx.Value(reqid.ReqIDKey)
+
+	var req *session.AllFilmsPreviewsRequest
+	res, err := (*filmsPageHandlers.client).GetFilmsPreviewsWithSub(ctx, req)
+	if err != nil {
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestID, err)
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	var filmsRegular []domain.FilmPreview
+	for _, film := range res.Films {
+		filmRegular := convertFilmPreviewToRegular(film)
+		escapeFilmPreview(&filmRegular)
+		filmsRegular = append(filmsRegular, filmRegular)
+	}
+
+	response := filmsPreviewsResponse{
+		Status: http.StatusOK,
+		Films:  filmsRegular,
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
+		}
+		return
+	}
+}
+
+type filmDataResponse struct {
+	Status   int         `json:"status"`
+	FilmData interface{} `json:"film"`
+}
+
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
 	uuid := mux.Vars(r)["uuid"]
 	ctx := r.Context()

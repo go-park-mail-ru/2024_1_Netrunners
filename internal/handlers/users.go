@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 
@@ -266,7 +267,7 @@ func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter,
 	uuid := mux.Vars(r)["uuid"]
 	req := session.HasSubscriptionRequest{Uuid: uuid}
 	stat, err := (*UserPageHandlers.usersClient).HasSubscription(ctx, &req)
-	if err != nil || !stat.Status {
+	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
 			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
@@ -314,6 +315,72 @@ func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter
 	}
 
 	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+type payRequest struct {
+	SubId string `json:"subId"`
+}
+
+type payResponse struct {
+	Link string `json:"link"`
+}
+
+func (UserPageHandlers *UserPageHandlers) PaySubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var request payRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to decode: %v\n", requestId, myerrors.ErrFailedDecode)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	uuid := mux.Vars(r)["uuid"]
+	req := session.HasSubscriptionRequest{Uuid: uuid}
+	stat, err := (*UserPageHandlers.usersClient).HasSubscription(ctx, &req)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	if stat.Status {
+		err = WriteError(w, r, UserPageHandlers.metrics, myerrors.ErrAlreadyHaveSubscription)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	link, err := (*UserPageHandlers.usersClient).PaySubscription(ctx, &session.PaySubscriptionRequest{
+		Uuid:  uuid,
+		SubId: request.SubId,
+	})
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, UserPageHandlers.metrics, payResponse{
+		Link: link.PaymentResponse,
+	}, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {

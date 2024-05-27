@@ -81,15 +81,15 @@ CREATE TABLE IF NOT EXISTS season
 
 CREATE TABLE IF NOT EXISTS comment
 (
-	id                 INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	external_id        UUID UNIQUE DEFAULT gen_random_uuid()       NOT NULL,
-	text               TEXT                                        NOT NULL,
-	score              SMALLINT CHECK (score >= 0 AND score <= 10) NOT NULL,
-	author_external_id UUID                                        NOT NULL,
-	film_external_id   UUID                                        NOT NULL,
-	added_at           TIMESTAMPTZ DEFAULT NOW()                   NOT NULL,
-	FOREIGN KEY (author_external_id) REFERENCES users (external_id) ON DELETE SET NULL,
-	FOREIGN KEY (film_external_id) REFERENCES film (external_id) ON DELETE CASCADE
+	id          INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	external_id UUID UNIQUE DEFAULT gen_random_uuid()       NOT NULL,
+	text        TEXT                                        NOT NULL,
+	score       SMALLINT CHECK (score >= 0 AND score <= 10) NOT NULL,
+	author      INTEGER,
+	film        INTEGER                                     NOT NULL,
+	added_at    TIMESTAMPTZ DEFAULT NOW()                   NOT NULL,
+	FOREIGN KEY (author) REFERENCES users (id) ON DELETE SET NULL,
+	FOREIGN KEY (film) REFERENCES film (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS film_actor

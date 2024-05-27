@@ -8,6 +8,7 @@ option go_package = "./session";
 
 service Films {
   rpc GetAllFilmsPreviews(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
+  rpc GetFilmsPreviewsWithSub(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
   rpc GetFilmDataByUuid(FilmDataByUuidRequest) returns (FilmDataByUuidResponse) {}
   rpc GetFilmPreviewByUuid(FilmPreviewByUuidRequest) returns (FilmPreviewByUuidResponse) {}
   rpc RemoveFilmByUuid(RemoveFilmByUuidRequest) returns (RemoveFilmByUuidResponse) {}

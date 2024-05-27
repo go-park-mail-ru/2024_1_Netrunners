@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -226,21 +227,86 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 		return "", err
 	}
 
-	fmt.Println("Done:")
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
-	_ = string(body)
-
-	err = service.storage.AddSubscription(uuid, time.Now().AddDate(0, int(sub.Duration), 0).Format("2006-01-02"))
-	if err != nil {
-		return "", err
+	c := make(map[string]json.RawMessage)
+	// unmarschal JSON
+	e := json.Unmarshal([]byte(string(body)), &c)
+	// panic on error
+	if e != nil {
+		panic(e)
 	}
 
-	return "https://yoomoney.ru/checkout/payments/v2/contract?orderId=2de6399b-000f-5000-9000-1b7c8adc1521", nil
+	go func() {
+		for {
+			select {
+			case <-time.After(time.Minute * 10):
+				fmt.Println("Payment failed")
+				return
+			default:
+				checkReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.yookassa.ru/v3/payments/%s",
+					string(c["id"])[1:len(c["id"])-1]), nil)
+				if err != nil {
+					fmt.Println(err)
+				}
+				checkReq.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
+
+				checkResp, err := http.DefaultClient.Do(checkReq)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				body, err := ioutil.ReadAll(checkResp.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer checkResp.Body.Close()
+
+				resp := make(map[string]json.RawMessage)
+				// unmarschal JSON
+				respBytes := json.Unmarshal([]byte(string(body)), &resp)
+				// panic on error
+				if respBytes != nil {
+					fmt.Println(err)
+				}
+
+				if string(resp["status"]) == `"waiting_for_capture"` {
+					req, err := http.NewRequest("POST", fmt.Sprintf(
+						"https://api.yookassa.ru/v3/payments/%s/capture", string(c["id"])[1:len(c["id"])-1]), nil)
+					if err != nil {
+						fmt.Println(err)
+					}
+					req.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
+					req.Header.Set("Content-Type", "application/json")
+					req.Header.Set("Idempotence-Key", id)
+
+					_, err = http.DefaultClient.Do(req)
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					err = service.storage.AddSubscription(uuid, time.Now().AddDate(0, int(sub.Duration), 0).Format("2006-01-02"))
+					if err != nil {
+						fmt.Println(err)
+					}
+					return
+				}
+				time.Sleep(time.Second * 10)
+			}
+		}
+	}()
+
+	e = json.Unmarshal([]byte(string(c["confirmation"])), &c)
+	// panic on error
+	if e != nil {
+		panic(e)
+	}
+
+	return string(c["confirmation_url"])[1 : len(c["confirmation_url"])-1], nil
 }
 
 func (service *UsersService) GetSubscriptions(ctx context.Context) ([]domain.Subscription, error) {

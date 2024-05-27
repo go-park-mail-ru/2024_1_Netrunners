@@ -41,7 +41,7 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authConn, err := grpc.Dial("sessions:8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, err := grpc.Dial("users:8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,8 +68,8 @@ func main() {
 	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, httpMetrics, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, httpMetrics, sugarLogger)
 
-	router := mux.NewRouter().Schemes("http").Subrouter()
-	// router := mux.NewRouter().Schemes("https").Subrouter()
+	// router := mux.NewRouter().Schemes("http").Subrouter()
+	router := mux.NewRouter().Schemes("https").Subrouter()
 
 	router.Handle("/metrics", promhttp.Handler())
 
@@ -79,6 +79,7 @@ func main() {
 	router.HandleFunc("/api/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/films/all_sub", filmsPageHandlers.GetFilmsPreviewsWithSub).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/{uuid}/actors", filmsPageHandlers.GetActorsByFilm).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
@@ -98,8 +99,8 @@ func main() {
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
 	router.HandleFunc("/profile/{uuid}/subscriptions/check", usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
-	router.HandleFunc("/profile/{uuid}/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
-	// router.HandleFunc("/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")

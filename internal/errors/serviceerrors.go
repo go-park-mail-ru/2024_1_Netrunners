@@ -13,4 +13,6 @@ var (
 
 	ErrNoSuchActor     = errors.New("failed to get actor")
 	ErrNoActorsForFilm = errors.New("failed to get film's actors")
+
+	ErrAlreadyHaveSubscription = errors.New("you have already purchased subscription")
 )

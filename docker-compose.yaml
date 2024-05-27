@@ -71,68 +71,68 @@ services:
       - postgres
     restart: always
 
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   container_name: prometheus
-  #   ports:
-  #     - 8091:9090
-  #   command:
-  #     - --config.file=/etc/prometheus/prometheus.yml
-  #   volumes:
-  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-  #   networks:
-  #     - app_network
-  #   depends_on:
-  #     - app
-  #     - cadvisor
-  #     - node_exporter
-  #   restart: always
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 8091:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - app_network
+    depends_on:
+      - app
+      - cadvisor
+      - node_exporter
+    restart: always
 
-  # cadvisor:
-  #   image: gcr.io/cadvisor/cadvisor-amd64:v0.49.1
-  #   container_name: cadvisor
-  #   ports:
-  #     - 8090:8080
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #   networks:
-  #     - app_network
-  #   restart: always
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor-amd64:v0.49.1
+    container_name: cadvisor
+    ports:
+      - 8090:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - app_network
+    restart: always
 
-  # node_exporter:
-  #   image: quay.io/prometheus/node-exporter:v1.3.1
-  #   container_name: node_exporter
-  #   command:
-  #     - '--path.rootfs=/host'
-  #   pid: host
-  #   restart: always
-  #   volumes:
-  #     - '/:/host:ro,rslave'
-  #   networks:
-  #     - app_network
-  #   ports:
-  #     - 8093:9100
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.3.1
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    restart: always
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - app_network
+    ports:
+      - 8093:9100
 
-  # grafana:
-  #   image: grafana/grafana
-  #   user: root
-  #   ports:
-  #     - 8092:3000
-  #   volumes:
-  #     - ./grafana:/var/lib/grafana
-  #     - ./grafana/provisioning/:/etc/grafana/provisioning/
-  #   container_name: grafana
-  #   hostname: grafana
-  #   environment:
-  #     TZ: "Europe/Moscow"
-  #   networks:
-  #     - app_network
-  #   depends_on:
-  #     - prometheus
-  #   restart: always
+  grafana:
+    image: grafana/grafana
+    user: root
+    ports:
+      - 8092:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    container_name: grafana
+    hostname: grafana
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - app_network
+    depends_on:
+      - prometheus
+    restart: always
 
 networks:
   app_network:

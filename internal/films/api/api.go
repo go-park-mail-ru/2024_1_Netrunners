@@ -19,6 +19,8 @@ type FilmsService interface {
 	RemoveFilm(ctx context.Context, uuid string) error
 	GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews(ctx context.Context) ([]domain.FilmPreview, error)
+	GetFilmsPreviewsWithSub(ctx context.Context) ([]domain.FilmPreview, error)
+	GetAllFilmComments(ctx context.Context, filmUuid string) ([]domain.Comment, error)
 	GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error)
 	GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error)
 	PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error
@@ -33,7 +35,6 @@ type FilmsService interface {
 	FindActorsShort(ctx context.Context, name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(ctx context.Context, name string, page int) (domain.SearchActors, error)
 	GetTopFilms(ctx context.Context) ([]domain.TopFilm, error)
-	GetAllFilmComments(ctx context.Context, filmUuid string) ([]domain.Comment, error)
 	AddComment(ctx context.Context, comment domain.CommentToAdd) error
 	RemoveComment(ctx context.Context, comment domain.CommentToRemove) error
 }
@@ -57,6 +58,25 @@ func (server *FilmsServer) GetAllFilmsPreviews(ctx context.Context,
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestId, err)
 		return nil, fmt.Errorf("[reqid=%s] failed to get all films previews: %v\n", requestId, err)
+	}
+
+	var filmsConverted []*session.FilmPreview
+	for _, film := range films {
+		filmsConverted = append(filmsConverted, convertFilmPreviewToProto(&film))
+	}
+
+	return &session.AllFilmsPreviewsResponse{
+		Films: filmsConverted,
+	}, nil
+}
+
+func (server *FilmsServer) GetFilmsPreviewsWithSub(ctx context.Context,
+	req *session.AllFilmsPreviewsRequest) (res *session.AllFilmsPreviewsResponse, err error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	films, err := server.filmsService.GetFilmsPreviewsWithSub(ctx)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get films previews with sub: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get films previews with sub: %v\n", requestId, err)
 	}
 
 	var filmsConverted []*session.FilmPreview
