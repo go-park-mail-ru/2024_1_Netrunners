@@ -292,7 +292,7 @@ func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter,
 
 type subsctiptionsResponse struct {
 	Status        int                   `json:"status"`
-	Subsctiptions []domain.Subscription `json:"subsctiptions"`
+	Subscriptions []domain.Subscription `json:"subscriptions"`
 }
 
 func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter, r *http.Request) {
@@ -311,7 +311,7 @@ func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter
 
 	response := subsctiptionsResponse{
 		Status:        http.StatusOK,
-		Subsctiptions: subscriptions,
+		Subscriptions: subscriptions,
 	}
 
 	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)

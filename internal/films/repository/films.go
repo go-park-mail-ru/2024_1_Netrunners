@@ -338,7 +338,7 @@ const getFilmsPreviewsWithSub = `
 		SELECT f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration,
 			COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
 		FROM film f
-		LEFT JOIN comment c ON f.id = c.film
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		where with_subscription = true
 		GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
