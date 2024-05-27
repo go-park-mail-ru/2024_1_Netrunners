@@ -253,3 +253,72 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
 	}
 }
+
+type hasSubsctiptionsResponse struct {
+	Status          int  `json:"status"`
+	HasSubscription bool `json:"hasSubscription"`
+}
+
+func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	uuid := mux.Vars(r)["uuid"]
+	req := session.HasSubscriptionRequest{Uuid: uuid}
+	stat, err := (*UserPageHandlers.usersClient).HasSubscription(ctx, &req)
+	if err != nil || !stat.Status {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	response := hasSubsctiptionsResponse{
+		Status:          http.StatusOK,
+		HasSubscription: stat.Status,
+	}
+
+	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+type subsctiptionsResponse struct {
+	Status        int                   `json:"status"`
+	Subsctiptions []domain.Subscription `json:"subsctiptions"`
+}
+
+func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	subs, err := (*UserPageHandlers.usersClient).GetSubscriptions(ctx, &session.GetSubscriptionsRequest{})
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+	subscriptions := convertSubsToRegular(subs.Subscriptions)
+
+	response := subsctiptionsResponse{
+		Status:        http.StatusOK,
+		Subsctiptions: subscriptions,
+	}
+
+	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}

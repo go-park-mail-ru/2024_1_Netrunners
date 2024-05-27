@@ -25,6 +25,10 @@ type UsersService interface {
 	ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User, error)
 	ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error)
 	ChangeUserAvatarByUuid(ctx context.Context, uuid, newAvatar string) (domain.User, error)
+	HasSubscription(ctx context.Context, uuid string) (bool, error)
+	PaySubscription(ctx context.Context, uuid, subId string) (string, error)
+	GetSubscriptions(ctx context.Context) ([]domain.Subscription, error)
+	GetSubscription(ctx context.Context, uuid string) (domain.Subscription, error)
 }
 
 type UsersServer struct {
@@ -176,6 +180,45 @@ func (server *UsersServer) ChangeUserAvatarByUuid(ctx context.Context,
 	}, nil
 }
 
+func (server *UsersServer) HasSubscription(ctx context.Context,
+	req *session.HasSubscriptionRequest) (*session.HasSubscriptionResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	stat, err := server.usersService.HasSubscription(ctx, req.Uuid)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to check user subscription: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to check user subscription: %v\n", requestId, err)
+	}
+	return &session.HasSubscriptionResponse{
+		Status: stat,
+	}, nil
+}
+
+func (server *UsersServer) GetSubscriptions(ctx context.Context,
+	req *session.GetSubscriptionsRequest) (*session.GetSubscriptionsResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	subs, err := server.usersService.GetSubscriptions(ctx)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to get subs: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to get subs: %v\n", requestId, err)
+	}
+	return &session.GetSubscriptionsResponse{
+		Subscriptions: convertSubsToProto(subs),
+	}, nil
+}
+
+func (server *UsersServer) PaySubscription(ctx context.Context,
+	req *session.PaySubscriptionRequest) (*session.PaySubscriptionResponse, error) {
+	requestId := ctx.Value(reqid.ReqIDKey)
+	response, err := server.usersService.PaySubscription(ctx, req.Uuid, req.SubId)
+	if err != nil {
+		server.logger.Errorf("[reqid=%s] failed to pay: %v\n", requestId, err)
+		return nil, fmt.Errorf("[reqid=%s] failed to pay: %v\n", requestId, err)
+	}
+	return &session.PaySubscriptionResponse{
+		PaymentResponse: response,
+	}, nil
+}
+
 func convertUserSignUpToRegular(user *session.UserSignUp) domain.UserSignUp {
 	return domain.UserSignUp{
 		Email:    user.Email,
@@ -211,4 +254,17 @@ func convertUserPreviewToProto(user domain.UserPreview) *session.UserPreview {
 		Username: user.Name,
 		Avatar:   user.Avatar,
 	}
+}
+
+func convertSubsToProto(subs []domain.Subscription) []*session.Subscription {
+	protoSubs := make([]*session.Subscription, 0, len(subs))
+	for _, sub := range subs {
+		protoSubs = append(protoSubs, &session.Subscription{
+			Uuid:        sub.Uuid,
+			Title:       sub.Title,
+			Description: sub.Description,
+			Price:       sub.Amount,
+		})
+	}
+	return protoSubs
 }

@@ -41,7 +41,7 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	authConn, err := grpc.Dial("sessions:8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authConn, err := grpc.Dial(":8010", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	usersConn, err := grpc.Dial("users:8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	usersConn, err := grpc.Dial(":8030", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +68,8 @@ func main() {
 	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, httpMetrics, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, httpMetrics, sugarLogger)
 
-	router := mux.NewRouter()
+	router := mux.NewRouter().Schemes("http").Subrouter()
+	// router := mux.NewRouter().Schemes("https").Subrouter()
 
 	router.Handle("/metrics", promhttp.Handler())
 
@@ -96,6 +97,9 @@ func main() {
 	router.HandleFunc("/api/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/subscriptions/check", usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/profile/{uuid}/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
+	// router.HandleFunc("/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")

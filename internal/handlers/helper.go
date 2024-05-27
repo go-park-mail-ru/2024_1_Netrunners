@@ -457,6 +457,20 @@ func convertCommentToRemoveToProto(comment domain.CommentToRemove) *session.Comm
 	}
 }
 
+func convertSubsToRegular(subs []*session.Subscription) []domain.Subscription {
+	subscriptions := make([]domain.Subscription, 0, len(subs))
+	for _, sub := range subs {
+		subscriptions = append(subscriptions, domain.Subscription{
+			Uuid:        sub.Uuid,
+			Title:       sub.Title,
+			Amount:      sub.Price,
+			Description: sub.Description,
+			Duration:    sub.Duration,
+		})
+	}
+	return subscriptions
+}
+
 func IsTokenValid(token *http.Cookie, secretKey string) (jwt.MapClaims, error) {
 	parsedToken, err := jwt.Parse(token.Value, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

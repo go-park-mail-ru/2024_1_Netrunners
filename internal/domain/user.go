@@ -40,3 +40,11 @@ type ProfilePreviewResponse struct {
 	Status      int         `json:"status"`
 	UserPreview UserPreview `json:"user"`
 }
+
+type Subscription struct {
+	Uuid        string  `json:"uuid"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Amount      float32 `json:"amount"`
+	Duration    uint32  `json:"duration"`
+}

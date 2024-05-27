@@ -1055,8 +1055,8 @@ func (storage *FilmsStorage) FindFilmsShort(title string, page int) ([]domain.Fi
 }
 
 func (storage *FilmsStorage) FindFilmsLong(title string, page int) (domain.SearchFilms, error) {
-	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+title+"%", largePageLimit,
-		(page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+strings.ToLower(title)+"%", largePageLimit,
+		(page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchFilms{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1176,8 +1176,8 @@ func (storage *FilmsStorage) FindSerialsShort(title string, page int) ([]domain.
 }
 
 func (storage *FilmsStorage) FindSerialsLong(title string, page int) (domain.SearchFilms, error) {
-	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+title+"%", largePageLimit,
-		(page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+strings.ToLower(title)+"%", largePageLimit,
+		(page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchFilms{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1285,7 +1285,8 @@ func (storage *FilmsStorage) FindActorsShort(name string, page int) ([]domain.Ac
 }
 
 func (storage *FilmsStorage) FindActorsLong(name string, page int) (domain.SearchActors, error) {
-	rows, err := storage.pool.Query(context.Background(), searchActorLong, "%"+name+"%", pageLimit, (page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchActorLong, "%"+strings.ToLower(name)+"%",
+		largePageLimit, (page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchActors{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -80,6 +82,25 @@ const getUserPreviewByUuid = `
 		SELECT external_id, name, avatar 
 		FROM users
 		WHERE external_id = $1;`
+
+const hasSubscription = `
+	select subscription_end_date
+	from users
+	where external_id = $1 and subscription_end_date > now();`
+
+const addSubscription = `
+	update users
+	set subscription_end_date = $1
+	where external_id = $2;`
+
+const getSubscriptions = `
+	select id, title, amount, description, duration
+	from subscription;`
+
+const getSubscription = `
+	select id, title, amount, description, duration
+	from subscription
+	where id = $1;`
 
 func (storage *UsersStorage) CreateUser(user domain.UserSignUp) error {
 	_, err := storage.pool.Exec(context.Background(), insertUser, user.Email, user.Name, user.Password)
@@ -289,4 +310,74 @@ func (storage *UsersStorage) ChangeUserAvatarByUuid(uuid, filename string) (doma
 	}
 
 	return user, nil
+}
+
+func (storage *UsersStorage) HasSubscription(uuid string) (bool, error) {
+	var time time.Time
+	err := storage.pool.QueryRow(context.Background(), hasSubscription, uuid).Scan(&time)
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (storage *UsersStorage) AddSubscription(uuid string, newDate string) error {
+	_, err := storage.pool.Exec(context.Background(), addSubscription, newDate, uuid)
+	if err != nil {
+		return fmt.Errorf("failed to add subscription: %w: %w", err,
+			myerrors.ErrFailInExec)
+	}
+
+	return nil
+}
+
+func (storage *UsersStorage) GetSubscriptions() ([]domain.Subscription, error) {
+	rows, err := storage.pool.Query(context.Background(), getSubscriptions)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		subs        []domain.Subscription
+		uuid        string
+		title       string
+		description string
+		amount      string
+		duration    string
+	)
+	for rows.Next() {
+		sub := domain.Subscription{}
+		err = rows.Scan(&uuid, &title, &amount, &description, &duration)
+		if err != nil {
+			return nil, err
+		}
+		sub.Uuid = uuid
+		sub.Title = title
+		sub.Description = description
+		price, err := strconv.ParseFloat(amount, 32)
+		if err != nil {
+			return nil, err
+		}
+		sub.Amount = float32(price)
+		durat, err := strconv.ParseUint(duration, 32, 32)
+		if err != nil {
+			return nil, err
+		}
+		sub.Duration = uint32(durat)
+
+		subs = append(subs, sub)
+	}
+	return subs, nil
+}
+
+func (storage *UsersStorage) GetSubscription(uuid string) (domain.Subscription, error) {
+	var sub domain.Subscription
+	err := storage.pool.QueryRow(context.Background(), getSubscription, uuid).Scan(
+		&sub.Uuid, &sub.Title, &sub.Amount, &sub.Description, &sub.Duration)
+	if err != nil {
+		return domain.Subscription{}, fmt.Errorf("failed to get subscription: %w: %w", err,
+			myerrors.ErrFailInQueryRow)
+	}
+	return sub, nil
 }
