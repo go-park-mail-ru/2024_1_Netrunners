@@ -100,13 +100,14 @@ func TestFilmsServer_GetAllFilmComments(t *testing.T) {
 	server := NewFilmsServer(mockService, nil)
 
 	ctx := context.Background()
+	filmUuid := "123"
 	expectedComments := []domain.Comment{
 		{Uuid: "1", Text: "Comment 1", FilmUuid: "1", Author: "User 1", Score: 5, AddedAt: time.Now()},
 		{Uuid: "2", Text: "Comment 2", FilmUuid: "1", Author: "User 2", Score: 4, AddedAt: time.Now()},
 	}
-	mockService.EXPECT().GetAllFilmComments(ctx, "1").Return(expectedComments, nil)
+	mockService.EXPECT().GetAllFilmComments(ctx, filmUuid).Return(expectedComments, nil)
 
-	req := &session.AllFilmCommentsRequest{Uuid: "1"}
+	req := &session.AllFilmCommentsRequest{FilmUuid: filmUuid}
 	resp, err := server.GetAllFilmComments(ctx, req)
 
 	require.NoError(t, err)

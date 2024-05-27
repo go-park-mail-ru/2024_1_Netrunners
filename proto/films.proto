@@ -10,7 +10,6 @@ service Films {
   rpc GetAllFilmsPreviews(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
   rpc GetFilmDataByUuid(FilmDataByUuidRequest) returns (FilmDataByUuidResponse) {}
   rpc GetFilmPreviewByUuid(FilmPreviewByUuidRequest) returns (FilmPreviewByUuidResponse) {}
-  rpc GetAllFilmComments(AllFilmCommentsRequest) returns (AllFilmCommentsResponse) {}
   rpc RemoveFilmByUuid(RemoveFilmByUuidRequest) returns (RemoveFilmByUuidResponse) {}
   rpc GetActorDataByUuid(ActorDataByUuidRequest) returns (ActorDataByUuidResponse) {}
   rpc GetActorsByFilm(ActorsByFilmRequest) returns (ActorsByFilmResponse) {}
@@ -27,6 +26,9 @@ service Films {
   rpc FindActorsShort(FindActorsShortRequest) returns (FindActorsShortResponse) {}
   rpc FindActorsLong(FindActorsShortRequest) returns (FindActorsLongResponse) {}
   rpc GetTopFilms(GetTopFilmsRequest) returns (GetTopFilmsResponse) {}
+  rpc GetAllFilmComments(AllFilmCommentsRequest) returns (AllFilmCommentsResponse) {}
+  rpc AddComment(AddCommentRequest) returns (AddCommentResponse) {}
+  rpc RemoveComment(RemoveCommentRequest) returns (RemoveCommentResponse) {}
 }
 
 message FilmPreview {
@@ -70,15 +72,6 @@ message FilmData {
   repeated Genre genres = 12;
   bool is_serial = 13;
   repeated Season seasons = 14;
-}
-
-message Comment {
-  string uuid = 1;
-  string film_uuid = 2;
-  string author = 3;
-  string text = 4;
-  uint32 score = 5;
-  google.protobuf.Timestamp added_at = 6;
 }
 
 message ActorData {
@@ -126,7 +119,7 @@ message FilmPreviewByUuidResponse {
 }
 
 message AllFilmCommentsRequest {
-  string uuid = 1;
+  string film_uuid = 1;
 }
 
 message AllFilmCommentsResponse {
@@ -242,7 +235,7 @@ message FilmToAdd {
 }
 
 message AddFilmRequest {
-    FilmToAdd filmData = 1;
+  FilmToAdd filmData = 1;
 }
 
 message AddFilmResponse {}
@@ -311,3 +304,37 @@ message GetTopFilmsRequest {}
 message GetTopFilmsResponse {
   repeated TopFilm films = 1;
 }
+
+message Comment {
+  string uuid = 1;
+  string film_uuid = 2;
+  string author_uuid = 3;
+  string author = 4;
+  string text = 5;
+  uint32 score = 6;
+  google.protobuf.Timestamp added_at = 7;
+}
+
+message CommentToAdd {
+  string film_uuid = 1;
+  string author_uuid = 2;
+  string text = 3;
+  uint32 score = 4;
+}
+
+message CommentToRemove {
+  string film_uuid = 1;
+  string author_uuid = 2;
+}
+
+message AddCommentRequest {
+  CommentToAdd comment = 1;
+}
+
+message AddCommentResponse {}
+
+message RemoveCommentRequest {
+  CommentToRemove comment = 1;
+}
+
+message RemoveCommentResponse {}

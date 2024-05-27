@@ -17,7 +17,6 @@ type FilmsStorage interface {
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
-	GetAllFilmComments(uuid string) ([]domain.Comment, error)
 	GetActorByUuid(actorUuid string) (domain.ActorData, error)
 	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
 	PutFavoriteFilm(filmUuid string, userUuid string) error
@@ -32,6 +31,9 @@ type FilmsStorage interface {
 	FindActorsShort(name string, page int) ([]domain.ActorPreview, error)
 	FindActorsLong(name string, page int) (domain.SearchActors, error)
 	GetTopFilms() ([]domain.TopFilm, error)
+	GetAllFilmComments(filmUuid string) ([]domain.Comment, error)
+	AddComment(comment domain.CommentToAdd) error
+	RemoveComment(comment domain.CommentToRemove) error
 }
 
 type FilmsService struct {
@@ -105,9 +107,9 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 	return filmPreviews, nil
 }
 
-func (service *FilmsService) GetAllFilmComments(ctx context.Context, uuid string) ([]domain.Comment, error) {
+func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid string) ([]domain.Comment, error) {
 	service.metrics.IncRequestsTotal("GetAllFilmComments")
-	comments, err := service.storage.GetAllFilmComments(uuid)
+	comments, err := service.storage.GetAllFilmComments(filmUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film comments: %v",
 			ctx.Value(requestId.ReqIDKey), err)
@@ -266,9 +268,28 @@ func (service *FilmsService) GetTopFilms(ctx context.Context) ([]domain.TopFilm,
 	service.metrics.IncRequestsTotal("GetTopFilms")
 	films, err := service.storage.GetTopFilms()
 	if err != nil {
-		service.logger.Errorf("[reqid=%s] failed to get top films: %v", ctx.Value(requestId.ReqIDKey),
-			err)
+		service.logger.Errorf("[reqid=%s] failed to get top films: %v", ctx.Value(requestId.ReqIDKey), err)
 		return nil, err
 	}
 	return films, nil
+}
+
+func (service *FilmsService) AddComment(ctx context.Context, comment domain.CommentToAdd) error {
+	service.metrics.IncRequestsTotal("AddComment")
+	err := service.storage.AddComment(comment)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to add comment: %v", ctx.Value(requestId.ReqIDKey), err)
+		return err
+	}
+	return nil
+}
+
+func (service *FilmsService) RemoveComment(ctx context.Context, comment domain.CommentToRemove) error {
+	service.metrics.IncRequestsTotal("RemoveComment")
+	err := service.storage.RemoveComment(comment)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to remove comment: %v", ctx.Value(requestId.ReqIDKey), err)
+		return err
+	}
+	return nil
 }

@@ -31,6 +31,8 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrTokenIsNotValid),
 		errors.Is(err, ErrNoActiveSession),
 		errors.Is(err, ErrFailedDecode),
+		errors.Is(err, ErrWrongScore),
+		errors.Is(err, ErrCommentAlreadyExists),
 		errors.Is(err, ErrFavoriteAlreadyExists),
 		errors.Is(err, ErrNoSuchFilm):
 		status = 401

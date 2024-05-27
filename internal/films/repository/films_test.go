@@ -160,21 +160,24 @@ func TestFilmsStorage_GetAllFilmComments(t *testing.T) {
 	storage, err := NewFilmsStorage(mock)
 
 	newFilmComments := mocks.NewMockFilmComments()
-	uuid := "1"
+	filmUuid := "1"
 
-	mockRows := pgxmock.NewRows([]string{"uuid", "film_uuid", "author", "text", "score", "added_at"}).
-		AddRow(newFilmComments[0].Uuid, newFilmComments[0].FilmUuid, newFilmComments[0].Author, newFilmComments[0].Text, newFilmComments[0].Score,
+	mockRows1 := pgxmock.NewRows([]string{"uuid", "film_uuid", "author_uuid", "author", "text", "score", "added_at"}).
+		AddRow(newFilmComments[0].Uuid, newFilmComments[0].FilmUuid, newFilmComments[0].AuthorUuid,
+			newFilmComments[0].Author, newFilmComments[0].Text, newFilmComments[0].Score,
 			newFilmComments[0].AddedAt).
-		AddRow(newFilmComments[1].Uuid, newFilmComments[1].FilmUuid, newFilmComments[1].Author, newFilmComments[1].Text, newFilmComments[1].Score,
+		AddRow(newFilmComments[1].Uuid, newFilmComments[1].FilmUuid, newFilmComments[1].AuthorUuid,
+			newFilmComments[1].Author, newFilmComments[1].Text, newFilmComments[1].Score,
 			newFilmComments[1].AddedAt).
-		AddRow(newFilmComments[2].Uuid, newFilmComments[2].FilmUuid, newFilmComments[2].Author, newFilmComments[2].Text, newFilmComments[2].Score,
+		AddRow(newFilmComments[2].Uuid, newFilmComments[2].FilmUuid, newFilmComments[2].AuthorUuid,
+			newFilmComments[2].Author, newFilmComments[2].Text, newFilmComments[2].Score,
 			newFilmComments[2].AddedAt)
 
 	mock.ExpectQuery("SELECT").
-		WithArgs(uuid).
-		WillReturnRows(mockRows)
+		WithArgs(filmUuid).
+		WillReturnRows(mockRows1)
 
-	filmComments, err := storage.GetAllFilmComments(uuid)
+	filmComments, err := storage.GetAllFilmComments(filmUuid)
 	require.NoError(t, err)
 	require.Equal(t, newFilmComments, filmComments)
 
