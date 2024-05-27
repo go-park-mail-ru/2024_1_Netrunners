@@ -36,7 +36,7 @@ func (server *SessionSever) Add(ctx context.Context, req *session.AddRequest) (r
 	err = server.sessionsService.Add(ctx, req.Login, req.Token, req.Version)
 	if err != nil {
 		server.logger.Errorf("[reqid=%s] failed to add session: %v\n", requestId, err)
-		return nil, fmt.Errorf("[reqid=%s] failed to add session: %v\n", requestId, err)
+		return nil, err
 	}
 	return &session.AddResponse{}, nil
 }

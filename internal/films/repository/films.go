@@ -928,8 +928,8 @@ func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.Film
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmIsSerial, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating,
-			&FilmAgeLimit)
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmIsSerial, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore,
+			&FilmRating, &FilmAgeLimit)
 		if err != nil {
 			return nil, err
 		}
