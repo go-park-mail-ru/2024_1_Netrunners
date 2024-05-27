@@ -122,19 +122,12 @@ const getAllFilmsPreviews = `
     JOIN director d ON f.director = d.id
     GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
-const getCommentForUser = `
-		SELECT c.external_id, film_external_id, author_external_id, u.name AS author_name, c.text, c.score, 
-		       c.added_at
-		FROM comment c
-		JOIN users u ON c.author_external_id = u.external_id
-		WHERE film_external_id = $1 AND author_external_id = $2;`
-
 const getAllFilmComments = `
 		SELECT c.external_id, film_external_id, author_external_id, u.name AS author_name, c.text, c.score, 
 		       c.added_at
 		FROM comment c
 		JOIN users u ON c.author_external_id = u.external_id
-		WHERE film_external_id = $1 AND author_external_id != $2;`
+		WHERE film_external_id = $1;`
 
 const getAllFilmActors = `
 		SELECT a.external_id, a.name, a.avatar
@@ -671,35 +664,13 @@ func (storage *FilmsStorage) GetAllFilmActors(uuid string) ([]domain.ActorPrevie
 	return actors, nil
 }
 
-func (storage *FilmsStorage) GetAllFilmComments(filmUuid string, userUuid string) ([]domain.Comment, error) {
+func (storage *FilmsStorage) GetAllFilmComments(filmUuid string) ([]domain.Comment, error) {
 	comments := make([]domain.Comment, 0)
-	var (
-		comment           domain.Comment
-		CommentUuid       string
-		CommentFilmUuid   string
-		CommentAuthorUuid string
-		CommentAuthor     string
-		CommentText       string
-		CommentScore      uint32
-		CommentAddedAt    time.Time
-	)
+	var comment domain.Comment
 
-	err := storage.pool.QueryRow(context.Background(), getCommentForUser, filmUuid, userUuid).Scan(&comment.Uuid,
-		&comment.FilmUuid, &comment.AuthorUuid, &comment.Author, &comment.Text, &comment.Score, &comment.AddedAt)
+	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, filmUuid)
 	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
-				myerrors.ErrFailInQuery)
-		}
-	}
-
-	comments = append(comments, comment)
-
-	rows, err := storage.pool.Query(context.Background(), getAllFilmComments, filmUuid, userUuid)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err,
-			myerrors.ErrFailInQuery)
-
+		return nil, fmt.Errorf("failed to get all film's comments: %w: %w", err, myerrors.ErrFailInQuery)
 	}
 
 	for rows.Next() {
@@ -711,15 +682,6 @@ func (storage *FilmsStorage) GetAllFilmComments(filmUuid string, userUuid string
 		if err != nil {
 			return nil, err
 		}
-
-		comment.Uuid = CommentUuid
-		comment.Author = CommentAuthor
-		comment.AuthorUuid = CommentAuthorUuid
-		comment.FilmUuid = CommentFilmUuid
-		comment.Text = CommentText
-		comment.Score = CommentScore
-		comment.AddedAt = CommentAddedAt
-
 		comments = append(comments, comment)
 	}
 
@@ -962,10 +924,11 @@ func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.Film
 		FilmScore    float32
 		FilmRating   uint64
 		FilmAgeLimit uint32
+		FilmIsSerial bool
 	)
 	for rows.Next() {
 		var film domain.FilmPreview
-		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating,
+		err = rows.Scan(&FilmUuid, &FilmTitle, &FilmIsSerial, &FilmPreview, &FilmDirector, &FilmDuration, &FilmScore, &FilmRating,
 			&FilmAgeLimit)
 		if err != nil {
 			return nil, err
@@ -978,6 +941,7 @@ func (storage *FilmsStorage) GetAllFilmsByGenre(genreUuid string) ([]domain.Film
 		film.ScoresCount = FilmRating
 		film.AverageScore = FilmScore
 		film.AgeLimit = FilmAgeLimit
+		film.IsSerial = FilmIsSerial
 
 		films = append(films, film)
 	}

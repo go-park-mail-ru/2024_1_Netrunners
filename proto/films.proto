@@ -120,7 +120,6 @@ message FilmPreviewByUuidResponse {
 
 message AllFilmCommentsRequest {
   string film_uuid = 1;
-  string user_uuid = 2;
 }
 
 message AllFilmCommentsResponse {
