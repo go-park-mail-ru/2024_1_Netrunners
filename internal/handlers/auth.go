@@ -2,13 +2,12 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/dgrijalva/jwt-go"
-
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -71,7 +70,7 @@ func (authPageHandlers *AuthPageHandlers) Login(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	err := easyjson.UnmarshalFromReader(r.Body, &inputUserData)
 	if err != nil {
 		authPageHandlers.logger.Errorf("[reqid=%s] failed to decode: %v\n", requestID, myerrors.ErrFailedDecode)
 		err = WriteError(w, r, authPageHandlers.metrics, err)
@@ -243,7 +242,7 @@ func (authPageHandlers *AuthPageHandlers) Signup(w http.ResponseWriter, r *http.
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
 
-	err := json.NewDecoder(r.Body).Decode(&inputUserData)
+	err := easyjson.UnmarshalFromReader(r.Body, &inputUserData)
 	if err != nil {
 		err = WriteError(w, r, authPageHandlers.metrics, err)
 		if err != nil {

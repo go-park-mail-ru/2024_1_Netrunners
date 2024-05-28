@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -32,24 +32,6 @@ func NewFilmsPageHandlers(client *session.FilmsClient, metrics *metrics.HttpMetr
 	}
 }
 
-type shortSearchResponse struct {
-	Status int                   `json:"status"`
-	Films  []domain.FilmPreview  `json:"films"`
-	Actors []domain.ActorPreview `json:"actors"`
-}
-
-type longSearchResponse struct {
-	Status int                `json:"status"`
-	Films  []domain.FilmData  `json:"films"`
-	Actors []domain.ActorData `json:"actors"`
-	Count  int                `json:"searchResCount"`
-}
-
-type filmsPreviewsResponse struct {
-	Status int                  `json:"status"`
-	Films  []domain.FilmPreview `json:"films"`
-}
-
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestID := ctx.Value(reqid.ReqIDKey)
@@ -72,12 +54,20 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		filmsRegular = append(filmsRegular, filmRegular)
 	}
 
-	response := filmsPreviewsResponse{
+	response := domain.FilmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  filmsRegular,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
@@ -85,11 +75,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 		}
 		return
 	}
-}
-
-type filmDataResponse struct {
-	Status   int         `json:"status"`
-	FilmData interface{} `json:"film"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
@@ -108,24 +93,33 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		return
 	}
 
-	var response filmDataResponse
+	var response domain.FilmDataResponse
 	if !filmData.FilmData.IsSerial {
 		filmDataRegular := convertFilmDataToRegular(filmData.FilmData)
 		escapeFilmData(&filmDataRegular)
-		response = filmDataResponse{
+		response = domain.FilmDataResponse{
 			Status:   http.StatusOK,
 			FilmData: filmDataRegular,
 		}
 	} else {
 		serialDataRegular := convertSerialDataToRegular(filmData.FilmData)
 		escapeSerialData(&serialDataRegular)
-		response = filmDataResponse{
+		response = domain.FilmDataResponse{
 			Status:   http.StatusOK,
 			FilmData: serialDataRegular,
 		}
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
@@ -133,11 +127,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 		}
 		return
 	}
-}
-
-type filmCommentsResponse struct {
-	Status   int              `json:"status"`
-	Comments []domain.Comment `json:"comments"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWriter, r *http.Request) {
@@ -164,12 +153,21 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 		commentsRegular = append(commentsRegular, commentRegular)
 	}
 
-	response := filmCommentsResponse{
+	response := domain.FilmCommentsResponse{
 		Status:   http.StatusOK,
 		Comments: commentsRegular,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
@@ -177,11 +175,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 		}
 		return
 	}
-}
-
-type filmActorsResponse struct {
-	Status int                   `json:"status"`
-	Actors []domain.ActorPreview `json:"actors"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetActorsByFilm(w http.ResponseWriter, r *http.Request) {
@@ -210,12 +203,21 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorsByFilm(w http.ResponseWrite
 		actorsRegular = append(actorsRegular, actorRegular)
 	}
 
-	response := filmActorsResponse{
+	response := domain.FilmActorsResponse{
 		Status: http.StatusOK,
 		Actors: actorsRegular,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
@@ -223,11 +225,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorsByFilm(w http.ResponseWrite
 		}
 		return
 	}
-}
-
-type actorResponse struct {
-	Status int              `json:"status"`
-	Actor  domain.ActorData `json:"actor"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetActorByUuid(w http.ResponseWriter, r *http.Request) {
@@ -251,12 +248,21 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorByUuid(w http.ResponseWriter
 	actorDataRegular := convertActorDataToRegular(actor.Actor)
 	escapeActorData(&actorDataRegular)
 
-	response := actorResponse{
+	response := domain.ActorResponse{
 		Status: http.StatusOK,
 		Actor:  actorDataRegular,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
@@ -266,17 +272,12 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorByUuid(w http.ResponseWriter
 	}
 }
 
-type dataToFavorite struct {
-	FilmUuid string `json:"filmUuid"`
-	UserUuid string `json:"userUuid"`
-}
-
 func (filmsPageHandlers *FilmsPageHandlers) PutFavoriteFilm(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
 
-	var data dataToFavorite
-	err := json.NewDecoder(r.Body).Decode(&data)
+	var data domain.DataToFavorite
+	err := easyjson.UnmarshalFromReader(r.Body, &data)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -310,8 +311,8 @@ func (filmsPageHandlers *FilmsPageHandlers) RemoveFavoriteFilm(w http.ResponseWr
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
 
-	var data dataToFavorite
-	err := json.NewDecoder(r.Body).Decode(&data)
+	var data domain.DataToFavorite
+	err := easyjson.UnmarshalFromReader(r.Body, &data)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -340,16 +341,16 @@ func (filmsPageHandlers *FilmsPageHandlers) RemoveFavoriteFilm(w http.ResponseWr
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 
 	req := session.GetAllFavoriteFilmsRequest{UserUuid: uuid}
 	films, err := (*filmsPageHandlers.client).GetAllFavoriteFilms(ctx, &req)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all favorite film: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all favorite film: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -361,16 +362,25 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
 
-	response := filmsPreviewsResponse{
+	response := domain.FilmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  filmsConverted,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -378,16 +388,16 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 
 func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 
 	req := session.GetAllFilmsByGenreRequest{GenreUuid: uuid}
 	films, err := (*filmsPageHandlers.client).GetAllFilmsByGenre(ctx, &req)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all genre films: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get all genre films: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -398,16 +408,25 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 		escapeFilmPreview(&filmConverted)
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
-	response := filmsPreviewsResponse{
+	response := domain.FilmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  filmsConverted,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -415,7 +434,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 
 func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	params := r.URL.Query()
 	var (
@@ -437,10 +456,10 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	}
 	films, err := (*filmsPageHandlers.client).FindFilmsShort(ctx, &filmsReq)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -458,10 +477,10 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	}
 	serials, err := (*filmsPageHandlers.client).FindSerialsShort(ctx, &serialsReq)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find serials: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find serials: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -478,10 +497,10 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	}
 	actors, err := (*filmsPageHandlers.client).FindActorsShort(ctx, &actorsReq)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find actors: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find actors: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -493,17 +512,26 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 		actorssConverted = append(actorssConverted, actorConverted)
 	}
 
-	response := shortSearchResponse{
+	response := domain.ShortSearchResponse{
 		Status: http.StatusOK,
 		Films:  filmsConverted,
 		Actors: actorssConverted,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -511,7 +539,7 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 
 func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	params := r.URL.Query()
 	var (
@@ -528,11 +556,11 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		page = 1
 	}
 	if fb, ok := params["fb"]; !ok {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get fb param: %v\n", requestId,
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get fb param: %v\n", requestID,
 			myerrors.ErrIncorrectSearchParams)
 		err := WriteError(w, r, filmsPageHandlers.metrics, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	} else {
@@ -547,10 +575,10 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 		films, err := (*filmsPageHandlers.client).FindFilmsLong(ctx, &filmsReq)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestID, err)
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
@@ -562,17 +590,17 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			filmsConverted = append(filmsConverted, filmConverted)
 		}
 
-		response := longSearchResponse{
+		response := domain.LongSearchResponse{
 			Status: http.StatusOK,
 			Films:  filmsConverted,
 			Count:  int(films.Count),
 		}
 
-		err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+		err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestID)
 		if err != nil {
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
@@ -583,10 +611,10 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 		serials, err := (*filmsPageHandlers.client).FindSerialsLong(ctx, &filmsReq)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find films: %v\n", requestID, err)
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
@@ -598,17 +626,26 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			serialsConverted = append(serialsConverted, serialConverted)
 		}
 
-		response := longSearchResponse{
+		response := domain.LongSearchResponse{
 			Status: http.StatusOK,
 			Films:  serialsConverted,
 			Count:  int(serials.Count),
 		}
 
-		err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+		jsonResponse, err := easyjson.Marshal(response)
 		if err != nil {
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+			}
+			return
+		}
+
+		err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+		if err != nil {
+			err = WriteError(w, r, filmsPageHandlers.metrics, err)
+			if err != nil {
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
@@ -619,10 +656,10 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 		actors, err := (*filmsPageHandlers.client).FindActorsLong(ctx, &actorsReq)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find actors: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to find actors: %v\n", requestID, err)
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
@@ -634,45 +671,49 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 			actorssConverted = append(actorssConverted, actorConverted)
 		}
 
-		response := longSearchResponse{
+		response := domain.LongSearchResponse{
 			Status: http.StatusOK,
 			Actors: actorssConverted,
 			Count:  int(actors.Count),
 		}
 
-		err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+		jsonResponse, err := easyjson.Marshal(response)
 		if err != nil {
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
 			if err != nil {
-				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+			}
+			return
+		}
+
+		err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+		if err != nil {
+			err = WriteError(w, r, filmsPageHandlers.metrics, err)
+			if err != nil {
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 			}
 			return
 		}
 	default:
 		err := WriteError(w, r, filmsPageHandlers.metrics, myerrors.ErrIncorrectSearchParams)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
 }
 
-type genresResponse struct {
-	Status      int                 `json:"status"`
-	GenresFilms []domain.GenreFilms `json:"genres"`
-}
-
 func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	var req session.GetAllGenresRequest
 	genresFilms, err := (*filmsPageHandlers.client).GetAllGenres(ctx, &req)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get genres: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get genres: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -683,16 +724,25 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, 
 		genresConverted = append(genresConverted, genreConverted)
 	}
 
-	response := genresResponse{
+	response := domain.GenresResponse{
 		Status:      http.StatusOK,
 		GenresFilms: genresConverted,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -702,7 +752,7 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
 	var filmAddData domain.FilmToAdd
-	err := json.NewDecoder(r.Body).Decode(&filmAddData)
+	err := easyjson.UnmarshalFromReader(r.Body, &filmAddData)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode film data to add: %v\n", requestId, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -729,22 +779,17 @@ func (filmsPageHandlers *FilmsPageHandlers) AddFilm(w http.ResponseWriter, r *ht
 	}
 }
 
-type topFilmsResponse struct {
-	Status int              `json:"status"`
-	Films  []domain.TopFilm `json:"films"`
-}
-
 func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	var req session.GetTopFilmsRequest
 	films, err := (*filmsPageHandlers.client).GetTopFilms(ctx, &req)
 	if err != nil {
-		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get top films: %v\n", requestId, err)
+		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to get top films: %v\n", requestID, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -756,16 +801,25 @@ func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r
 		filmsConverted = append(filmsConverted, filmConverted)
 	}
 
-	response := topFilmsResponse{
+	response := domain.TopFilmsResponse{
 		Status: http.StatusOK,
 		Films:  filmsConverted,
 	}
 
-	err = WriteResponse(w, r, filmsPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
 		if err != nil {
-			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
+	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -794,7 +848,7 @@ func (filmsPageHandlers *FilmsPageHandlers) AddComment(w http.ResponseWriter, r 
 	}
 
 	var commentAddData domain.CommentToAdd
-	err = json.NewDecoder(r.Body).Decode(&commentAddData)
+	err = easyjson.UnmarshalFromReader(r.Body, &commentAddData)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -851,7 +905,7 @@ func (filmsPageHandlers *FilmsPageHandlers) RemoveComment(w http.ResponseWriter,
 	}
 
 	var commentRemoveData domain.CommentToRemove
-	err = json.NewDecoder(r.Body).Decode(&commentRemoveData)
+	err = easyjson.UnmarshalFromReader(r.Body, &commentRemoveData)
 	if err != nil {
 		filmsPageHandlers.logger.Errorf("[reqid=%s] failed to decode request data: %v\n", requestId, err)
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
