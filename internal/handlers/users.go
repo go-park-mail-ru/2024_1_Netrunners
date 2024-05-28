@@ -54,6 +54,14 @@ func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, 
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
@@ -88,6 +96,14 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)

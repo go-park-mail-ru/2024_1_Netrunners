@@ -60,6 +60,13 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsPreviews(w http.ResponseW
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -104,6 +111,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWri
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -144,6 +159,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmComments(w http.ResponseWr
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -186,6 +209,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorsByFilm(w http.ResponseWrite
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -223,6 +254,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetActorByUuid(w http.ResponseWriter
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -329,6 +368,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFavoriteFilms(w http.ResponseW
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -367,6 +414,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllFilmsByGenre(w http.ResponseWr
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -464,6 +519,14 @@ func (filmsPageHandlers *FilmsPageHandlers) ShortSearch(w http.ResponseWriter, r
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -570,6 +633,14 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 
 		jsonResponse, err := easyjson.Marshal(response)
+		if err != nil {
+			err = WriteError(w, r, filmsPageHandlers.metrics, err)
+			if err != nil {
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+			}
+			return
+		}
+
 		err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 		if err != nil {
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -607,6 +678,14 @@ func (filmsPageHandlers *FilmsPageHandlers) LongSearch(w http.ResponseWriter, r 
 		}
 
 		jsonResponse, err := easyjson.Marshal(response)
+		if err != nil {
+			err = WriteError(w, r, filmsPageHandlers.metrics, err)
+			if err != nil {
+				filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+			}
+			return
+		}
+
 		err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 		if err != nil {
 			err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -651,6 +730,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetAllGenres(w http.ResponseWriter, 
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
@@ -720,6 +807,14 @@ func (filmsPageHandlers *FilmsPageHandlers) GetTopFilms(w http.ResponseWriter, r
 	}
 
 	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, filmsPageHandlers.metrics, err)
+		if err != nil {
+			filmsPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestID, err)
+		}
+		return
+	}
+
 	err = WriteResponse(w, r, filmsPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, filmsPageHandlers.metrics, err)
