@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -31,50 +32,41 @@ func NewUserPageHandlers(usersClient *session.UsersClient, sessionsClient *sessi
 	}
 }
 
-type profileResponse struct {
-	Status   int         `json:"status"`
-	UserInfo domain.User `json:"user"`
-}
-
 func (UserPageHandlers *UserPageHandlers) GetProfileData(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 	uuid := mux.Vars(r)["uuid"]
 	req := session.GetUserDataByUuidRequest{Uuid: uuid}
 	userProto, err := (*UserPageHandlers.usersClient).GetUserDataByUuid(ctx, &req)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
 	user := convertUserToRegular(userProto.User)
 
 	escapeUserData(&user)
-	response := profileResponse{
+	response := domain.ProfileResponse{
 		Status:   http.StatusOK,
 		UserInfo: user,
 	}
 
-	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
 }
 
-type profilePreviewResponse struct {
-	Status      int                `json:"status"`
-	UserPreview domain.UserPreview `json:"user"`
-}
-
 func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	requestId := ctx.Value(reqid.ReqIDKey)
+	requestID := ctx.Value(reqid.ReqIDKey)
 
 	uuid := mux.Vars(r)["uuid"]
 	req := session.GetUserPreviewRequest{Uuid: uuid}
@@ -82,7 +74,7 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}
@@ -90,16 +82,17 @@ func (UserPageHandlers *UserPageHandlers) GetProfilePreview(w http.ResponseWrite
 
 	escapeUserPreviewData(&userPreview)
 
-	response := profilePreviewResponse{
+	response := domain.ProfilePreviewResponse{
 		Status:      http.StatusOK,
 		UserPreview: userPreview,
 	}
 
-	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestID)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
-			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 		}
 		return
 	}

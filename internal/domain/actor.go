@@ -2,6 +2,7 @@ package domain
 
 import "time"
 
+//easyjson:json
 type ActorToAdd struct {
 	Name       string    `json:"name"`
 	Avatar     string    `json:"avatar"`
@@ -12,11 +13,13 @@ type ActorToAdd struct {
 	Spouse     string    `json:"spouse"`
 }
 
+//easyjson:json
 type SearchActors struct {
 	Actors []ActorData `json:"actors"`
 	Count  uint32      `json:"count"`
 }
 
+//easyjson:json
 type ActorData struct {
 	Uuid       string        `json:"uuid"`
 	Name       string        `json:"name"`
@@ -29,6 +32,7 @@ type ActorData struct {
 	Films      []FilmPreview `json:"films"`
 }
 
+//easyjson:json
 type ActorPreview struct {
 	Uuid   string `json:"uuid"`
 	Name   string `json:"name"`
