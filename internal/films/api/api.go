@@ -501,6 +501,7 @@ func convertCommonFilmDataToProto(film *domain.CommonFilmData) *session.FilmData
 		Data:        film.Data,
 		Genres:      genres,
 		Seasons:     seasons,
+		WithSub:     film.WithSub,
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -238,7 +238,7 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 		return "", err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -271,7 +271,7 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 					fmt.Println(err)
 				}
 
-				body, err := ioutil.ReadAll(checkResp.Body)
+				body, err := io.ReadAll(checkResp.Body)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -295,10 +295,11 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 					req.Header.Set("Content-Type", "application/json")
 					req.Header.Set("Idempotence-Key", id)
 
-					_, err = http.DefaultClient.Do(req)
+					resp, err := http.DefaultClient.Do(req)
 					if err != nil {
 						fmt.Println(err)
 					}
+					defer resp.Body.Close()
 
 					err = service.storage.AddSubscription(uuid, time.Now().AddDate(0, int(sub.Duration), 0).Format("2006-01-02"))
 					if err != nil {

@@ -69,7 +69,7 @@ func main() {
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, httpMetrics, sugarLogger)
 
 	// router := mux.NewRouter().Schemes("http").Subrouter()
-	router := mux.NewRouter().Schemes("https").Subrouter()
+	router := mux.NewRouter()
 
 	router.Handle("/metrics", promhttp.Handler())
 
@@ -98,8 +98,10 @@ func main() {
 	router.HandleFunc("/api/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/profile/{uuid}/subscriptions/check", usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
-	router.HandleFunc("/api/profile/{uuid}/subscriptions/pay", usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/check",
+		usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/pay",
+		usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/films",
@@ -130,7 +132,7 @@ func main() {
 
 	fmt.Printf("Starting server at %s%s\n", "localhost", fmt.Sprintf(":%d", backEndPort))
 
-	if err := server.ListenAndServeTLS("./certs/app.crt", "./certs/app.key"); err != http.ErrServerClosed {
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

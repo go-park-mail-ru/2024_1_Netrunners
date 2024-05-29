@@ -42,13 +42,14 @@ const (
 
 const getFilmDataByUuid = `
 		SELECT f.external_id, f.is_serial, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, 
-		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit
+		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit,
+			   f.with_subscription
 		FROM film f
 		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
 		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data,
-			f.duration, f.age_limit, f.is_serial;`
+			f.duration, f.age_limit, f.is_serial, f.with_subscription;`
 
 const checkIsSerial = `
 	SELECT is_serial, id
@@ -372,7 +373,8 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 		&film.Date,
 		&film.AverageScore,
 		&film.ScoresCount,
-		&film.AgeLimit)
+		&film.AgeLimit,
+		&film.WithSub)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.CommonFilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}

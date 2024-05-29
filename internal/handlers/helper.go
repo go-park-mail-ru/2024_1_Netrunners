@@ -228,6 +228,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
 		Genres:       genres,
+		WithSub:      film.WithSub,
 	}
 }
 
@@ -264,6 +265,7 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Genres:       genres,
+		WithSub:      film.WithSub,
 	}
 }
 
