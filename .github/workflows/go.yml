@@ -1,4 +1,4 @@
-name: projet-CI
+name: project-CI
 
 on: [ push ]
 
