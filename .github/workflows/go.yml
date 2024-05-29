@@ -53,4 +53,4 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose down proxy app films sessions users && sudo docker compose up -d proxy app films sessions users
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose down app films sessions users && sudo docker compose up -d app films sessions users
