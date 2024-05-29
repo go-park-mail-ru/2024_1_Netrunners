@@ -31,15 +31,6 @@ jobs:
     name: deploy netrunnerflix
     runs-on: ubuntu-latest
     steps:
-      - name: update cfg
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            git config --global --add safe.directory /home/ubuntu/back/test/2024_1_Netrunners
-            cd /home/ubuntu/back/test/2024_1_Netrunners && git pull
       - name: Pull code
         uses: appleboy/ssh-action@master
         with:
