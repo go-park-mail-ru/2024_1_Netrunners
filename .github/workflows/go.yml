@@ -1,4 +1,4 @@
-name: projet-CI
+name: project-CI
 
 on: [ push ]
 
@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.21
- 
+
       - name: build
         run: go build ./cmd/app/main.go
 
@@ -26,3 +26,31 @@ jobs:
 
       - name: test
         run: go test -v ./...
+
+  deploy:
+    name: deploy netrunnerflix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull code
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && git pull --no-rebase
+      - name: Build containers
+        uses: appleboy/ssh-action@master
+        with:
+          timeout: 200m
+          command_timeout: 200m
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose build app films sessions users
+      - name: Restart service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose down app films sessions users && sudo docker compose up -d app films sessions users
