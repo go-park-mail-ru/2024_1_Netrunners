@@ -29,7 +29,6 @@ jobs:
 
   deploy:
     name: deploy netrunnerflix
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Pull code
