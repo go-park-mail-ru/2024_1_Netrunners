@@ -197,12 +197,7 @@ func (service *UsersService) HasSubscription(ctx context.Context, uuid string) (
 
 func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId string) (string, error) {
 	service.metrics.IncRequestsTotal("PaySubscription")
-	// err := service.storage.AddSubscription(uuid, "2025-05-05")
-	// if err != nil {
-	// 	service.logger.Errorf("[reqid=%s] failed to add subscription: %v", ctx.Value(requestId.ReqIDKey),
-	// 		err)
-	// 	return "", err
-	// }
+
 	sub, err := service.storage.GetSubscription(subId)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get subscription: %v", ctx.Value(requestId.ReqIDKey),
@@ -245,11 +240,10 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 	defer resp.Body.Close()
 
 	c := make(map[string]json.RawMessage)
-	// unmarschal JSON
+
 	e := json.Unmarshal([]byte(string(body)), &c)
-	// panic on error
 	if e != nil {
-		panic(e)
+		return "", e
 	}
 
 	go func() {
@@ -278,9 +272,8 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 				defer checkResp.Body.Close()
 
 				resp := make(map[string]json.RawMessage)
-				// unmarschal JSON
+
 				respBytes := json.Unmarshal([]byte(string(body)), &resp)
-				// panic on error
 				if respBytes != nil {
 					fmt.Println(err)
 				}
@@ -313,9 +306,8 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 	}()
 
 	e = json.Unmarshal([]byte(string(c["confirmation"])), &c)
-	// panic on error
 	if e != nil {
-		panic(e)
+		return "", e
 	}
 
 	return string(c["confirmation_url"])[1 : len(c["confirmation_url"])-1], nil

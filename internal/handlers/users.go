@@ -255,11 +255,6 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	}
 }
 
-type hasSubsctiptionsResponse struct {
-	Status          int  `json:"status"`
-	HasSubscription bool `json:"hasSubscription"`
-}
-
 func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestId := ctx.Value(reqid.ReqIDKey)
@@ -275,12 +270,20 @@ func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter,
 		return
 	}
 
-	response := hasSubsctiptionsResponse{
+	response := domain.HasSubsctiptionsResponse{
 		Status:          http.StatusOK,
 		HasSubscription: stat.Status,
 	}
 
-	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
@@ -288,11 +291,6 @@ func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter,
 		}
 		return
 	}
-}
-
-type subsctiptionsResponse struct {
-	Status        int                   `json:"status"`
-	Subscriptions []domain.Subscription `json:"subscriptions"`
 }
 
 func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter, r *http.Request) {
@@ -309,12 +307,20 @@ func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter
 	}
 	subscriptions := convertSubsToRegular(subs.Subscriptions)
 
-	response := subsctiptionsResponse{
+	response := domain.SubsctiptionsResponse{
 		Status:        http.StatusOK,
 		Subscriptions: subscriptions,
 	}
 
-	err = WriteResponse(w, r, UserPageHandlers.metrics, response, requestId)
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {
@@ -326,10 +332,6 @@ func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter
 
 type payRequest struct {
 	SubId string `json:"subId"`
-}
-
-type payResponse struct {
-	Link string `json:"link"`
 }
 
 func (UserPageHandlers *UserPageHandlers) PaySubscription(w http.ResponseWriter, r *http.Request) {
@@ -378,9 +380,19 @@ func (UserPageHandlers *UserPageHandlers) PaySubscription(w http.ResponseWriter,
 		return
 	}
 
-	err = WriteResponse(w, r, UserPageHandlers.metrics, payResponse{
+	response := domain.PayResponse{
 		Link: link.PaymentResponse,
-	}, requestId)
+	}
+
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
 	if err != nil {
 		err = WriteError(w, r, UserPageHandlers.metrics, err)
 		if err != nil {

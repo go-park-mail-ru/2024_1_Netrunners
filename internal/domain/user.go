@@ -49,3 +49,17 @@ type Subscription struct {
 	Amount      float32 `json:"amount"`
 	Duration    uint32  `json:"duration"`
 }
+
+type HasSubsctiptionsResponse struct {
+	Status          int  `json:"status"`
+	HasSubscription bool `json:"hasSubscription"`
+}
+
+type SubsctiptionsResponse struct {
+	Status        int            `json:"status"`
+	Subscriptions []Subscription `json:"subscriptions"`
+}
+
+type PayResponse struct {
+	Link string `json:"link"`
+}
