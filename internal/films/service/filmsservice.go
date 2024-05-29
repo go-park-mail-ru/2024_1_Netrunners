@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
 
+	guid "github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -56,6 +58,13 @@ func NewFilmsService(storage FilmsStorage, metrics *metrics.GrpcMetrics, logger 
 
 func (service *FilmsService) GetFilmDataByUuid(ctx context.Context, uuid string) (domain.CommonFilmData, error) {
 	service.metrics.IncRequestsTotal("GetFilmDataByUuid")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.CommonFilmData{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 	film, err := service.storage.GetFilmDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
@@ -78,7 +87,14 @@ func (service *FilmsService) AddFilm(ctx context.Context, film domain.FilmToAdd)
 
 func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error {
 	service.metrics.IncRequestsTotal("RemoveFilm")
-	err := service.storage.RemoveFilm(uuid)
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+	err = service.storage.RemoveFilm(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove film: %v", ctx.Value(requestId.ReqIDKey), err)
 		return err
@@ -88,6 +104,13 @@ func (service *FilmsService) RemoveFilm(ctx context.Context, uuid string) error 
 
 func (service *FilmsService) GetFilmPreview(ctx context.Context, uuid string) (domain.FilmPreview, error) {
 	service.metrics.IncRequestsTotal("GetFilmPreview")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.FilmPreview{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 	filmPreview, err := service.storage.GetFilmPreview(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get film preview: %v", ctx.Value(requestId.ReqIDKey),
@@ -121,6 +144,13 @@ func (service *FilmsService) GetFilmsPreviewsWithSub(ctx context.Context) ([]dom
 
 func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid string) ([]domain.Comment, error) {
 	service.metrics.IncRequestsTotal("GetAllFilmComments")
+	err := guid.Validate(filmUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return nil, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 	comments, err := service.storage.GetAllFilmComments(filmUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film comments: %v",
@@ -132,6 +162,13 @@ func (service *FilmsService) GetAllFilmComments(ctx context.Context, filmUuid st
 
 func (service *FilmsService) GetActorsByFilm(ctx context.Context, uuid string) ([]domain.ActorPreview, error) {
 	service.metrics.IncRequestsTotal("GetActorsByFilm")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return nil, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 	actors, err := service.storage.GetActorsByFilm(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get all film actors: %v", ctx.Value(requestId.ReqIDKey),
@@ -143,6 +180,13 @@ func (service *FilmsService) GetActorsByFilm(ctx context.Context, uuid string) (
 
 func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid string) (domain.ActorData, error) {
 	service.metrics.IncRequestsTotal("GetActorByUuid")
+	err := guid.Validate(actorUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.ActorData{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 	actor, err := service.storage.GetActorByUuid(actorUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get actor: %v", ctx.Value(requestId.ReqIDKey),
@@ -155,7 +199,23 @@ func (service *FilmsService) GetActorByUuid(ctx context.Context, actorUuid strin
 
 func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
 	service.metrics.IncRequestsTotal("PutFavoriteFilm")
-	err := service.storage.PutFavoriteFilm(filmUuid, userUuid)
+	err := guid.Validate(filmUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
+	err = guid.Validate(userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
+	err = service.storage.PutFavoriteFilm(filmUuid, userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to put favorite film: %v", ctx.Value(requestId.ReqIDKey),
 			err)
@@ -166,7 +226,23 @@ func (service *FilmsService) PutFavoriteFilm(ctx context.Context, filmUuid strin
 
 func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid string, userUuid string) error {
 	service.metrics.IncRequestsTotal("RemoveFavoriteFilm")
-	err := service.storage.RemoveFavoriteFilm(filmUuid, userUuid)
+	err := guid.Validate(filmUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
+	err = guid.Validate(userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
+	err = service.storage.RemoveFavoriteFilm(filmUuid, userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
 			err)
@@ -177,6 +253,14 @@ func (service *FilmsService) RemoveFavoriteFilm(ctx context.Context, filmUuid st
 
 func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid string) ([]domain.FilmPreview, error) {
 	service.metrics.IncRequestsTotal("GetAllFavoriteFilms")
+	err := guid.Validate(userUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return nil, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	films, err := service.storage.GetAllFavoriteFilms(userUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to remove favorite film: %v", ctx.Value(requestId.ReqIDKey),
@@ -188,6 +272,14 @@ func (service *FilmsService) GetAllFavoriteFilms(ctx context.Context, userUuid s
 
 func (service *FilmsService) GetAllFilmsByGenre(ctx context.Context, genreUuid string) ([]domain.FilmPreview, error) {
 	service.metrics.IncRequestsTotal("GetAllFilmsByGenre")
+	err := guid.Validate(genreUuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return nil, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	films, err := service.storage.GetAllFilmsByGenre(genreUuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get genre films: %v", ctx.Value(requestId.ReqIDKey),

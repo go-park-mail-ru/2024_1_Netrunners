@@ -1,4 +1,4 @@
-package hepler
+package constants
 
 import "os"
 
