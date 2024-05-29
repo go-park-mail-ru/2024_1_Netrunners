@@ -99,7 +99,7 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmsPreviewsWithSub(w http.Respo
 		filmsRegular = append(filmsRegular, filmRegular)
 	}
 
-	response := filmsPreviewsResponse{
+	response := domain.FilmsPreviewsResponse{
 		Status: http.StatusOK,
 		Films:  filmsRegular,
 	}
@@ -112,11 +112,6 @@ func (filmsPageHandlers *FilmsPageHandlers) GetFilmsPreviewsWithSub(w http.Respo
 		}
 		return
 	}
-}
-
-type filmDataResponse struct {
-	Status   int         `json:"status"`
-	FilmData interface{} `json:"film"`
 }
 
 func (filmsPageHandlers *FilmsPageHandlers) GetFilmDataByUuid(w http.ResponseWriter, r *http.Request) {
