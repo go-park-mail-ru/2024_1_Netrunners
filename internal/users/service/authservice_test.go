@@ -111,6 +111,8 @@ func TestAuthService_GetUserDataByUuid(t *testing.T) {
 
 	mockStorage.EXPECT().GetUserDataByUuid(uuid).Return(user, nil)
 
+	mockStorage.EXPECT().HasSubscription(uuid).Return(false, nil)
+
 	metrics := metrics.NewGrpcMetrics("users")
 
 	authService := NewUsersService(mockStorage, metrics, mockLogger)
