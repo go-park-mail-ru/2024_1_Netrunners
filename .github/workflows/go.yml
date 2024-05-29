@@ -46,7 +46,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose build proxy app films sessions users
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose build app films sessions users
       - name: Restart service
         uses: appleboy/ssh-action@master
         with:
