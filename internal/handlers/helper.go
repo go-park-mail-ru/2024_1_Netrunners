@@ -228,6 +228,7 @@ func convertFilmDataToRegular(film *session.FilmData) domain.FilmData {
 		ScoresCount:  film.ScoresCount,
 		Duration:     film.Duration,
 		Genres:       genres,
+		WithSub:      film.WithSub,
 	}
 }
 
@@ -264,6 +265,7 @@ func convertSerialDataToRegular(film *session.FilmData) domain.SerialData {
 		AverageScore: film.AvgScore,
 		ScoresCount:  film.ScoresCount,
 		Genres:       genres,
+		WithSub:      film.WithSub,
 	}
 }
 
@@ -324,15 +326,16 @@ func convertProtoToTime(protoTime *timestamppb.Timestamp) time.Time {
 
 func convertUserToRegular(user *session.User) domain.User {
 	return domain.User{
-		Uuid:         user.Uuid,
-		Email:        user.Email,
-		Password:     user.Password,
-		Name:         user.Username,
-		Version:      user.Version,
-		IsAdmin:      user.IsAdmin,
-		Avatar:       user.Avatar,
-		Birthday:     convertProtoToTime(user.Birthday),
-		RegisteredAt: convertProtoToTime(user.RegisteredAt),
+		Uuid:            user.Uuid,
+		Email:           user.Email,
+		Password:        user.Password,
+		Name:            user.Username,
+		Version:         user.Version,
+		IsAdmin:         user.IsAdmin,
+		Avatar:          user.Avatar,
+		Birthday:        convertProtoToTime(user.Birthday),
+		RegisteredAt:    convertProtoToTime(user.RegisteredAt),
+		HasSubscription: user.HasSubscription,
 	}
 }
 
@@ -455,6 +458,20 @@ func convertCommentToRemoveToProto(comment domain.CommentToRemove) *session.Comm
 		FilmUuid:   comment.FilmUuid,
 		AuthorUuid: comment.AuthorUuid,
 	}
+}
+
+func convertSubsToRegular(subs []*session.Subscription) []domain.Subscription {
+	subscriptions := make([]domain.Subscription, 0, len(subs))
+	for _, sub := range subs {
+		subscriptions = append(subscriptions, domain.Subscription{
+			Uuid:        sub.Uuid,
+			Title:       sub.Title,
+			Amount:      sub.Price,
+			Description: sub.Description,
+			Duration:    sub.Duration,
+		})
+	}
+	return subscriptions
 }
 
 func IsTokenValid(token *http.Cookie, secretKey string) (jwt.MapClaims, error) {

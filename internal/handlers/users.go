@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 
@@ -251,5 +252,152 @@ func (UserPageHandlers *UserPageHandlers) ProfileEditByUuid(w http.ResponseWrite
 	err = WriteSuccess(w, r, UserPageHandlers.metrics)
 	if err != nil {
 		UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+	}
+}
+
+func (UserPageHandlers *UserPageHandlers) HasSubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	uuid := mux.Vars(r)["uuid"]
+	req := session.HasSubscriptionRequest{Uuid: uuid}
+	stat, err := (*UserPageHandlers.usersClient).HasSubscription(ctx, &req)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	response := domain.HasSubsctiptionsResponse{
+		Status:          http.StatusOK,
+		HasSubscription: stat.Status,
+	}
+
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+func (UserPageHandlers *UserPageHandlers) GetSubscriptions(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	subs, err := (*UserPageHandlers.usersClient).GetSubscriptions(ctx, &session.GetSubscriptionsRequest{})
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+	subscriptions := convertSubsToRegular(subs.Subscriptions)
+
+	response := domain.SubsctiptionsResponse{
+		Status:        http.StatusOK,
+		Subscriptions: subscriptions,
+	}
+
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+}
+
+type payRequest struct {
+	SubId string `json:"subId"`
+}
+
+func (UserPageHandlers *UserPageHandlers) PaySubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	requestId := ctx.Value(reqid.ReqIDKey)
+
+	var request payRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		UserPageHandlers.logger.Errorf("[reqid=%s] failed to decode: %v\n", requestId, myerrors.ErrFailedDecode)
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	uuid := mux.Vars(r)["uuid"]
+	req := session.HasSubscriptionRequest{Uuid: uuid}
+	stat, err := (*UserPageHandlers.usersClient).HasSubscription(ctx, &req)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	if stat.Status {
+		err = WriteError(w, r, UserPageHandlers.metrics, myerrors.ErrAlreadyHaveSubscription)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	link, err := (*UserPageHandlers.usersClient).PaySubscription(ctx, &session.PaySubscriptionRequest{
+		Uuid:  uuid,
+		SubId: request.SubId,
+	})
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
+	}
+
+	response := domain.PayResponse{
+		Link: link.PaymentResponse,
+	}
+
+	jsonResponse, err := easyjson.Marshal(response)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to marshal response: %v\n", requestId, err)
+		}
+		return
+	}
+	err = WriteResponse(w, r, UserPageHandlers.metrics, jsonResponse, requestId)
+	if err != nil {
+		err = WriteError(w, r, UserPageHandlers.metrics, err)
+		if err != nil {
+			UserPageHandlers.logger.Errorf("[reqid=%s] failed to write response: %v\n", requestId, err)
+		}
+		return
 	}
 }

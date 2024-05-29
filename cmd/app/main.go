@@ -68,6 +68,7 @@ func main() {
 	usersPageHandlers := handlers.NewUserPageHandlers(&usersClient, &sessionClient, httpMetrics, sugarLogger)
 	filmsPageHandlers := handlers.NewFilmsPageHandlers(&filmsClient, httpMetrics, sugarLogger)
 
+	// router := mux.NewRouter().Schemes("http").Subrouter()
 	router := mux.NewRouter()
 
 	router.Handle("/metrics", promhttp.Handler())
@@ -78,6 +79,7 @@ func main() {
 	router.HandleFunc("/api/auth/check", authPageHandlers.Check).Methods("POST", "OPTIONS")
 
 	router.HandleFunc("/api/films/all", filmsPageHandlers.GetAllFilmsPreviews).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/films/all_sub", filmsPageHandlers.GetFilmsPreviewsWithSub).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/{uuid}/data", filmsPageHandlers.GetFilmDataByUuid).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/{uuid}/actors", filmsPageHandlers.GetActorsByFilm).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/films/put_favorite", filmsPageHandlers.PutFavoriteFilm).Methods("POST", "OPTIONS")
@@ -96,6 +98,11 @@ func main() {
 	router.HandleFunc("/api/profile/{uuid}/data", usersPageHandlers.GetProfileData).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/edit", usersPageHandlers.ProfileEditByUuid).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/profile/{uuid}/preview", usersPageHandlers.GetProfilePreview).Methods("GET", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/check",
+		usersPageHandlers.HasSubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/profile/{uuid}/subscriptions/pay",
+		usersPageHandlers.PaySubscription).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/subscriptions/get", usersPageHandlers.GetSubscriptions).Methods("GET", "OPTIONS")
 
 	router.HandleFunc("/api/films",
 		middleware.AuthMiddleware(filmsPageHandlers.GetAllFilmsPreviews)).Methods("GET", "OPTIONS")

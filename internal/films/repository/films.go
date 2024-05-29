@@ -42,13 +42,14 @@ const (
 
 const getFilmDataByUuid = `
 		SELECT f.external_id, f.is_serial, f.title, f.banner, f.s3_link, d.name, f.data, f.duration, f.published_at, 
-		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit
+		       COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, age_limit,
+			   f.with_subscription
 		FROM film f
 		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
 		WHERE f.external_id = $1
 		GROUP BY f.external_id, f.title,  f.banner, d.name, f.published_at, f.s3_link, f.data,
-			f.duration, f.age_limit, f.is_serial;`
+			f.duration, f.age_limit, f.is_serial, f.with_subscription;`
 
 const checkIsSerial = `
 	SELECT is_serial, id
@@ -120,6 +121,7 @@ const getAllFilmsPreviews = `
     FROM film f
     LEFT JOIN comment c ON f.external_id = c.film_external_id
     JOIN director d ON f.director = d.id
+	where with_subscription = false
     GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
 const getAllFilmComments = `
@@ -196,7 +198,7 @@ const getAllFilmsByGenreUuid = `
 		LEFT JOIN film_genres fg ON f.external_id = fg.film_external_id
 		LEFT JOIN comment c ON f.external_id = c.film_external_id
 		JOIN director d ON f.director = d.id
-		WHERE fg.genre_external_id = $1
+		WHERE with_subscription = false and fg.genre_external_id = $1
 		GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial
 		LIMIT $2;`
 
@@ -265,7 +267,7 @@ const searchFilmLong = `
 	FROM film f
 	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
-	WHERE LOWER(f.title) LIKE $1 AND is_serial = FALSE
+	WHERE with_subscription = false and LOWER(f.title) LIKE $1 AND is_serial = FALSE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
 	LIMIT $2
 	OFFSET $3;`
@@ -281,7 +283,7 @@ const searchSerialLong = `
 	FROM film f
 	LEFT JOIN comment c ON f.external_id = c.film_external_id
 	JOIN director d ON f.director = d.id
-	WHERE LOWER(f.title) LIKE $1 AND is_serial = TRUE
+	WHERE with_subscription = false and LOWER(f.title) LIKE $1 AND is_serial = TRUE
 	GROUP BY f.external_id, f.title, f.banner, d.name, f.duration, f.age_limit, f.is_serial, f.published_at
 	LIMIT $2
 	OFFSET $3;`
@@ -289,7 +291,7 @@ const searchSerialLong = `
 const searchSerialTotal = `
 	SELECT COUNT(*)
 	FROM film f
-	WHERE LOWER(f.title) LIKE $1 AND is_serial = TRUE;`
+	WHERE with_subscription = false and LOWER(f.title) LIKE $1 AND is_serial = TRUE;`
 
 const searchActorLong = `
 	SELECT external_id, name, avatar, birthday, career, birth_place
@@ -309,6 +311,7 @@ const getTop4Films = `
 		FROM film AS f
 		JOIN director AS d ON f.director = d.id
 		LEFT JOIN comment AS c ON f.external_id = c.film_external_id
+		where with_subscription = false
 		GROUP BY f.external_id, f.title, f.banner, f.data, f.is_serial
 		ORDER BY avg_score DESC
 		LIMIT 4;`
@@ -331,6 +334,15 @@ const checkComment = `
     	SELECT 1 
     	FROM comment 
     	WHERE film_external_id = $1 AND author_external_id = $2);`
+
+const getFilmsPreviewsWithSub = `
+		SELECT f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration,
+			COALESCE(AVG(c.score), 0) AS avg_score, COALESCE(COUNT(c.id), 0) AS comment_count, f.age_limit
+		FROM film f
+		LEFT JOIN comment c ON f.external_id = c.film_external_id
+		JOIN director d ON f.director = d.id
+		where with_subscription = true
+		GROUP BY f.external_id, f.title, f.is_serial, f.banner, d.name, f.duration, f.age_limit;`
 
 const (
 	pageLimit      = 5
@@ -361,7 +373,8 @@ func (storage *FilmsStorage) GetFilmDataByUuid(uuid string) (domain.CommonFilmDa
 		&film.Date,
 		&film.AverageScore,
 		&film.ScoresCount,
-		&film.AgeLimit)
+		&film.AgeLimit,
+		&film.WithSub)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return domain.CommonFilmData{}, fmt.Errorf("%w", myerrors.ErrNotFound)
 	}
@@ -586,6 +599,52 @@ func (storage *FilmsStorage) GetFilmPreview(uuid string) (domain.FilmPreview, er
 
 func (storage *FilmsStorage) GetAllFilmsPreviews() ([]domain.FilmPreview, error) {
 	rows, err := storage.pool.Query(context.Background(), getAllFilmsPreviews)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
+			myerrors.ErrInternalServerError)
+	}
+
+	films := make([]domain.FilmPreview, 0)
+	var (
+		filmUuid     string
+		filmPreview  string
+		filmTitle    string
+		isSerial     bool
+		filmDirector string
+		filmDuration uint32
+		filmScore    float32
+		filmRating   uint64
+		filmAgeLimit uint32
+	)
+	for rows.Next() {
+		var film domain.FilmPreview
+		err = rows.Scan(&filmUuid, &filmTitle, &isSerial, &filmPreview, &filmDirector, &filmDuration, &filmScore, &filmRating,
+			&filmAgeLimit)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%w", myerrors.ErrNotFound)
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		film.Uuid = filmUuid
+		film.Title = filmTitle
+		film.IsSerial = isSerial
+		film.Preview = filmPreview
+		film.Director = filmDirector
+		film.Duration = filmDuration
+		film.ScoresCount = filmRating
+		film.AverageScore = filmScore
+		film.AgeLimit = filmAgeLimit
+
+		films = append(films, film)
+	}
+
+	return films, nil
+}
+
+func (storage *FilmsStorage) GetFilmsPreviewsWithSub() ([]domain.FilmPreview, error) {
+	rows, err := storage.pool.Query(context.Background(), getFilmsPreviewsWithSub)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1055,8 +1114,8 @@ func (storage *FilmsStorage) FindFilmsShort(title string, page int) ([]domain.Fi
 }
 
 func (storage *FilmsStorage) FindFilmsLong(title string, page int) (domain.SearchFilms, error) {
-	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+title+"%", largePageLimit,
-		(page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchFilmLong, "%"+strings.ToLower(title)+"%", largePageLimit,
+		(page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchFilms{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1176,8 +1235,8 @@ func (storage *FilmsStorage) FindSerialsShort(title string, page int) ([]domain.
 }
 
 func (storage *FilmsStorage) FindSerialsLong(title string, page int) (domain.SearchFilms, error) {
-	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+title+"%", largePageLimit,
-		(page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchSerialLong, "%"+strings.ToLower(title)+"%", largePageLimit,
+		(page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchFilms{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)
@@ -1285,7 +1344,8 @@ func (storage *FilmsStorage) FindActorsShort(name string, page int) ([]domain.Ac
 }
 
 func (storage *FilmsStorage) FindActorsLong(name string, page int) (domain.SearchActors, error) {
-	rows, err := storage.pool.Query(context.Background(), searchActorLong, "%"+name+"%", pageLimit, (page-1)*pageLimit)
+	rows, err := storage.pool.Query(context.Background(), searchActorLong, "%"+strings.ToLower(name)+"%",
+		largePageLimit, (page-1)*largePageLimit)
 	if err != nil {
 		return domain.SearchActors{}, fmt.Errorf("failed to get all films' previews: %w: %w", err,
 			myerrors.ErrInternalServerError)

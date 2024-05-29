@@ -1,9 +1,16 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"time"
 
+	guuid "github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -23,6 +30,10 @@ type usersStorage interface {
 	ChangeUserPasswordByUuid(uuid, newPassword string) (domain.User, error)
 	ChangeUserNameByUuid(uuid, newName string) (domain.User, error)
 	ChangeUserAvatarByUuid(uuid, filename string) (domain.User, error)
+	HasSubscription(uuid string) (bool, error)
+	AddSubscription(uuid string, newDate string) error
+	GetSubscriptions() ([]domain.Subscription, error)
+	GetSubscription(uuid string) (domain.Subscription, error)
 }
 
 type UsersService struct {
@@ -114,6 +125,17 @@ func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string)
 			ctx.Value(requestId.ReqIDKey), err)
 		return domain.User{}, err
 	}
+
+	service.metrics.IncRequestsTotal("HasSubscription")
+	stat, err := service.storage.HasSubscription(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to check subscription: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.User{}, err
+	}
+
+	user.HasSubscription = stat
+
 	return user, nil
 }
 
@@ -160,4 +182,155 @@ func (service *UsersService) ChangeUserAvatarByUuid(ctx context.Context, uuid, n
 		return domain.User{}, err
 	}
 	return user, nil
+}
+
+func (service *UsersService) HasSubscription(ctx context.Context, uuid string) (bool, error) {
+	service.metrics.IncRequestsTotal("HasSubscription")
+	stat, err := service.storage.HasSubscription(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to check subscription: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return false, err
+	}
+	return stat, nil
+}
+
+func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId string) (string, error) {
+	service.metrics.IncRequestsTotal("PaySubscription")
+
+	sub, err := service.storage.GetSubscription(subId)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get subscription: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return "", err
+	}
+
+	requestBody := bytes.NewBuffer([]byte(fmt.Sprintf(`{
+        "amount": {
+          "value": %f,
+          "currency": "RUB"
+        },
+        "payment_method_data": {
+          "type": "bank_card"
+        },
+        "confirmation": {
+          "type": "redirect",
+          "return_url": "https://netrunnerflix.ru/"
+        },
+        "description": "Подписка %s"
+      }`, sub.Amount, uuid)))
+	req, err := http.NewRequest("POST", "https://api.yookassa.ru/v3/payments", requestBody)
+	if err != nil {
+		return "", err
+	}
+	req.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
+	req.Header.Set("Content-Type", "application/json")
+	id := guuid.New().String()
+	req.Header.Set("Idempotence-Key", id)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	c := make(map[string]json.RawMessage)
+
+	e := json.Unmarshal([]byte(string(body)), &c)
+	if e != nil {
+		return "", e
+	}
+
+	go func() {
+		for {
+			select {
+			case <-time.After(time.Minute * 10):
+				fmt.Println("Payment failed")
+				return
+			default:
+				checkReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.yookassa.ru/v3/payments/%s",
+					string(c["id"])[1:len(c["id"])-1]), nil)
+				if err != nil {
+					fmt.Println(err)
+				}
+				checkReq.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
+
+				checkResp, err := http.DefaultClient.Do(checkReq)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				body, err := io.ReadAll(checkResp.Body)
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer checkResp.Body.Close()
+
+				resp := make(map[string]json.RawMessage)
+
+				respBytes := json.Unmarshal([]byte(string(body)), &resp)
+				if respBytes != nil {
+					fmt.Println(err)
+				}
+
+				if string(resp["status"]) == `"waiting_for_capture"` {
+					req, err := http.NewRequest("POST", fmt.Sprintf(
+						"https://api.yookassa.ru/v3/payments/%s/capture", string(c["id"])[1:len(c["id"])-1]), nil)
+					if err != nil {
+						fmt.Println(err)
+					}
+					req.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
+					req.Header.Set("Content-Type", "application/json")
+					req.Header.Set("Idempotence-Key", id)
+
+					resp, err := http.DefaultClient.Do(req)
+					if err != nil {
+						fmt.Println(err)
+					}
+					defer resp.Body.Close()
+
+					err = service.storage.AddSubscription(uuid, time.Now().AddDate(0, int(sub.Duration), 0).Format("2006-01-02"))
+					if err != nil {
+						fmt.Println(err)
+					}
+					return
+				}
+				time.Sleep(time.Second * 10)
+			}
+		}
+	}()
+
+	e = json.Unmarshal([]byte(string(c["confirmation"])), &c)
+	if e != nil {
+		return "", e
+	}
+
+	return string(c["confirmation_url"])[1 : len(c["confirmation_url"])-1], nil
+}
+
+func (service *UsersService) GetSubscriptions(ctx context.Context) ([]domain.Subscription, error) {
+	service.metrics.IncRequestsTotal("AddSubscription")
+	subs, err := service.storage.GetSubscriptions()
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get subscriptions: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return nil, err
+	}
+	return subs, nil
+}
+
+func (service *UsersService) GetSubscription(ctx context.Context, uuid string) (domain.Subscription, error) {
+	service.metrics.IncRequestsTotal("GetSubscription")
+	sub, err := service.storage.GetSubscription(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get subscription: %v", ctx.Value(requestId.ReqIDKey),
+			err)
+		return domain.Subscription{}, err
+	}
+	return sub, nil
 }

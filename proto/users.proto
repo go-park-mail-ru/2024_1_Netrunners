@@ -18,6 +18,9 @@ service Users {
   rpc ChangeUserPasswordByUuid(ChangeUserPasswordByUuidRequest) returns (ChangeUserPasswordByUuidResponse) {}
   rpc ChangeUserNameByUuid(ChangeUserNameByUuidRequest) returns (ChangeUserNameByUuidResponse) {}
   rpc ChangeUserAvatarByUuid(ChangeUserAvatarByUuidRequest) returns (ChangeUserAvatarByUuidResponse) {}
+  rpc HasSubscription(HasSubscriptionRequest) returns (HasSubscriptionResponse) {}
+  rpc GetSubscriptions(GetSubscriptionsRequest) returns (GetSubscriptionsResponse) {}
+  rpc PaySubscription(PaySubscriptionRequest) returns (PaySubscriptionResponse) {}
 }
 
 message UserSignUp {
@@ -36,6 +39,7 @@ message User {
   string avatar = 7;
   google.protobuf.Timestamp birthday = 8;
   google.protobuf.Timestamp registeredAt = 9;
+  bool HasSubscription = 10;
 }
 
 message UserPreview {
@@ -132,4 +136,35 @@ message ChangeUserAvatarByUuidRequest {
 
 message ChangeUserAvatarByUuidResponse {
   User user = 1;
+}
+
+message HasSubscriptionRequest {
+  string uuid = 1;
+}
+
+message HasSubscriptionResponse {
+  bool status = 1;
+}
+
+message Subscription {
+  string uuid = 1;
+  string title = 2;
+  string description = 3;
+  float price = 4;
+  uint32 duration = 5;
+}
+
+message GetSubscriptionsRequest {}
+
+message GetSubscriptionsResponse {
+  repeated Subscription subscriptions = 1;
+}
+
+message PaySubscriptionRequest {
+  string uuid = 1;
+  string subId = 2;
+}
+
+message PaySubscriptionResponse {
+  string paymentResponse = 1;
 }

@@ -10,7 +10,17 @@ CREATE TABLE IF NOT EXISTS users
 	password      TEXT CHECK (LENGTH(password) <= 64) NOT NULL,
 	registered_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 	birthday      TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-	is_admin      BOOLEAN     DEFAULT FALSE NOT NULL
+	is_admin      BOOLEAN     DEFAULT FALSE NOT NULL,
+	subscription_end_date TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+create table if not exists subscription
+(
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	title TEXT NOT NULL,
+	amount DECIMAL NOT NULL,
+	description TEXT NOT NULL,
+	duration INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS actor
@@ -48,7 +58,8 @@ CREATE TABLE IF NOT EXISTS film
 	age_limit    SMALLINT CHECK (age_limit >= 0 AND age_limit <= 18) DEFAULT 18                          NOT NULL,
 	duration     SMALLINT CHECK (duration > 0)                       DEFAULT 143                         NOT NULL,
 	published_at TIMESTAMPTZ                                         DEFAULT NOW()                       NOT NULL,
-	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL
+	FOREIGN KEY (director) REFERENCES director (id) ON DELETE SET NULL,
+	with_subscription BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS episode

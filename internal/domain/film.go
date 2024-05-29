@@ -17,6 +17,7 @@ type FilmData struct {
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
 	Genres       []Genre   `json:"genres"`
+	WithSub      bool      `json:"withSubscription"`
 }
 
 //easyjson:json
@@ -41,6 +42,7 @@ type CommonFilmData struct {
 	AgeLimit     uint32    `json:"ageLimit"`
 	Seasons      []Season  `json:"seasons"`
 	Genres       []Genre   `json:"genres"`
+	WithSub      bool      `json:"withSubscription"`
 }
 
 //easyjson:json
@@ -69,6 +71,7 @@ type SerialData struct {
 	Data         string    `json:"data"`
 	AgeLimit     uint32    `json:"ageLimit"`
 	Genres       []Genre   `json:"genres"`
+	WithSub      bool      `json:"withSubscription"`
 }
 
 //easyjson:json

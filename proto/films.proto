@@ -8,6 +8,7 @@ option go_package = "./session";
 
 service Films {
   rpc GetAllFilmsPreviews(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
+  rpc GetFilmsPreviewsWithSub(AllFilmsPreviewsRequest) returns (AllFilmsPreviewsResponse) {}
   rpc GetFilmDataByUuid(FilmDataByUuidRequest) returns (FilmDataByUuidResponse) {}
   rpc GetFilmPreviewByUuid(FilmPreviewByUuidRequest) returns (FilmPreviewByUuidResponse) {}
   rpc RemoveFilmByUuid(RemoveFilmByUuidRequest) returns (RemoveFilmByUuidResponse) {}
@@ -72,6 +73,7 @@ message FilmData {
   repeated Genre genres = 12;
   bool is_serial = 13;
   repeated Season seasons = 14;
+  bool with_sub = 15;
 }
 
 message ActorData {

@@ -17,6 +17,7 @@ type FilmsStorage interface {
 	RemoveFilm(uuid string) error
 	GetFilmPreview(uuid string) (domain.FilmPreview, error)
 	GetAllFilmsPreviews() ([]domain.FilmPreview, error)
+	GetFilmsPreviewsWithSub() ([]domain.FilmPreview, error)
 	GetActorByUuid(actorUuid string) (domain.ActorData, error)
 	GetActorsByFilm(filmUuid string) ([]domain.ActorPreview, error)
 	PutFavoriteFilm(filmUuid string, userUuid string) error
@@ -101,6 +102,17 @@ func (service *FilmsService) GetAllFilmsPreviews(ctx context.Context) ([]domain.
 	filmPreviews, err := service.storage.GetAllFilmsPreviews()
 	if err != nil {
 		service.logger.Errorf("[reqid=%v] failed to get all films previews: %v",
+			ctx.Value(requestId.ReqIDKey), err)
+		return nil, err
+	}
+	return filmPreviews, nil
+}
+
+func (service *FilmsService) GetFilmsPreviewsWithSub(ctx context.Context) ([]domain.FilmPreview, error) {
+	service.metrics.IncRequestsTotal("GetFilmsPreviewsWithSub")
+	filmPreviews, err := service.storage.GetFilmsPreviewsWithSub()
+	if err != nil {
+		service.logger.Errorf("[reqid=%v] failed to get films previews with sub: %v",
 			ctx.Value(requestId.ReqIDKey), err)
 		return nil, err
 	}
