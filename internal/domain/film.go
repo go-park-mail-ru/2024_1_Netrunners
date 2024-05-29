@@ -2,6 +2,7 @@ package domain
 
 import "time"
 
+//easyjson:json
 type FilmData struct {
 	Uuid         string    `json:"uuid"`
 	IsSerial     bool      `json:"isSerial"`
@@ -18,11 +19,13 @@ type FilmData struct {
 	Genres       []Genre   `json:"genres"`
 }
 
+//easyjson:json
 type SearchFilms struct {
 	Films []FilmData `json:"films"`
 	Count uint32     `json:"count"`
 }
 
+//easyjson:json
 type CommonFilmData struct {
 	Uuid         string    `json:"uuid"`
 	IsSerial     bool      `json:"isSerial"`
@@ -40,15 +43,18 @@ type CommonFilmData struct {
 	Genres       []Genre   `json:"genres"`
 }
 
+//easyjson:json
 type Episode struct {
 	Title string `json:"title"`
 	Link  string `json:"link"`
 }
 
+//easyjson:json
 type Season struct {
 	Series []Episode `json:"series"`
 }
 
+//easyjson:json
 type SerialData struct {
 	Uuid         string    `json:"uuid"`
 	IsSerial     bool      `json:"isSerial"`
@@ -65,6 +71,7 @@ type SerialData struct {
 	Genres       []Genre   `json:"genres"`
 }
 
+//easyjson:json
 type FilmDataToAdd struct {
 	Title       string    `json:"title"`
 	IsSerial    bool      `json:"isSerial"`
@@ -79,6 +86,7 @@ type FilmDataToAdd struct {
 	Seasons     []Season  `json:"seasons,omitempty"`
 }
 
+//easyjson:json
 type FilmPreview struct {
 	Uuid         string  `json:"uuid"`
 	IsSerial     bool    `json:"isSerial"`
@@ -91,16 +99,81 @@ type FilmPreview struct {
 	AgeLimit     uint32  `json:"ageLimit"`
 }
 
+//easyjson:json
 type FilmToAdd struct {
 	FilmData      FilmDataToAdd `json:"filmData"`
 	Actors        []ActorToAdd  `json:"actors"`
 	DirectorToAdd DirectorToAdd `json:"directorToAdd"`
 }
 
+//easyjson:json
 type TopFilm struct {
 	Uuid     string `json:"uuid"`
 	IsSerial bool   `json:"isSerial"`
 	Title    string `json:"title"`
 	Preview  string `json:"preview_data"`
 	Data     string `json:"data"`
+}
+
+//easyjson:json
+type ShortSearchResponse struct {
+	Status int            `json:"status"`
+	Films  []FilmPreview  `json:"films"`
+	Actors []ActorPreview `json:"actors"`
+}
+
+//easyjson:json
+type LongSearchResponse struct {
+	Status int         `json:"status"`
+	Films  []FilmData  `json:"films"`
+	Actors []ActorData `json:"actors"`
+	Count  int         `json:"searchResCount"`
+}
+
+//easyjson:json
+type FilmsPreviewsResponse struct {
+	Status int           `json:"status"`
+	Films  []FilmPreview `json:"films"`
+}
+
+//easyjson:json
+type FilmDataResponse struct {
+	Status   int         `json:"status"`
+	FilmData interface{} `json:"film"`
+}
+
+//easyjson:json
+type FilmCommentsResponse struct {
+	Status   int       `json:"status"`
+	Comments []Comment `json:"comments"`
+}
+
+//easyjson:json
+type FilmActorsResponse struct {
+	Status int            `json:"status"`
+	Actors []ActorPreview `json:"actors"`
+}
+
+//easyjson:json
+type ActorResponse struct {
+	Status int       `json:"status"`
+	Actor  ActorData `json:"actor"`
+}
+
+//easyjson:json
+type DataToFavorite struct {
+	FilmUuid string `json:"filmUuid"`
+	UserUuid string `json:"userUuid"`
+}
+
+//easyjson:json
+type GenresResponse struct {
+	Status      int          `json:"status"`
+	GenresFilms []GenreFilms `json:"genres"`
+}
+
+//easyjson:json
+type TopFilmsResponse struct {
+	Status int       `json:"status"`
+	Films  []TopFilm `json:"films"`
 }

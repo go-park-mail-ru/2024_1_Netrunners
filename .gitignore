@@ -148,3 +148,5 @@ cover.out
 /cert
 
 **/.DS_Store
+
+grafana.db

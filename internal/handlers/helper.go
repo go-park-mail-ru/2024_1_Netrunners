@@ -88,22 +88,17 @@ func WriteError(w http.ResponseWriter, req *http.Request, metrics *metrics.HttpM
 	return nil
 }
 
-func WriteResponse(w http.ResponseWriter, r *http.Request, metrics *metrics.HttpMetrics, response any,
+func WriteResponse(w http.ResponseWriter, r *http.Request, metrics *metrics.HttpMetrics, jsonResponse any,
 	requestID any) error {
 	pathTemplate, err := mux.CurrentRoute(r).GetPathTemplate()
 	if err != nil {
 		return fmt.Errorf("unable to get path template: %w", err)
 	}
 
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		return fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
-	}
-
 	metrics.IncRequestsTotal(pathTemplate, r.Method, 200)
 
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse.([]byte))
 	if err != nil {
 		return fmt.Errorf("[reqid=%s] failed to write response: %v\n", requestID, err)
 	}
