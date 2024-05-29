@@ -37,7 +37,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd /home/ubuntu/back/test/2024_1_Netrunners && git pull
+          script: cd /home/ubuntu/back/test/2024_1_Netrunners && git pull --no-rebase
       - name: Build containers
         uses: appleboy/ssh-action@master
         with:
