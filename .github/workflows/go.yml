@@ -26,3 +26,32 @@ jobs:
 
       - name: test
         run: go test -v ./...
+
+  deploy:
+    name: deploy netrunnerflix
+    needs: test
+    runs-on: ubuntu-latest
+  steps:
+    - name: Pull code
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: cd /home/ubuntu/back/test/2024_1_Netrunners && git pull
+    - name: Build containers
+      uses: appleboy/ssh-action@master
+      with:
+        timeout: 200m
+        command_timeout: 200m
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose build
+    - name: Restart service
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: cd /home/ubuntu/back/test/2024_1_Netrunners && sudo docker-compose down proxy app films sessions users && sudo docker compose up -d proxy app films sessions users
