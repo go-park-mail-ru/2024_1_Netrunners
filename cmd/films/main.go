@@ -52,8 +52,8 @@ func main() {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"postgres",
 		"5432",
-		"postgres",
-		"root1234",
+		"netrunnerflix_admin",
+		"admin",
 		"netrunnerflix",
 	))
 	if err != nil {

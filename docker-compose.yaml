@@ -5,8 +5,8 @@ services:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root1234
+      POSTGRES_USER: netrunnerflix_admin
+      POSTGRES_PASSWORD: admin
     build:
       dockerfile: ./db/migrations/Dockerfile
     ports:
