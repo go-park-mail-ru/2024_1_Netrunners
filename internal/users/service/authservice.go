@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	myerrors "github.com/go-park-mail-ru/2024_1_Netrunners/internal/errors"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	guuid "github.com/google/uuid"
+	guid "github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/go-park-mail-ru/2024_1_Netrunners/internal/domain"
@@ -119,6 +120,14 @@ func (service *UsersService) ChangeUserName(ctx context.Context, login, newName 
 
 func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string) (domain.User, error) {
 	service.metrics.IncRequestsTotal("GetUserDataByUuid")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get film: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.User{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	user, err := service.storage.GetUserDataByUuid(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user data: %v",
@@ -141,6 +150,14 @@ func (service *UsersService) GetUserDataByUuid(ctx context.Context, uuid string)
 
 func (service *UsersService) GetUserPreview(ctx context.Context, uuid string) (domain.UserPreview, error) {
 	service.metrics.IncRequestsTotal("GetUserPreview")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.UserPreview{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	userPreview, err := service.storage.GetUserPreview(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get user preview: %v", ctx.Value(requestId.ReqIDKey),
@@ -153,6 +170,14 @@ func (service *UsersService) GetUserPreview(ctx context.Context, uuid string) (d
 func (service *UsersService) ChangeUserPasswordByUuid(ctx context.Context, uuid, newPassword string) (domain.User,
 	error) {
 	service.metrics.IncRequestsTotal("ChangeUserPasswordByUuid")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.User{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	user, err := service.storage.ChangeUserPasswordByUuid(uuid, newPassword)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change password: %v",
@@ -164,6 +189,14 @@ func (service *UsersService) ChangeUserPasswordByUuid(ctx context.Context, uuid,
 
 func (service *UsersService) ChangeUserNameByUuid(ctx context.Context, uuid, newName string) (domain.User, error) {
 	service.metrics.IncRequestsTotal("ChangeUserNameByUuid")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.User{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	user, err := service.storage.ChangeUserNameByUuid(uuid, newName)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
@@ -175,6 +208,14 @@ func (service *UsersService) ChangeUserNameByUuid(ctx context.Context, uuid, new
 
 func (service *UsersService) ChangeUserAvatarByUuid(ctx context.Context, uuid, newAvatar string) (domain.User, error) {
 	service.metrics.IncRequestsTotal("ChangeUserAvatarByUuid")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.User{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	user, err := service.storage.ChangeUserAvatarByUuid(uuid, newAvatar)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to change username: %v", ctx.Value(requestId.ReqIDKey),
@@ -186,6 +227,14 @@ func (service *UsersService) ChangeUserAvatarByUuid(ctx context.Context, uuid, n
 
 func (service *UsersService) HasSubscription(ctx context.Context, uuid string) (bool, error) {
 	service.metrics.IncRequestsTotal("HasSubscription")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return false, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	stat, err := service.storage.HasSubscription(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to check subscription: %v", ctx.Value(requestId.ReqIDKey),
@@ -197,6 +246,13 @@ func (service *UsersService) HasSubscription(ctx context.Context, uuid string) (
 
 func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId string) (string, error) {
 	service.metrics.IncRequestsTotal("PaySubscription")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return "", fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
 
 	sub, err := service.storage.GetSubscription(subId)
 	if err != nil {
@@ -225,7 +281,7 @@ func (service *UsersService) PaySubscription(ctx context.Context, uuid, subId st
 	}
 	req.SetBasicAuth("393063", "test_qaG8b_fmJMDHP-Htdq7a_kCwhnAKTEM9ZWAOA0OgDJ0")
 	req.Header.Set("Content-Type", "application/json")
-	id := guuid.New().String()
+	id := guid.New().String()
 	req.Header.Set("Idempotence-Key", id)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -326,6 +382,14 @@ func (service *UsersService) GetSubscriptions(ctx context.Context) ([]domain.Sub
 
 func (service *UsersService) GetSubscription(ctx context.Context, uuid string) (domain.Subscription, error) {
 	service.metrics.IncRequestsTotal("GetSubscription")
+	err := guid.Validate(uuid)
+	if err != nil {
+		service.logger.Errorf("[reqid=%s] failed to ChangeUserPasswordByUuid: %v", ctx.Value(requestId.ReqIDKey),
+			myerrors.ErrUuidIsNotValid)
+		return domain.Subscription{}, fmt.Errorf("[reqid=%s] invalid UUID format: %w",
+			ctx.Value(requestId.ReqIDKey), myerrors.ErrUuidIsNotValid)
+	}
+
 	sub, err := service.storage.GetSubscription(uuid)
 	if err != nil {
 		service.logger.Errorf("[reqid=%s] failed to get subscription: %v", ctx.Value(requestId.ReqIDKey),

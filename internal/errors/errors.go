@@ -22,6 +22,7 @@ func ParseError(err error) (int, error) {
 		errors.Is(err, ErrFailInExec),
 		errors.Is(err, ErrFailInExec),
 		errors.Is(err, ErrIncorrectSearchParams),
+		errors.Is(err, ErrUuidIsNotValid),
 		errors.Is(err, ErrAlreadyHaveSubscription):
 		status = 400
 	case errors.Is(err, ErrNoSuchItemInTheCache),

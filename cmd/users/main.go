@@ -48,14 +48,21 @@ func main() {
 	}
 	sugarLogger := logger.Sugar()
 
-	pool, err := pgxpool.New(context.Background(), fmt.Sprintf(
+	config, err := pgxpool.ParseConfig(fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		"postgres",
 		"5432",
-		"postgres",
-		"root1234",
+		"netrunnerflix_admin",
+		"admin",
 		"netrunnerflix",
 	))
+	if err != nil {
+		log.Fatalf("Unable to parse configuration: %v\n", err)
+	}
+
+	config.MaxConns = 40
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
 		log.Fatal(err)
 	}
